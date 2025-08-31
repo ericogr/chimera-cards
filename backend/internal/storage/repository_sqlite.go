@@ -55,8 +55,34 @@ func (r *sqliteRepository) CreateGame(g *game.Game) error {
 
 func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 	var g game.Game
+
 	err := r.db.Preload("Players.Hybrids.BaseAnimals").First(&g, id).Error
-	return &g, err
+	if err != nil {
+		return nil, err
+	}
+	// Override stats from config for preloaded base animals so the
+	// frontend receives the complete animal information (skill name, costs, etc.).
+	if r.configByName != nil {
+		for pi := range g.Players {
+			for hi := range g.Players[pi].Hybrids {
+				for ai := range g.Players[pi].Hybrids[hi].BaseAnimals {
+					a := &g.Players[pi].Hybrids[hi].BaseAnimals[ai]
+					if conf, ok := r.configByName[strings.ToLower(a.Name)]; ok {
+						a.HitPoints = conf.HitPoints
+						a.Attack = conf.Attack
+						a.Defense = conf.Defense
+						a.Agility = conf.Agility
+						a.Energy = conf.Energy
+						a.VigorCost = conf.VigorCost
+						a.SkillName = conf.SkillName
+						a.SkillCost = conf.SkillCost
+						a.SkillDescription = conf.SkillDescription
+					}
+				}
+			}
+		}
+	}
+	return &g, nil
 }
 
 func (r *sqliteRepository) UpdateGame(g *game.Game) error {
