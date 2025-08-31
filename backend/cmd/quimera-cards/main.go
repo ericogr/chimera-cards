@@ -7,6 +7,7 @@ import (
 	"github.com/ericogr/quimera-cards/internal/config"
 	"github.com/ericogr/quimera-cards/internal/constants"
 	"github.com/ericogr/quimera-cards/internal/logging"
+	"github.com/ericogr/quimera-cards/internal/openaiclient"
 	"github.com/ericogr/quimera-cards/internal/storage"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,12 @@ func main() {
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional server.address"})
+	}
+
+	// If the configuration provides an image prompt template, apply it
+	// to the OpenAI client so image generation uses the configured text.
+	if cfg.ImagePromptTemplate != "" {
+		openaiclient.SetImagePromptTemplate(cfg.ImagePromptTemplate)
 	}
 
 	db, err := storage.OpenAndMigrate("quimera.db", cfg.Animals)

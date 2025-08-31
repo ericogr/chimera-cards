@@ -121,5 +121,6 @@
       "skill_description": "Reveals the opponent hybrid's current Energy and abilities."
     }
   ],
-  "server": { "address": ":8080" }
+  "server": { "address": ":8080" },
+  "image_prompt": "Create a single image of {{animals}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature."
 }

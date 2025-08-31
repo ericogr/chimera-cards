@@ -9,39 +9,57 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
+    "time"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
+    "github.com/ericogr/quimera-cards/internal/constants"
 )
+
+// imagePromptTemplate can be set at application startup to customize the
+// prompt used when requesting image generation from OpenAI. Use the token
+// "{{animals}}" in the template where the comma-separated animal names
+// should be substituted.
+var imagePromptTemplate string
+
+// SetImagePromptTemplate sets a custom prompt template for image
+// generation. Call this during app initialization if you wish to override
+// the built-in default.
+func SetImagePromptTemplate(t string) {
+    imagePromptTemplate = strings.TrimSpace(t)
+}
 
 // GenerateImageFromNames calls the OpenAI Images API to generate a single PNG
 // image (256/1024 depending on constants) for the provided animal names.
 // It returns the raw image bytes (PNG) or an error.
 func GenerateImageFromNames(ctx context.Context, animalNames []string) ([]byte, error) {
-	if len(animalNames) == 0 || len(animalNames) > 3 {
-		return nil, fmt.Errorf("animalNames must contain 1..3 items")
-	}
+    if len(animalNames) == 0 || len(animalNames) > 3 {
+        return nil, fmt.Errorf("animalNames must contain 1..3 items")
+    }
 
 	apiKey := os.Getenv(constants.EnvOpenAIAPIKey)
 	if apiKey == "" {
 		return nil, fmt.Errorf("%s not set", constants.EnvOpenAIAPIKey)
 	}
 
-	// Build prompt
-	var prompt string
-	if len(animalNames) == 1 {
-		prompt = fmt.Sprintf("Create a single %s PNG image of a %s in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background.", constants.OpenAIImageSizeDefault, animalNames[0])
-	} else {
-		prompt = fmt.Sprintf("Create a single %s PNG image of a hybrid creature that merges these animals into one chimeric superhero: %s. Style: comic-book superhero cartoon, vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature.", constants.OpenAIImageSizeDefault, strings.Join(animalNames, ", "))
-	}
+    // Build prompt from template. The openaiclient package exposes a
+    // configurable prompt template (see SetImagePromptTemplate). The
+    // template should contain the token "{{animals}}" which will be
+    // substituted with a comma-separated list of animal names. If no
+    // custom template was provided, a sensible default is used.
+    animalsPart := strings.Join(animalNames, ", ")
+    prompt := imagePromptTemplate
+    if prompt == "" {
+        // default template that works for 1..3 animals
+        prompt = "Create a single PNG image of {{animals}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature."
+    }
+    prompt = strings.ReplaceAll(prompt, "{{animals}}", animalsPart)
 
-	payload := map[string]interface{}{
-		"prompt":  prompt,
-		"n":       1,
-		"size":    constants.OpenAIImageSizeDefault,
-		"model":   constants.OpenAIImageModel,
-		"quality": constants.OpenAIImageQualityDefault,
-	}
+    payload := map[string]interface{}{
+        "prompt":  prompt,
+        "n":       1,
+        "size":    constants.OpenAIImageSizeDefault,
+        "model":   constants.OpenAIImageModel,
+        "quality": constants.OpenAIImageQualityDefault,
+    }
 
 	b, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))
