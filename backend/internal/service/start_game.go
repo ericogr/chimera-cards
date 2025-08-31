@@ -95,13 +95,11 @@ func generateNamesAndImages(repo storage.Repository, g *game.Game) error {
 		for j := range g.Players[i].Hybrids {
 			hbd := &g.Players[i].Hybrids[j]
 			names := make([]string, len(hbd.BaseAnimals))
-			ids := make([]uint, len(hbd.BaseAnimals))
 			for k := range hbd.BaseAnimals {
-				ids[k] = hbd.BaseAnimals[k].ID
 				names[k] = hbd.BaseAnimals[k].Name
 			}
 
-			if gen, source, err := hybridname.GetOrCreateGeneratedName(repo, ids, names); err == nil && gen != "" {
+			if gen, source, err := hybridname.GetOrCreateGeneratedName(repo, names); err == nil && gen != "" {
 				hbd.GeneratedName = gen
 				logging.Info("game-start hybrid name assigned", logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j, constants.LogFieldSource: source, constants.LogFieldName: gen})
 			} else {
