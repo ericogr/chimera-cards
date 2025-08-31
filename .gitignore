@@ -1,0 +1,5 @@
+.vscode/
+backend/bin/
+GEMINI.md
+backend/quimera.db
+.gocache/

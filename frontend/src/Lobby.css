@@ -1,0 +1,64 @@
+.game-list {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr 2fr 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.game-list-header {
+  font-weight: bold;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 10px;
+}
+
+.game-name {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.game-description {
+  font-size: 0.9em;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px; /* Adjust as needed */
+}
+
+.game-players,
+.game-waiting {
+  font-size: 0.9em;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #61dafb;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.link-button:hover {
+  color: #fff;
+}
+
+/* Leaderboard styles */
+.rank-list {
+  display: grid;
+  grid-template-columns: 0.5fr 3fr 1fr 1fr 1.5fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #444;
+}
+
+.rank-list-header {
+  font-weight: bold;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 10px;
+}

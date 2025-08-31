@@ -1,0 +1,4 @@
+# Binary and DB
+bin/
+quimera.db
+*.db

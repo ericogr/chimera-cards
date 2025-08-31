@@ -1,0 +1,125 @@
+{
+  "animal_list": [
+    {
+      "name": "Lion",
+      "hit_points": 4,
+      "attack": 8,
+      "defense": 4,
+      "agility": 5,
+      "energy": 0,
+      "vigor_cost": 2,
+      "skill_name": "Commanding Roar",
+      "skill_cost": 3,
+      "skill_description": "Reduces the opponent's Attack by 30% for one round."
+    },
+    {
+      "name": "Bear",
+      "hit_points": 6,
+      "attack": 7,
+      "defense": 5,
+      "agility": 2,
+      "energy": 0,
+      "vigor_cost": 3,
+      "skill_name": "Frenzy",
+      "skill_cost": 4,
+      "skill_description": "Increases own Attack by 50% this round and ignores the opponent's Defense."
+    },
+    {
+      "name": "Cheetah",
+      "hit_points": 3,
+      "attack": 5,
+      "defense": 2,
+      "agility": 10,
+      "energy": 1,
+      "vigor_cost": 2,
+      "skill_name": "Swift Pounce",
+      "skill_cost": 3,
+      "skill_description": "An attack that cannot be avoided and ignores 40% of the opponent's Defense."
+    },
+    {
+      "name": "Eagle",
+      "hit_points": 2,
+      "attack": 6,
+      "defense": 2,
+      "agility": 9,
+      "energy": 1,
+      "vigor_cost": 1,
+      "skill_name": "Strategic Flight",
+      "skill_cost": 2,
+      "skill_description": "Guarantees you will attack first next round, regardless of Agility."
+    },
+    {
+      "name": "Rhino",
+      "hit_points": 7,
+      "attack": 6,
+      "defense": 7,
+      "agility": 1,
+      "energy": 0,
+      "vigor_cost": 3,
+      "skill_name": "Relentless Charge",
+      "skill_cost": 4,
+      "skill_description": "Deals massive damage (ATK + 5), but you also take 20% of the damage dealt."
+    },
+    {
+      "name": "Turtle",
+      "hit_points": 8,
+      "attack": 1,
+      "defense": 9,
+      "agility": 1,
+      "energy": 0,
+      "vigor_cost": 3,
+      "skill_name": "Iron Shell",
+      "skill_cost": 3,
+      "skill_description": "Triples your Defense for one round. You cannot attack this round."
+    },
+    {
+      "name": "Gorilla",
+      "hit_points": 6,
+      "attack": 7,
+      "defense": 6,
+      "agility": 2,
+      "energy": 0,
+      "vigor_cost": 3,
+      "skill_name": "Stunning Blow",
+      "skill_cost": 5,
+      "skill_description": "Deals normal damage with a 50% chance to prevent the opponent from acting next round."
+    },
+    {
+      "name": "Wolf",
+      "hit_points": 4,
+      "attack": 5,
+      "defense": 4,
+      "agility": 6,
+      "energy": 1,
+      "vigor_cost": 1,
+      "skill_name": "Pack Tactics",
+      "skill_cost": 2,
+      "skill_description": "Restore 4 Energy points."
+    },
+    {
+      "name": "Octopus",
+      "hit_points": 5,
+      "attack": 2,
+      "defense": 5,
+      "agility": 4,
+      "energy": 1,
+      "vigor_cost": 2,
+      "skill_name": "Ink Curtain",
+      "skill_cost": 3,
+      "skill_description": "Reduces the opponent's Agility by 50% for two rounds."
+    },
+    {
+      "name": "Raven",
+      "hit_points": 2,
+      "attack": 3,
+      "defense": 3,
+      "agility": 7,
+      "energy": 1,
+      "vigor_cost": 1,
+      "skill_name": "Cunning Analysis",
+      "skill_cost": 2,
+      "skill_description": "Reveals the opponent hybrid's current Energy and abilities."
+    }
+  ],
+  "server": { "address": ":8080" }
+}
