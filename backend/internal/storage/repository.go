@@ -15,8 +15,9 @@ type Repository interface {
 
 	// GetAnimalByName returns an animal by its name (case-insensitive).
 	GetAnimalByName(name string) (*game.Animal, error)
-	// Generated name cache
-	GetGeneratedNameByAnimalIDs(ids []uint) (*game.HybridGeneratedName, error)
+	// Generated name cache (lookup by canonical animal key)
+	// e.g. key = "lion_raven"
+	GetGeneratedNameByAnimalKey(key string) (*game.HybridGeneratedName, error)
 	SaveGeneratedNameForAnimalIDs(ids []uint, animalNames, generatedName string) error
 	// Hybrid image storage
 	GetHybridImageByKey(key string) ([]byte, error)

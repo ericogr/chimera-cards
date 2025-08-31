@@ -105,45 +105,68 @@ func callOpenAI(animalNames []string) (string, error) {
 // stores it in the repository. It returns the name, the source ("db"|"openai"),
 // and an error if the OpenAI call failed.
 func GetOrCreateGeneratedName(repo storage.Repository, animalIDs []uint, animalNames []string) (string, string, error) {
-	key := buildKeyFromIDs(animalIDs)
+	// Build canonical animal key from names: lowercase, underscores, sorted.
+	parts := make([]string, 0, len(animalNames))
+	for _, p := range animalNames {
+		q := strings.TrimSpace(p)
+		if q != "" {
+			parts = append(parts, strings.ToLower(strings.ReplaceAll(q, " ", "_")))
+		}
+	}
+	sort.Strings(parts)
+	animalKey := strings.Join(parts, "_")
 
-	// Try cache first
-	if gn, err := repo.GetGeneratedNameByAnimalIDs(animalIDs); err == nil && gn != nil && gn.GeneratedName != "" {
-		logging.Info("hybrid-name cache hit", logging.Fields{constants.LogFieldKey: key, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db"})
-		return gn.GeneratedName, "db", nil
+	// Try cache by canonical name-key first.
+	if animalKey != "" {
+		if gn, err := repo.GetGeneratedNameByAnimalKey(animalKey); err == nil && gn != nil && gn.GeneratedName != "" {
+			logging.Info("hybrid-name cache hit by animal_key", logging.Fields{constants.LogFieldKey: animalKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
+			return gn.GeneratedName, "db_key", nil
+		}
 	}
 
-	// Not cached — deduplicate concurrent generation using singleflight.
+	// Not cached — deduplicate concurrent generation using singleflight
+	// keyed by the canonical animalKey (fallback to a stable string if
+	// animalKey is empty).
+	sfKey := animalKey
+	if sfKey == "" {
+		// As a last resort use the joined animal names string (unsorted)
+		sfKey = strings.Join(animalNames, " + ")
+	}
+
 	type genRes struct {
 		Name   string
 		Source string
 	}
 
-	ch := dedupe.NameGroup.DoChan(key, func() (interface{}, error) {
-		// Re-check the DB inside the singleflight function in case another
-		// goroutine saved the generated name before we got here.
-		if gn, err := repo.GetGeneratedNameByAnimalIDs(animalIDs); err == nil && gn != nil && gn.GeneratedName != "" {
-			logging.Info("hybrid-name cache hit (singleflight)", logging.Fields{constants.LogFieldKey: key, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db"})
-			return genRes{Name: gn.GeneratedName, Source: "db"}, nil
+	ch := dedupe.NameGroup.DoChan(sfKey, func() (interface{}, error) {
+		// Re-check DB by animal key inside the singleflight function in
+		// case another goroutine saved the generated name before we got here.
+		if animalKey != "" {
+			if gn, err := repo.GetGeneratedNameByAnimalKey(animalKey); err == nil && gn != nil && gn.GeneratedName != "" {
+				logging.Info("hybrid-name cache hit (singleflight)", logging.Fields{constants.LogFieldKey: animalKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
+				return genRes{Name: gn.GeneratedName, Source: "db_key"}, nil
+			}
 		}
 
+		// Ask OpenAI for a new name
 		name, err := callOpenAI(animalNames)
 		if err != nil {
-			logging.Error("hybrid-name openai failed", err, logging.Fields{constants.LogFieldKey: key})
+			logging.Error("hybrid-name openai failed", err, logging.Fields{constants.LogFieldKey: sfKey})
 			return genRes{}, err
 		}
 		if name == "" {
-			logging.Error("hybrid-name openai returned empty name", fmt.Errorf("empty"), logging.Fields{constants.LogFieldKey: key})
+			logging.Error("hybrid-name openai returned empty name", fmt.Errorf("empty"), logging.Fields{constants.LogFieldKey: sfKey})
 			return genRes{}, fmt.Errorf("openai returned empty name")
 		}
 
-		logging.Info("hybrid-name openai success", logging.Fields{constants.LogFieldKey: key, constants.LogFieldName: name})
+		logging.Info("hybrid-name openai success", logging.Fields{constants.LogFieldKey: sfKey, constants.LogFieldName: name})
 
-		// Persist the generated name for future reuse
+		// Persist the generated name for future reuse. SaveGeneratedNameForAnimalIDs
+		// will compute and store the canonical animal_key as well.
 		if err := repo.SaveGeneratedNameForAnimalIDs(animalIDs, strings.Join(animalNames, " + "), name); err != nil {
-			logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: key})
+			logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: sfKey})
 		} else {
-			logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: key})
+			logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: sfKey})
 		}
 
 		return genRes{Name: name, Source: "openai"}, nil
@@ -153,7 +176,7 @@ func GetOrCreateGeneratedName(repo storage.Repository, animalIDs []uint, animalN
 	select {
 	case r := <-ch:
 		if r.Err != nil {
-			logging.Error("hybrid-name generation failed (singleflight)", r.Err, logging.Fields{constants.LogFieldKey: key})
+			logging.Error("hybrid-name generation failed (singleflight)", r.Err, logging.Fields{constants.LogFieldKey: sfKey})
 			return "", "openai_error", r.Err
 		}
 		if rr, ok := r.Val.(genRes); ok {
@@ -162,7 +185,7 @@ func GetOrCreateGeneratedName(repo storage.Repository, animalIDs []uint, animalN
 		// Unexpected type
 		return "", "openai_error", fmt.Errorf("unexpected result type from singleflight")
 	case <-time.After(60 * time.Second):
-		logging.Error("hybrid-name generation timed out", fmt.Errorf("timeout"), logging.Fields{constants.LogFieldKey: key})
+		logging.Error("hybrid-name generation timed out", fmt.Errorf("timeout"), logging.Fields{constants.LogFieldKey: sfKey})
 		return "", "timeout", fmt.Errorf("timed out waiting for name generation")
 	}
 }

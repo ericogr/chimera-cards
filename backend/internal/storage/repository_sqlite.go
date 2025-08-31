@@ -311,35 +311,9 @@ func buildKeyFromIDs(ids []uint) string {
 	return strings.Join(parts, ",")
 }
 
-func (r *sqliteRepository) GetGeneratedNameByAnimalIDs(ids []uint) (*game.HybridGeneratedName, error) {
-	// Normalize and sort IDs so the lookup is order-independent, then map to
-	// the three animal key columns. The third key may be nil for two-animal
-	// combinations.
-	if len(ids) < 2 || len(ids) > 3 {
-		return nil, gorm.ErrRecordNotFound
-	}
-	ints := make([]int, len(ids))
-	for i, v := range ids {
-		ints[i] = int(v)
-	}
-	sort.Ints(ints)
-
-	a1 := uint(ints[0])
-	a2 := uint(ints[1])
-	var a3 uint
-	if len(ints) == 3 {
-		a3 = uint(ints[2])
-	} else {
-		// Use 0 to represent the absent third animal.
-		a3 = 0
-	}
-
-	var h game.HybridGeneratedName
-	if err := r.db.Where("animal1_key = ? AND animal2_key = ? AND animal3_key = ?", a1, a2, a3).First(&h).Error; err != nil {
-		return nil, err
-	}
-	return &h, nil
-}
+// NOTE: lookup by numeric animal IDs was removed in favor of canonical
+// name-key lookup (`GetGeneratedNameByAnimalKey`). This keeps the cache
+// stable across DB recreations where numeric IDs can change.
 
 func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames, generatedName string) error {
 	if len(ids) < 2 || len(ids) > 3 {
@@ -397,4 +371,16 @@ func (r *sqliteRepository) SaveHybridImageByKey(key string, png []byte) error {
 	// Otherwise create a minimal record
 	h := game.HybridGeneratedName{AnimalKey: key, ImagePNG: png}
 	return r.db.Create(&h).Error
+}
+
+// GetGeneratedNameByAnimalKey looks up the generated hybrid name by the
+// canonical animal key (lowercase names joined by underscores). This is a
+// fallback when numeric IDs do not match cached rows (for example, when
+// the database was recreated and animal IDs changed but names stayed the same).
+func (r *sqliteRepository) GetGeneratedNameByAnimalKey(key string) (*game.HybridGeneratedName, error) {
+	var h game.HybridGeneratedName
+	if err := r.db.Where("animal_key = ?", key).First(&h).Error; err != nil {
+		return nil, err
+	}
+	return &h, nil
 }
