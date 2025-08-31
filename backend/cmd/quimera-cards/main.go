@@ -6,9 +6,9 @@ import (
 	"github.com/ericogr/quimera-cards/internal/api"
 	"github.com/ericogr/quimera-cards/internal/config"
 	"github.com/ericogr/quimera-cards/internal/constants"
+	"github.com/ericogr/quimera-cards/internal/hybridname"
 	"github.com/ericogr/quimera-cards/internal/logging"
 	"github.com/ericogr/quimera-cards/internal/openaiclient"
-	"github.com/ericogr/quimera-cards/internal/hybridname"
 	"github.com/ericogr/quimera-cards/internal/storage"
 
 	"github.com/gin-gonic/gin"

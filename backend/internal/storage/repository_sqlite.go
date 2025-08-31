@@ -2,11 +2,11 @@ package storage
 
 import (
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/quimera-cards/internal/keys"
 	"gorm.io/gorm"
 )
 
@@ -294,23 +294,6 @@ func (r *sqliteRepository) GetAnimalByName(name string) (*game.Animal, error) {
 	return &a, nil
 }
 
-// buildKeyFromIDs returns a canonical key for a list of animal IDs, e.g. "1,3,7".
-func buildKeyFromIDs(ids []uint) string {
-	if len(ids) == 0 {
-		return ""
-	}
-	ints := make([]int, len(ids))
-	for i, v := range ids {
-		ints[i] = int(v)
-	}
-	sort.Ints(ints)
-	parts := make([]string, len(ints))
-	for i, v := range ints {
-		parts[i] = strconv.Itoa(v)
-	}
-	return strings.Join(parts, ",")
-}
-
 // NOTE: lookup by numeric animal IDs was removed in favor of canonical
 // name-key lookup (`GetGeneratedNameByAnimalKey`). This keeps the cache
 // stable across DB recreations where numeric IDs can change.
@@ -336,16 +319,7 @@ func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames
 
 	// Build canonical animal key from the provided human-readable string.
 	// The caller passes `animalNames` typically as "Name1 + Name2".
-	parts := strings.Split(animalNames, " + ")
-	cleaned := make([]string, 0, len(parts))
-	for _, p := range parts {
-		q := strings.TrimSpace(p)
-		if q != "" {
-			cleaned = append(cleaned, strings.ToLower(strings.ReplaceAll(q, " ", "_")))
-		}
-	}
-	sort.Strings(cleaned)
-	animalKey := strings.Join(cleaned, "_")
+	animalKey := keys.AnimalKeyFromNames(strings.Split(animalNames, " + "))
 
 	h := game.HybridGeneratedName{Animal1Key: a1, Animal2Key: a2, Animal3Key: a3, AnimalNames: animalNames, GeneratedName: generatedName, AnimalKey: animalKey}
 	return r.db.Create(&h).Error

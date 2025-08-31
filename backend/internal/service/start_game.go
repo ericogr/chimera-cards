@@ -1,14 +1,14 @@
 package service
 
 import (
-    "errors"
+	"errors"
 
-    "github.com/ericogr/quimera-cards/internal/constants"
-    "github.com/ericogr/quimera-cards/internal/game"
-    "github.com/ericogr/quimera-cards/internal/hybridimage"
-    "github.com/ericogr/quimera-cards/internal/hybridname"
-    "github.com/ericogr/quimera-cards/internal/logging"
-    "github.com/ericogr/quimera-cards/internal/storage"
+	"github.com/ericogr/quimera-cards/internal/constants"
+	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/quimera-cards/internal/hybridimage"
+	"github.com/ericogr/quimera-cards/internal/hybridname"
+	"github.com/ericogr/quimera-cards/internal/logging"
+	"github.com/ericogr/quimera-cards/internal/storage"
 )
 
 var (
@@ -26,35 +26,10 @@ func StartGame(repo storage.Repository, g *game.Game) error {
 		return ErrPlayersNotReady
 	}
 
-	// Generate final hybrid names using cached value or OpenAI
-    for i := range g.Players {
-        for j := range g.Players[i].Hybrids {
-            hbd := &g.Players[i].Hybrids[j]
-            ids := make([]uint, len(hbd.BaseAnimals))
-            names := make([]string, len(hbd.BaseAnimals))
-            for k := range hbd.BaseAnimals {
-                ids[k] = hbd.BaseAnimals[k].ID
-                names[k] = hbd.BaseAnimals[k].Name
-            }
-            if gen, source, err := hybridname.GetOrCreateGeneratedName(repo, ids, names); err == nil && gen != "" {
-                hbd.GeneratedName = gen
-                logging.Info("game-start hybrid name assigned", logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j, constants.LogFieldSource: source, constants.LogFieldName: gen})
-            } else {
-                // fallback: use the concatenated name but do not store it in DB
-                hbd.GeneratedName = hbd.Name
-                logging.Error("game-start hybrid name fallback", err, logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j, constants.LogFieldName: hbd.Name})
-            }
-
-            // Ensure the hybrid image is present (generate if missing). This
-            // blocks until the image is available or generation fails so the
-            // client is only redirected to the board when both name and image
-            // are ready.
-            if err := hybridimage.EnsureHybridImage(repo, names); err != nil {
-                logging.Error("game-start failed to generate hybrid image", err, logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j})
-                return err
-            }
-        }
-    }
+	// Generate names and images (may call OpenAI if missing)
+	if err := generateNamesAndImages(repo, g); err != nil {
+		return err
+	}
 
 	// Initialize current stats and set first hybrid active
 	for i := range g.Players {
@@ -108,6 +83,38 @@ func StartGame(repo storage.Repository, g *game.Game) error {
 	// Persist the updated game
 	if err := repo.UpdateGame(g); err != nil {
 		return err
+	}
+	return nil
+}
+
+// generateNamesAndImages assigns GeneratedName for each hybrid (from cache
+// or OpenAI) and ensures the hybrid image exists (generating via OpenAI
+// if missing). Returns error if any generation fails.
+func generateNamesAndImages(repo storage.Repository, g *game.Game) error {
+	for i := range g.Players {
+		for j := range g.Players[i].Hybrids {
+			hbd := &g.Players[i].Hybrids[j]
+			names := make([]string, len(hbd.BaseAnimals))
+			ids := make([]uint, len(hbd.BaseAnimals))
+			for k := range hbd.BaseAnimals {
+				ids[k] = hbd.BaseAnimals[k].ID
+				names[k] = hbd.BaseAnimals[k].Name
+			}
+
+			if gen, source, err := hybridname.GetOrCreateGeneratedName(repo, ids, names); err == nil && gen != "" {
+				hbd.GeneratedName = gen
+				logging.Info("game-start hybrid name assigned", logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j, constants.LogFieldSource: source, constants.LogFieldName: gen})
+			} else {
+				// fallback: use the concatenated name but do not store it in DB
+				hbd.GeneratedName = hbd.Name
+				logging.Error("game-start hybrid name fallback", err, logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j, constants.LogFieldName: hbd.Name})
+			}
+
+			if err := hybridimage.EnsureHybridImage(repo, names); err != nil {
+				logging.Error("game-start failed to generate hybrid image", err, logging.Fields{constants.LogFieldGameID: g.ID, constants.LogFieldPlayerIdx: i, constants.LogFieldHybridIdx: j})
+				return err
+			}
+		}
 	}
 	return nil
 }

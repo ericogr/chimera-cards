@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +14,7 @@ import (
 	"github.com/ericogr/quimera-cards/internal/dedupe"
 	"github.com/ericogr/quimera-cards/internal/logging"
 
+	"github.com/ericogr/quimera-cards/internal/keys"
 	"github.com/ericogr/quimera-cards/internal/storage"
 )
 
@@ -32,21 +31,7 @@ func SetNamePromptTemplate(t string) {
 }
 
 // buildKeyFromIDs returns a canonical key for a list of animal IDs, e.g. "1,3,7".
-func buildKeyFromIDs(ids []uint) string {
-	if len(ids) == 0 {
-		return ""
-	}
-	ints := make([]int, len(ids))
-	for i, v := range ids {
-		ints[i] = int(v)
-	}
-	sort.Ints(ints)
-	parts := make([]string, len(ints))
-	for i, v := range ints {
-		parts[i] = strconv.Itoa(v)
-	}
-	return strings.Join(parts, ",")
-}
+// buildKeyFromIDs removed; we canonicalize by names via keys.AnimalKeyFromNames
 
 // callOpenAI invokes the OpenAI Chat Completions API to generate a single
 // creative name for the provided animal names. It returns the generated name
@@ -126,15 +111,7 @@ func callOpenAI(animalNames []string) (string, error) {
 // and an error if the OpenAI call failed.
 func GetOrCreateGeneratedName(repo storage.Repository, animalIDs []uint, animalNames []string) (string, string, error) {
 	// Build canonical animal key from names: lowercase, underscores, sorted.
-	parts := make([]string, 0, len(animalNames))
-	for _, p := range animalNames {
-		q := strings.TrimSpace(p)
-		if q != "" {
-			parts = append(parts, strings.ToLower(strings.ReplaceAll(q, " ", "_")))
-		}
-	}
-	sort.Strings(parts)
-	animalKey := strings.Join(parts, "_")
+	animalKey := keys.AnimalKeyFromNames(animalNames)
 
 	// Try cache by canonical name-key first.
 	if animalKey != "" {

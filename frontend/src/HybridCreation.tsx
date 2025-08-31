@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animal } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
+import { animalAssetUrl } from './utils/keys';
 
 interface Props {
   gameId: string;
@@ -107,12 +108,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   if (error) return <div>Error: {error}</div>;
 
   const imageSrcFor = (name: string) => {
-    // Images are now served by the backend under `/api/assets/animals`.
-    // The frontend development server proxies `/api` to the backend, so
-    // using this path works in development and production when the API
-    // is served from the same origin.
-    const file = name.trim().toLowerCase() + '.png';
-    return `${constants.API_ASSETS_ANIMALS}/${file}`;
+    return animalAssetUrl(name);
   };
 
   const animalCard = (a: Animal, target: 'h1' | 'h2') => {

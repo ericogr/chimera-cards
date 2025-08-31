@@ -7,6 +7,7 @@ import iconRest from './images/rest.svg';
 import iconAbility from './images/ability.svg';
 import iconEnd from './images/end_match.svg';
 import { Game, Player, Hybrid, Animal, AnimalName } from './types';
+import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
 
@@ -284,18 +285,7 @@ export default GameBoard;
 const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) => {
   if (!hybrid) return <div />;
 
-  // Build hybrid image key from base animal names: lowercase, replace spaces
-  // with underscores, sort alphabetically and join with underscore.
-  const buildHybridKey = (names?: any[]) => {
-    if (!names || names.length === 0) return '';
-    const parts = names.map((a: any) => (a?.name || '').toString().trim().toLowerCase().replace(/\s+/g, '_'))
-      .filter(Boolean)
-      .sort();
-    return parts.join('_');
-  };
-
-  const key = buildHybridKey(hybrid.base_animals as any[]);
-  const imgSrc = key ? `${constants.API_ASSETS_HYBRIDS}/${key}.png` : '';
+  const imgSrc = hybridAssetUrlFromNames((hybrid?.base_animals || []).map(a => a.name));
 
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>

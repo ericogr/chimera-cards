@@ -27,16 +27,16 @@ type rawConfig struct {
 	Server     *struct {
 		Address string `json:"address"`
 	} `json:"server"`
-    // Optional image prompt template used to generate animal/hybrid images.
-    // Use the string token {{animals}} where the comma-separated list of
-    // animal names will be substituted. If not provided, a sensible
-    // default is used by the OpenAI client.
-    ImagePrompt string `json:"image_prompt"`
-    // Optional name prompt template used to generate hybrid names.
-    // Use the token {{animals}} where the comma-separated list of animal
-    // names will be substituted. If omitted, a default prompt is used.
-    NamePrompt string `json:"name_prompt"`
-    }
+	// Optional image prompt template used to generate animal/hybrid images.
+	// Use the string token {{animals}} where the comma-separated list of
+	// animal names will be substituted. If not provided, a sensible
+	// default is used by the OpenAI client.
+	ImagePrompt string `json:"image_prompt"`
+	// Optional name prompt template used to generate hybrid names.
+	// Use the token {{animals}} where the comma-separated list of animal
+	// names will be substituted. If omitted, a default prompt is used.
+	NamePrompt string `json:"name_prompt"`
+}
 
 // LoadedConfig contains animals to seed and the server address to bind to.
 type LoadedConfig struct {
@@ -44,6 +44,8 @@ type LoadedConfig struct {
 	ServerAddress string
 	// Optional image prompt template loaded from config
 	ImagePromptTemplate string
+	// Optional name prompt template loaded from config
+	NamePromptTemplate string
 }
 
 // LoadConfig reads the configuration file at path and returns animals and
@@ -87,12 +89,12 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		addr = rc.Server.Address
 	}
 
-    return &LoadedConfig{
-        Animals:             out,
-        ServerAddress:       addr,
-        ImagePromptTemplate: strings.TrimSpace(rc.ImagePrompt),
-        NamePromptTemplate:  strings.TrimSpace(rc.NamePrompt),
-    }, nil
+	return &LoadedConfig{
+		Animals:             out,
+		ServerAddress:       addr,
+		ImagePromptTemplate: strings.TrimSpace(rc.ImagePrompt),
+		NamePromptTemplate:  strings.TrimSpace(rc.NamePrompt),
+	}, nil
 }
 
 // (No compatibility wrapper) Use LoadConfig to obtain animals and server address.
