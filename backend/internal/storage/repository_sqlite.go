@@ -82,6 +82,22 @@ func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 			}
 		}
 	}
+
+	// Compute the display name for hybrids on every load. The hybrid name
+	// is a concatenation of its base animal names (sorted) but is not
+	// persisted in the database anymore (it's derived). Populate the
+	// `Name` field so API responses include it.
+	for pi := range g.Players {
+		for hi := range g.Players[pi].Hybrids {
+			h := &g.Players[pi].Hybrids[hi]
+			names := make([]string, len(h.BaseAnimals))
+			for ai := range h.BaseAnimals {
+				names[ai] = h.BaseAnimals[ai].Name
+			}
+			sort.Slice(names, func(i, j int) bool { return strings.ToLower(names[i]) < strings.ToLower(names[j]) })
+			h.Name = strings.Join(names, " + ")
+		}
+	}
 	return &g, nil
 }
 

@@ -10,7 +10,6 @@ interface Props {
 }
 
 interface HybridSpecState {
-  name: string;
   animalIds: number[];
   selectedAnimalId?: number;
 }
@@ -19,8 +18,8 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [h1, setH1] = useState<HybridSpecState>({ name: '', animalIds: [], selectedAnimalId: undefined });
-  const [h2, setH2] = useState<HybridSpecState>({ name: '', animalIds: [], selectedAnimalId: undefined });
+  const [h1, setH1] = useState<HybridSpecState>({ animalIds: [], selectedAnimalId: undefined });
+  const [h2, setH2] = useState<HybridSpecState>({ animalIds: [], selectedAnimalId: undefined });
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
   const playerUUID = localStorage.getItem('player_uuid') || '';
@@ -85,10 +84,10 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
       const res = await apiFetch(`${constants.API_GAMES}/${gameId}/create-hybrids`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-        body: JSON.stringify({
+      body: JSON.stringify({
           player_uuid: playerUUID,
-          hybrid1: { name: h1Name || 'Hybrid 1', animal_ids: h1.animalIds, selected_animal_id: h1.selectedAnimalId },
-          hybrid2: { name: h2Name || 'Hybrid 2', animal_ids: h2.animalIds, selected_animal_id: h2.selectedAnimalId },
+          hybrid1: { animal_ids: h1.animalIds, selected_animal_id: h1.selectedAnimalId },
+          hybrid2: { animal_ids: h2.animalIds, selected_animal_id: h2.selectedAnimalId },
         }),
       });
       if (!res.ok) {

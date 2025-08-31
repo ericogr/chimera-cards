@@ -28,17 +28,25 @@ type Animal struct {
 	SkillDescription string `json:"skill_description" gorm:"-"`
 }
 
+// TableName overrides the default GORM table name for Animal so the
+// persisted table is `animals_generated` instead of the default `animals`.
+func (Animal) TableName() string { return "animals_generated" }
+
 type Hybrid struct {
 	gorm.Model
-	PlayerID uint   `json:"-"`
-	Name     string `json:"name"`
+	PlayerID uint `json:"-"`
+	// Name is a derived, non-persistent display field built from the
+	// hybrid's base animals (e.g. "Lion + Raven"). It is intentionally
+	// ignored by GORM so the database does not store redundant data.
+	Name string `json:"name" gorm:"-"`
 	// GeneratedName is the AI-created final name for the hybrid. It is
 	// empty until the game is started (both players created hybrids and
 	// the host starts the match). The frontend shows this during combat;
 	// during creation the `Name` field continues to hold the simple
 	// concatenation (e.g. "Lion + Raven").
-	GeneratedName    string   `json:"generated_name"`
-	BaseAnimals      []Animal `json:"base_animals" gorm:"many2many:hybrid_animals;"`
+	GeneratedName string `json:"generated_name"`
+	// Use a descriptive join table name for the many-to-many relation.
+	BaseAnimals      []Animal `json:"base_animals" gorm:"many2many:hybrid_animals_combination;"`
 	BaseHitPoints    int      `json:"base_pv"`
 	CurrentHitPoints int      `json:"current_pv"`
 	BaseAttack       int      `json:"base_atq"`
@@ -166,6 +174,11 @@ type HybridGeneratedName struct {
 	// ImagePNG stores the 256x256 PNG bytes for the hybrid image.
 	ImagePNG []byte `json:"-" gorm:"column:image_png;type:blob"`
 }
+
+// TableName overrides the default GORM table name for HybridGeneratedName
+// so the persisted table is `hybrid_generated` instead of the default
+// `hybrid_generated_names`.
+func (HybridGeneratedName) TableName() string { return "hybrid_generated" }
 
 // BeforeSave is a GORM hook that ensures animal key columns are stored in
 // ascending order (smallest ID first). This guarantees a canonical

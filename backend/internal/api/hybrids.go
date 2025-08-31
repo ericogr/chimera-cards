@@ -12,7 +12,6 @@ import (
 )
 
 type CreateHybridSpec struct {
-	Name      string `json:"name"`
 	AnimalIDs []uint `json:"animal_ids"`
 	// SelectedAnimalID must be one of AnimalIDs and will define the special
 	// ability available for this hybrid during combat.
