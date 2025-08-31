@@ -113,13 +113,13 @@ func GetOrCreateGeneratedName(repo storage.Repository, animalNames []string) (st
 	// Build canonical animal key from names: lowercase, underscores, sorted.
 	animalKey := keys.AnimalKeyFromNames(animalNames)
 
-    // Try cache by canonical name-key first.
-    if animalKey != "" {
-        if gn, err := repo.GetGeneratedNameByAnimalKey(animalKey); err == nil && gn != nil && gn.GeneratedName != "" {
-            logging.Info("hybrid-name cache hit by animal_key", logging.Fields{constants.LogFieldKey: animalKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
-            return gn.GeneratedName, "db_key", nil
-        }
-    }
+	// Try cache by canonical name-key first.
+	if animalKey != "" {
+		if gn, err := repo.GetGeneratedNameByAnimalKey(animalKey); err == nil && gn != nil && gn.GeneratedName != "" {
+			logging.Info("hybrid-name cache hit by animal_key", logging.Fields{constants.LogFieldKey: animalKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
+			return gn.GeneratedName, "db_key", nil
+		}
+	}
 
 	// Not cached — deduplicate concurrent generation using singleflight
 	// keyed by the canonical animalKey (fallback to a stable string if
@@ -158,33 +158,33 @@ func GetOrCreateGeneratedName(repo storage.Repository, animalNames []string) (st
 
 		logging.Info("hybrid-name openai success", logging.Fields{constants.LogFieldKey: sfKey, constants.LogFieldName: name})
 
-        // Persist the generated name for future reuse.
-        // Attempt to resolve numeric IDs from names so we can save the
-        // canonical row with animal key and numeric foreign keys. If
-        // any name is missing in the animals table we skip saving by IDs
-        // (the name is still usable via the animal_key lookup).
-        ids := make([]uint, 0, len(animalNames))
-        for _, n := range animalNames {
-            if a, err := repo.GetAnimalByName(n); err == nil && a != nil {
-                ids = append(ids, a.ID)
-            } else {
-                ids = nil
-                break
-            }
-        }
-        if ids != nil && (len(ids) == 2 || len(ids) == 3) {
-            if err := repo.SaveGeneratedNameForAnimalIDs(ids, strings.Join(animalNames, " + "), name); err != nil {
-                logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: sfKey})
-            } else {
-                logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: sfKey})
-            }
-        } else {
-            // Best-effort: save using animal_key only via repository by
-            // attempting a direct create (if repository supported it).
-            // For now we skip numeric-key save so cached lookup will rely
-            // on the stored animal_key created when possible.
-            logging.Info("hybrid-name saved to cache skipped (missing numeric ids)", logging.Fields{constants.LogFieldKey: sfKey})
-        }
+		// Persist the generated name for future reuse.
+		// Attempt to resolve numeric IDs from names so we can save the
+		// canonical row with animal key and numeric foreign keys. If
+		// any name is missing in the animals table we skip saving by IDs
+		// (the name is still usable via the animal_key lookup).
+		ids := make([]uint, 0, len(animalNames))
+		for _, n := range animalNames {
+			if a, err := repo.GetAnimalByName(n); err == nil && a != nil {
+				ids = append(ids, a.ID)
+			} else {
+				ids = nil
+				break
+			}
+		}
+		if ids != nil && (len(ids) == 2 || len(ids) == 3) {
+			if err := repo.SaveGeneratedNameForAnimalIDs(ids, strings.Join(animalNames, " + "), name); err != nil {
+				logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: sfKey})
+			} else {
+				logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: sfKey})
+			}
+		} else {
+			// Best-effort: save using animal_key only via repository by
+			// attempting a direct create (if repository supported it).
+			// For now we skip numeric-key save so cached lookup will rely
+			// on the stored animal_key created when possible.
+			logging.Info("hybrid-name saved to cache skipped (missing numeric ids)", logging.Fields{constants.LogFieldKey: sfKey})
+		}
 
 		return genRes{Name: name, Source: "openai"}, nil
 	})

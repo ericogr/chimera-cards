@@ -157,8 +157,6 @@ type HybridGeneratedName struct {
 	// intentionally no associated row.
 	Animal3 Animal `gorm:"foreignKey:Animal3Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
 
-	// Human-readable list of animal names that generated this hybrid name.
-	AnimalNames   string `json:"animal_names"`
 	GeneratedName string `json:"generated_name"`
 	// Canonical key for this animal combination (names sorted alphabetically,
 	// lowercase, separated by underscore). Used to lookup/store the hybrid

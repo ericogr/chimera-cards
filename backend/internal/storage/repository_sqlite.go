@@ -321,7 +321,7 @@ func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames
 	// The caller passes `animalNames` typically as "Name1 + Name2".
 	animalKey := keys.AnimalKeyFromNames(strings.Split(animalNames, " + "))
 
-	h := game.HybridGeneratedName{Animal1Key: a1, Animal2Key: a2, Animal3Key: a3, AnimalNames: animalNames, GeneratedName: generatedName, AnimalKey: animalKey}
+	h := game.HybridGeneratedName{Animal1Key: a1, Animal2Key: a2, Animal3Key: a3, GeneratedName: generatedName, AnimalKey: animalKey}
 	return r.db.Create(&h).Error
 }
 
