@@ -8,6 +8,7 @@ import (
 	"github.com/ericogr/quimera-cards/internal/constants"
 	"github.com/ericogr/quimera-cards/internal/logging"
 	"github.com/ericogr/quimera-cards/internal/openaiclient"
+	"github.com/ericogr/quimera-cards/internal/hybridname"
 	"github.com/ericogr/quimera-cards/internal/storage"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,12 @@ func main() {
 	// to the OpenAI client so image generation uses the configured text.
 	if cfg.ImagePromptTemplate != "" {
 		openaiclient.SetImagePromptTemplate(cfg.ImagePromptTemplate)
+	}
+
+	// If the configuration provides a name prompt template, apply it to
+	// the hybrid name generator so name generation uses the configured text.
+	if cfg.NamePromptTemplate != "" {
+		hybridname.SetNamePromptTemplate(cfg.NamePromptTemplate)
 	}
 
 	db, err := storage.OpenAndMigrate("quimera.db", cfg.Animals)

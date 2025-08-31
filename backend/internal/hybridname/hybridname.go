@@ -19,6 +19,18 @@ import (
 	"github.com/ericogr/quimera-cards/internal/storage"
 )
 
+// namePromptTemplate can be set at application startup to customize the
+// prompt used when requesting hybrid names from OpenAI. Use the token
+// "{{animals}}" where the comma-separated list of animal names will be
+// substituted.
+var namePromptTemplate string
+
+// SetNamePromptTemplate sets a custom prompt template for hybrid name
+// generation. Call from main after loading configuration.
+func SetNamePromptTemplate(t string) {
+	namePromptTemplate = strings.TrimSpace(t)
+}
+
 // buildKeyFromIDs returns a canonical key for a list of animal IDs, e.g. "1,3,7".
 func buildKeyFromIDs(ids []uint) string {
 	if len(ids) == 0 {
@@ -45,7 +57,15 @@ func callOpenAI(animalNames []string) (string, error) {
 		return "", fmt.Errorf("%s not set", constants.EnvOpenAIAPIKey)
 	}
 
-	prompt := fmt.Sprintf("Given these animal names: %s. Create a short, fun, single-name hybrid that combines them (1-3 words). Return only the name.", strings.Join(animalNames, ", "))
+	// Build prompt from template. If a configured template is present use
+	// it; otherwise fall back to a sensible default. The template should
+	// contain the token {{animals}} where the names list will be inserted.
+	animalsPart := strings.Join(animalNames, ", ")
+	prompt := namePromptTemplate
+	if prompt == "" {
+		prompt = "Given these animal names: {{animals}}. Create a short, fun, single-name hybrid that combines them (1-3 words). Return only the name."
+	}
+	prompt = strings.ReplaceAll(prompt, "{{animals}}", animalsPart)
 
 	payload := map[string]interface{}{
 		"model": constants.OpenAIChatModel,
