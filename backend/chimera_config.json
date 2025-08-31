@@ -123,5 +123,5 @@
   ],
   "server": { "address": ":8080" },
   "image_prompt": "Create a single image of {{animals}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature.",
-  "name_prompt": "Given these animal names: {{animals}}. Create a short, fun, single-name hybrid that combines them (1-3 words). Return only the name."
+  "name_prompt": "Given these animal names: {{animals}}. Create a short, fun, single-name hybrid that combines them. Return only the name."
 }

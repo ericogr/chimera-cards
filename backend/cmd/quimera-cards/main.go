@@ -68,7 +68,6 @@ func main() {
 		protected.Use(api.AuthRequired())
 
 		// Image and asset endpoints are protected — they require an authenticated session
-		protected.GET(constants.RouteAnimalsImage, handler.GenerateAnimalImage)
 		protected.GET(constants.RouteAssetsAnimals+"/*file", handler.ServeAnimalAsset)
 		protected.GET(constants.RouteAssetsHybrids+"/*file", handler.ServeHybridAsset)
 

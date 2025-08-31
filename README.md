@@ -130,12 +130,6 @@ Base: `http://localhost:8080/api`
 
 ### Protected endpoints (require session cookie)
 
-- `GET /animals/image?ids=1` or `ids=1,2`
-  - Returns a PNG (256x256) for one animal or a merged hybrid image for
-    2–3 animals. The `ids` query parameter is a comma-separated list of
-    animal IDs. The server uses OpenAI to generate images when not present
-    in the DB. Response Content-Type: `image/png`.
-
 - `GET /assets/animals/<file>`
   - Serves the stored animal image (generates via OpenAI if missing).
 
