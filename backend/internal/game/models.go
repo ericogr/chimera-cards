@@ -29,8 +29,8 @@ type Animal struct {
 }
 
 // TableName overrides the default GORM table name for Animal so the
-// persisted table is `animals_generated` instead of the default `animals`.
-func (Animal) TableName() string { return "animals_generated" }
+// persisted table is `animal_templates` instead of the default `animals`.
+func (Animal) TableName() string { return "animal_templates" }
 
 type Hybrid struct {
 	gorm.Model
@@ -46,7 +46,7 @@ type Hybrid struct {
 	// concatenation (e.g. "Lion + Raven").
 	GeneratedName string `json:"generated_name"`
 	// Use a descriptive join table name for the many-to-many relation.
-	BaseAnimals      []Animal `json:"base_animals" gorm:"many2many:hybrid_animals_combination;"`
+	BaseAnimals      []Animal `json:"base_animals" gorm:"many2many:hybrid_base_animals;"`
 	BaseHitPoints    int      `json:"base_pv"`
 	CurrentHitPoints int      `json:"current_pv"`
 	BaseAttack       int      `json:"base_atq"`
@@ -98,7 +98,7 @@ type Player struct {
 }
 
 // Store per-game participants in a dedicated table for clarity
-func (Player) TableName() string { return "game_participants" }
+func (Player) TableName() string { return "game_players" }
 
 type Game struct {
 	gorm.Model
@@ -129,8 +129,8 @@ type User struct {
 	Resignations int
 }
 
-// Unify global users table name as "players"
-func (User) TableName() string { return "players" }
+// Unify global users table name as "player_profiles"
+func (User) TableName() string { return "player_profiles" }
 
 // PendingActionType is a string alias representing a player's chosen action.
 // Using a dedicated type instead of plain string makes code safer and self-documenting.
@@ -154,9 +154,9 @@ type HybridGeneratedName struct {
 	// Store up to three animal IDs in separate columns so lookups can use
 	// explicit constraints. The third key uses 0 to represent "no animal",
 	// which makes uniqueness constraints simpler (no NULLs).
-	Animal1Key uint `json:"animal1_key" gorm:"column:animal1_key;uniqueIndex:idx_hybrid_animals"`
-	Animal2Key uint `json:"animal2_key" gorm:"column:animal2_key;uniqueIndex:idx_hybrid_animals"`
-	Animal3Key uint `json:"animal3_key" gorm:"column:animal3_key;uniqueIndex:idx_hybrid_animals"`
+	Animal1Key uint `json:"animal1_key" gorm:"column:animal1_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
+	Animal2Key uint `json:"animal2_key" gorm:"column:animal2_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
+	Animal3Key uint `json:"animal3_key" gorm:"column:animal3_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
 
 	// Associations to enforce foreign key constraints to the animals table.
 	Animal1 Animal `gorm:"foreignKey:Animal1Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
@@ -176,9 +176,9 @@ type HybridGeneratedName struct {
 }
 
 // TableName overrides the default GORM table name for HybridGeneratedName
-// so the persisted table is `hybrid_generated` instead of the default
+// so the persisted table is `hybrid_generated_cache` instead of the default
 // `hybrid_generated_names`.
-func (HybridGeneratedName) TableName() string { return "hybrid_generated" }
+func (HybridGeneratedName) TableName() string { return "hybrid_generated_cache" }
 
 // BeforeSave is a GORM hook that ensures animal key columns are stored in
 // ascending order (smallest ID first). This guarantees a canonical

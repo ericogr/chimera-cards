@@ -28,8 +28,9 @@ func OpenAndMigrate(dataSourceName string, animalsFromConfig []game.Animal) (*go
 
 	// Ensure a unique constraint across the three animal key columns. We use
 	// an explicit UNIQUE index so combinations like (a,b,0) are enforced when
-	// the third key is 0 (meaning "none").
-	if execErr := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_hybrid_animals ON hybrid_generated(animal1_key, animal2_key, animal3_key);").Error; execErr != nil {
+	// the third key is 0 (meaning "none"). The index targets the renamed
+	// cache table for hybrid-generated assets.
+	if execErr := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_hybrid_generated_cache_animals ON hybrid_generated_cache(animal1_key, animal2_key, animal3_key);").Error; execErr != nil {
 		return nil, execErr
 	}
 
