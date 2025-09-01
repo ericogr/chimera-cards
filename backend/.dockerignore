@@ -1,0 +1,12 @@
+bin
+quimera.db
+.git
+.gitignore
+*.md
+*.log
+node_modules
+*.swp
+tmp
+dist
+coverage
+

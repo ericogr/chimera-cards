@@ -1,6 +1,6 @@
 # Makefile for the Go backend application
 
-.PHONY: all build run clean
+.PHONY: all build run clean docker-build docker-push docker-build-push
 
 BINARY_NAME=quimera-cards
 OUT_DIR?=.
@@ -21,3 +21,20 @@ clean:
 	@go clean
 	@rm -f $(OUT_DIR)/$(BINARY_NAME)
 	@rm -f quimera.db
+
+# Docker image variables
+IMAGE ?= quimera-backend
+TAG ?= latest
+DOCKERFILE ?= Dockerfile
+
+.PHONY: docker-build docker-push docker-build-push
+
+docker-build:
+	@echo "Building backend docker image $(IMAGE):$(TAG)"
+	@docker build -t $(IMAGE):$(TAG) -f $(DOCKERFILE) .
+
+docker-push:
+	@echo "Pushing backend docker image $(IMAGE):$(TAG)"
+	@docker push $(IMAGE):$(TAG)
+
+docker-build-push: docker-build docker-push

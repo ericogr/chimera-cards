@@ -1,20 +1,23 @@
 # Main Makefile to control backend and frontend builds
 
 .PHONY: \
-	backend-build \
-	backend-run \
-	backend-clean \
-	backend-stop \
-	frontend-install \
-	frontend-start \
-	frontend-build \
-	frontend-test \
-	build \
-	run \
-	frontend-stop \
-	stop \
-	kill \
-	help
+    backend-build \
+    backend-run \
+    backend-clean \
+    backend-stop \
+    frontend-install \
+    frontend-start \
+    frontend-build \
+    frontend-test \
+    build \
+    run \
+    frontend-stop \
+    stop \
+    kill \
+    help \
+    docker-build \
+    docker-push \
+    docker-publish
 
 # Backend binary output directory (relative to backend/)
 BACKEND_OUT_DIR ?= bin
@@ -88,6 +91,19 @@ build:
 	@echo "--- Building All ---"
 	@$(MAKE) backend-build
 	@$(MAKE) frontend-build
+
+
+docker-build:
+	@echo "--- Building Docker images (backend + frontend) ---"
+	@$(MAKE) -C backend docker-build
+	@$(MAKE) -C frontend docker-build
+
+docker-push:
+	@echo "--- Pushing Docker images (backend + frontend) ---"
+	@$(MAKE) -C backend docker-push
+	@$(MAKE) -C frontend docker-push
+
+docker-publish: docker-build docker-push
 
 run:
 	@echo "--- Running All (in parallel) ---"
