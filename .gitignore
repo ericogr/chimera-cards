@@ -3,3 +3,7 @@ backend/bin/
 GEMINI.md
 backend/quimera.db
 .gocache/
+
+# Local frontend envs (do not commit secrets)
+frontend/.env
+frontend/.env.*
