@@ -1,12 +1,12 @@
 version: '3.8'
 services:
-  backend:
+  chimera-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     image: ${BACKEND_IMAGE:-quimera-backend}:${TAG:-latest}
     ports:
-      - "8080:8080"
+    - "8080:8080"
     environment:
       SESSION_SECRET: ${SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -14,8 +14,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       CHIMERA_CONFIG: /config/chimera_config.json
     volumes:
-      - ./backend/chimera_config.json:/config/chimera_config.json:ro
-      - ./backend/quimera.db:/quimera.db
+    - ./backend/chimera_config.json:/config/chimera_config.json:ro
+    - ./backend/quimera.db:/quimera.db
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "/healthcheck"]
@@ -24,16 +24,18 @@ services:
       retries: 5
       start_period: 10s
 
-  frontend:
+  chimera-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
         REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
-        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://localhost:8080}
+        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}
     image: ${FRONTEND_IMAGE:-quimera-frontend}:${TAG:-latest}
+    depends_on:
+    - chimera-backend
     ports:
-      - "80:80"
+    - "3000:80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost/ || exit 1"]

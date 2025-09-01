@@ -11,6 +11,97 @@ summary of the combat mechanics.
 
 ---
 
+## Production Deployment
+
+This repository includes a `docker-compose.yml` that builds and runs the
+frontend and backend as containers. The production-oriented flow is:
+
+- Build the frontend static bundle (Node) and serve it with `nginx`.
+- The frontend's `nginx` is configured to proxy `/api/*` requests to the
+  backend service (`http://chimera-backend:8080`) inside the Docker Compose
+  network. This allows the SPA to use same-origin API paths (`/api/...`)
+  and preserves HttpOnly session cookies (no CORS required).
+
+Key points:
+
+- Frontend static assets are built inside `frontend/Dockerfile` and the
+  final image uses `nginx` with a small `frontend/nginx.conf` that
+  proxies `/api/` to the `chimera-backend` service.
+- The SPA already uses `/api` as its API prefix. The Compose file sets
+  `REACT_APP_API_BASE_URL` to `/api` by default so builds remain
+  consistent, but the nginx proxy is what ensures same-origin routing.
+
+Environment variables (example, set in a root `.env` file or in your
+deployment system):
+
+```
+# Backend (required)
+SESSION_SECRET=your-strong-session-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+OPENAI_API_KEY=sk-...   # required for hybrid name/image generation
+SESSION_SECURE_COOKIE=1 # set to 1 when serving over HTTPS
+
+# Frontend build-time args (mapped in docker-compose)
+REACT_APP_GOOGLE_CLIENT_ID=your-google-client-id
+# REACT_APP_API_BASE_URL defaults to /api in docker-compose.yml
+```
+
+Build and run with Docker Compose:
+
+```
+docker compose build
+docker compose up -d
+```
+
+Logs and healthchecks:
+
+- Frontend healthcheck: nginx serves `/`, logs available via
+  `docker compose logs -f chimera-frontend`.
+- Chimera backend healthcheck: configured to call the internal `/healthcheck` binary.
+
+Production recommendations & notes
+
+- Do not expose the backend port publicly if you don't need to. To keep
+  the backend internal to the Compose network change the backend service
+  `ports:` entry to `expose:` so only other services (nginx) can reach it.
+  Example change in `docker-compose.yml`:
+
+  ```yaml
+  services:
+    chimera-backend:
+      # ...
+      # replace this:
+      # ports:
+      #   - "8080:8080"
+      # with this to avoid publishing the port to the host:
+      expose:
+        - "8080"
+  ```
+
+- TLS / HTTPS: the `frontend` container's nginx listens on port 80. In
+  production you should terminate TLS at a fronting reverse proxy (Traefik,
+  Caddy, cloud LB) and route traffic to the `frontend` container. If you
+  do this, make sure `SESSION_SECURE_COOKIE=1` so the backend will set
+  the session cookie with the `Secure` flag.
+
+- Persistent storage / DB: the project currently uses SQLite
+  (`backend/quimera.db`) which is intended for development. For a real
+  production deployment migrate the storage layer to a production-ready
+  database (Postgres/MySQL) and update `internal/storage` accordingly.
+
+- Secrets: never commit `SESSION_SECRET`, `GOOGLE_CLIENT_SECRET`, or
+  `OPENAI_API_KEY` to source control. Use your deployment platform's
+  secrets management (or environment variables injected securely).
+
+If you want, I can also:
+
+- Update `docker-compose.yml` to make the `chimera-backend` internal-only (replace
+  `ports` with `expose`).
+- Add an example `traefik` or `nginx` reverse-proxy entry to the compose
+  file to show TLS termination and routing.
+
+
 ## Highlights
 - Backend refactor: single executable at `backend/cmd/quimera-cards` and
   modularized `internal/` packages (api, service, engine, storage, hybrid
@@ -255,4 +346,3 @@ If you want, I can also:
 - add a short example client script that demonstrates the auth + game
   creation flow, or
 - generate a small OpenAPI spec from the route handlers.
-

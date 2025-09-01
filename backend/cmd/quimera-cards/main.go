@@ -42,7 +42,7 @@ func main() {
 
 	db, err := storage.OpenAndMigrate("quimera.db", cfg.Animals)
 	if err != nil {
-		logging.Fatal("Falha ao inicializar o banco de dados", err, nil)
+		logging.Fatal("Failed to initialize database", err, nil)
 	}
 
 	repo := storage.NewSQLiteRepository(db, cfg.Animals)
@@ -84,21 +84,16 @@ func main() {
 
 	// Start server on configured address
 	addr := cfg.ServerAddress
-	// For logging present a http://localhost:PORT style when address starts with ':'
-	displayAddr := addr
-	if len(addr) > 0 && addr[0] == ':' {
-		displayAddr = "http://localhost" + addr
-	}
-	logging.Info("Servidor iniciado", logging.Fields{constants.LogFieldAddr: displayAddr})
+	logging.Info("Server started", logging.Fields{constants.LogFieldAddr: addr})
 	if err := router.Run(addr); err != nil {
-		logging.Fatal("Falha ao iniciar o servidor", err, nil)
+		logging.Fatal("Failed to start server", err, nil)
 	}
 }
 
 func checkEnvVars(vars []string) {
 	for _, v := range vars {
 		if os.Getenv(v) == "" {
-			logging.Fatal("Variável de ambiente obrigatória não definida", nil, logging.Fields{"var": v})
+			logging.Fatal("Required environment variable not set", nil, logging.Fields{"var": v})
 		}
 	}
 }

@@ -5,5 +5,6 @@ backend/quimera.db
 .gocache/
 
 # Local frontend envs (do not commit secrets)
+.env
 frontend/.env
 frontend/.env.*
