@@ -8,6 +8,7 @@ import (
 	"github.com/ericogr/quimera-cards/internal/game"
 	"github.com/ericogr/quimera-cards/internal/keys"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type sqliteRepository struct {
@@ -338,7 +339,14 @@ func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames
 	animalKey := keys.AnimalKeyFromNames(strings.Split(animalNames, " + "))
 
 	h := game.HybridGeneratedName{Animal1Key: a1, Animal2Key: a2, Animal3Key: a3, GeneratedName: generatedName, AnimalKey: animalKey}
-	return r.db.Create(&h).Error
+	// Use upsert semantics keyed by `animal_key` so that if a minimal record
+	// was previously created (for example when saving an image only) we
+	// update it with the generated name and numeric animal keys instead
+	// of failing due to the unique constraint on `animal_key`.
+	return r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "animal_key"}},
+		DoUpdates: clause.AssignmentColumns([]string{"animal1_key", "animal2_key", "animal3_key", "generated_name"}),
+	}).Create(&h).Error
 }
 
 func (r *sqliteRepository) GetHybridImageByKey(key string) ([]byte, error) {

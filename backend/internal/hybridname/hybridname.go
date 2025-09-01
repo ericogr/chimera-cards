@@ -52,6 +52,9 @@ func callOpenAI(animalNames []string) (string, error) {
 	}
 	prompt = strings.ReplaceAll(prompt, "{{animals}}", animalsPart)
 
+	// Log the prompt so operators can see exactly what was sent to OpenAI
+	logging.Info("hybrid-name openai prompt", logging.Fields{"animals": animalsPart, "prompt": prompt})
+
 	payload := map[string]interface{}{
 		"model": constants.OpenAIChatModel,
 		"messages": []map[string]string{

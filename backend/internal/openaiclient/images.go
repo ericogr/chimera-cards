@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ericogr/quimera-cards/internal/constants"
+	"github.com/ericogr/quimera-cards/internal/logging"
 )
 
 // imagePromptTemplate can be set at application startup to customize the
@@ -60,6 +61,10 @@ func GenerateImageFromNames(ctx context.Context, animalNames []string) ([]byte, 
 		"model":   constants.OpenAIImageModel,
 		"quality": constants.OpenAIImageQualityDefault,
 	}
+
+	// Log the prompt before sending the request so operators can see what
+	// was asked to the image API when a generation happens.
+	logging.Info("hybrid-image openai prompt", logging.Fields{"animals": animalsPart, "prompt": prompt})
 
 	b, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))

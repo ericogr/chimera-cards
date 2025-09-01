@@ -3,6 +3,7 @@ package hybridimage
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ericogr/quimera-cards/internal/constants"
@@ -31,6 +32,7 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 
 	// Fast path: already in DB
 	if img, err := repo.GetHybridImageByKey(key); err == nil && len(img) > 0 {
+		logging.Info("hybrid-image cache hit", logging.Fields{"animal_key": key, "size_bytes": len(img)})
 		return nil
 	}
 
@@ -44,6 +46,7 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
 
+		logging.Info("hybrid-image generating via OpenAI", logging.Fields{"animal_key": key, "animals": strings.Join(animalNames, " + ")})
 		imgBytes, err := openaiclient.GenerateImageFromNames(ctx, animalNames)
 		if err != nil {
 			return nil, err
@@ -54,6 +57,8 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 		}
 		if err := repo.SaveHybridImageByKey(key, out); err != nil {
 			logging.Error("failed to save hybrid image", err, logging.Fields{constants.LogFieldKey: key})
+		} else {
+			logging.Info("hybrid-image generated and saved", logging.Fields{"animal_key": key, "size_bytes": len(out)})
 		}
 		return out, nil
 	})
