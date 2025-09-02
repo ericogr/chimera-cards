@@ -58,11 +58,6 @@ func main() {
 		apiRoutes.GET(constants.RoutePublicGames, handler.ListPublicGames)
 		apiRoutes.GET(constants.RouteLeaderboard, handler.ListLeaderboard)
 
-		authRoutes := apiRoutes.Group(constants.RouteAuth)
-		{
-			authRoutes.POST("/google/oauth2callback", authHandler.GoogleOAuthCallback)
-		}
-
 		// Authenticated endpoints
 		protected := apiRoutes.Group("")
 		protected.Use(api.AuthRequired())
@@ -81,6 +76,8 @@ func main() {
 		protected.POST(constants.RouteCreateHybrids, handler.CreateHybrids)
 		protected.POST(constants.RouteGameAction, handler.SubmitAction)
 	}
+
+	router.POST(constants.RouteAuthGoogleCallBack, authHandler.GoogleOAuthCallback)
 
 	// Start server on configured address
 	addr := cfg.ServerAddress

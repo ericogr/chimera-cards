@@ -108,7 +108,7 @@ If you want, I can also:
   image/name helpers, OpenAI client, etc.).
 - OpenAI integration: AI-generated hybrid names and images (DALL·E-like
   image generation). Images are cached in the database.
-- Session-based Google login: `/api/auth/google/oauth2callback` exchanges
+- Session-based Google login: `/auth/google/oauth2callback` exchanges
   the authorization code and sets an HttpOnly session cookie.
 
 ---

@@ -10,7 +10,9 @@ export const API_LEADERBOARD = `${API_PREFIX}/leaderboard`;
 export const API_GAMES = `${API_PREFIX}/games`;
 export const API_GAMES_JOIN = `${API_GAMES}/join`;
 export const API_PLAYER_STATS = `${API_PREFIX}/player-stats`;
-export const API_AUTH_GOOGLE_CALLBACK = `${API_PREFIX}/auth/google/oauth2callback`;
+// The Google OAuth callback is mounted at the root `/auth/...` path so
+// external OAuth redirects can reach it directly (not under `/api`).
+export const API_AUTH_GOOGLE_CALLBACK = `/auth/google/oauth2callback`;
 
 // Headers and content types
 export const HEADER_CONTENT_TYPE = 'Content-Type';
