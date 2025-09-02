@@ -22,8 +22,8 @@ ENV CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 RUN go build -a -installsuffix cgo -ldflags "-s -w" -o /app/quimera-cards ./cmd/quimera-cards
 
 ### Final image: distroless base (contains libc and TLS CA certs)
-# FROM gcr.io/distroless/base:nonroot
-FROM golang:1.25.0-bookworm
+FROM gcr.io/distroless/base:nonroot
+# FROM golang:1.25.0-bookworm
 
 # Copy binary from builder stage
 COPY --from=builder /app/quimera-cards /game/quimera-cards
