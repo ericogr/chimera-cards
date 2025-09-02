@@ -5,25 +5,23 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: ${BACKEND_IMAGE:-quimera-backend}:${TAG:-latest}
-    user: 1000:1000
+    # Run as the local UID/GID to avoid permissions issues when bind-mounting
+    # the host `backend/data` directory. Set LOCAL_UID/LOCAL_GID in your
+    # environment (or .env file) if your host UID differs.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     ports:
-    - "8080:8080"
+      - "8080:8080"
     environment:
       SESSION_SECRET: ${SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       CHIMERA_CONFIG: /game/chimera_config.json
+      CHIMERA_DB: /game/data/quimera.db
     volumes:
-    - ./backend/chimera_config.json:/game/chimera_config.json:ro
-    - ./backend/quimera.db:/game/quimera.db:rw
+      - ./backend/chimera_config.json:/game/chimera_config.json:ro
+      - ./backend/data:/game/data:rw
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "/healthcheck"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
 
   chimera-frontend:
     build:
@@ -39,7 +37,7 @@ services:
     depends_on:
       - chimera-backend
     ports:
-    - "3000:80"
+      - "3000:80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost/ || exit 1"]

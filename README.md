@@ -85,8 +85,8 @@ Production recommendations & notes
   do this, make sure `SESSION_SECURE_COOKIE=1` so the backend will set
   the session cookie with the `Secure` flag.
 
-- Persistent storage / DB: the project currently uses SQLite
-  (`backend/quimera.db`) which is intended for development. For a real
+-- Persistent storage / DB: the project currently uses SQLite
+  (`backend/data/quimera.db`) which is intended for development. For a real
   production deployment migrate the storage layer to a production-ready
   database (Postgres/MySQL) and update `internal/storage` accordingly.
 
@@ -124,7 +124,7 @@ If you want, I can also:
   - `internal/hybridname`, `hybridimage` — name/image caching and generation
   - `internal/openaiclient` — OpenAI API integration
   - `chimera_config.json` — example animal configuration (defaults to `./chimera_config.json`)
-  - `quimera.db` — runtime SQLite DB created in `backend/` (development)
+  - `data/quimera.db` — runtime SQLite DB created in `backend/data/` (development)
 
 - `frontend/` — React + TypeScript app (CRA)
   - `src/` — components, views, types
@@ -193,7 +193,7 @@ the backend which binds to the address in `chimera_config.json` (default
 `:8080`). API root: `http://localhost:8080/api`.
 
 The development SQLite database is created/seeded automatically at
-`backend/quimera.db` (this behavior is intended for development only).
+`backend/data/quimera.db` (this behavior is intended for development only).
 
 ---
 

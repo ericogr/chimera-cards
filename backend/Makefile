@@ -20,7 +20,7 @@ clean:
 	@echo "Cleaning backend..."
 	@go clean
 	@rm -f $(OUT_DIR)/$(BINARY_NAME)
-	@rm -f quimera.db
+	@rm -f data/quimera.db
 
 # Docker image variables
 IMAGE ?= quimera-backend

@@ -16,17 +16,17 @@ import (
 
 func main() {
 	checkEnvVars([]string{constants.EnvSessionSecret, constants.EnvGoogleClientID, constants.EnvGoogleClientSecret, constants.EnvOpenAIAPIKey})
-	// Load animal configuration file (required). Path may be provided via
-	// CHIMERA_CONFIG env var or defaults to ./chimera_config.json in the
-	// current working directory.
-	configPath := os.Getenv("CHIMERA_CONFIG")
-	if configPath == "" {
-		configPath = "./chimera_config.json"
-	}
-	cfg, err := config.LoadConfig(configPath)
-	if err != nil {
-		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional server.address"})
-	}
+    // Load animal configuration file (required). Path may be provided via
+    // CHIMERA_CONFIG env var or defaults to ./chimera_config.json in the
+    // current working directory.
+    configPath := os.Getenv("CHIMERA_CONFIG")
+    if configPath == "" {
+        configPath = "./chimera_config.json"
+    }
+    cfg, err := config.LoadConfig(configPath)
+    if err != nil {
+        logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional server.address"})
+    }
 
 	// If the configuration provides an image prompt template, apply it
 	// to the OpenAI client so image generation uses the configured text.
@@ -40,10 +40,16 @@ func main() {
 		hybridname.SetNamePromptTemplate(cfg.NamePromptTemplate)
 	}
 
-	db, err := storage.OpenAndMigrate("quimera.db", cfg.Animals)
-	if err != nil {
-		logging.Fatal("Failed to initialize database", err, nil)
-	}
+    // Allow the DB path to be configured via CHIMERA_DB. Default to
+    // a `data/` directory inside the backend module for local development.
+    dbPath := os.Getenv("CHIMERA_DB")
+    if dbPath == "" {
+        dbPath = "./data/quimera.db"
+    }
+    db, err := storage.OpenAndMigrate(dbPath, cfg.Animals)
+    if err != nil {
+        logging.Fatal("Failed to initialize database", err, nil)
+    }
 
 	repo := storage.NewSQLiteRepository(db, cfg.Animals)
 	handler := api.NewGameHandler(repo)
