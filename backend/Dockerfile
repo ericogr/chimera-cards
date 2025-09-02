@@ -20,26 +20,21 @@ COPY . ./
 # Build the server binary. Use CGO as github.com/mattn/go-sqlite3 requires it.
 ENV CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 RUN go build -a -installsuffix cgo -ldflags "-s -w" -o /app/quimera-cards ./cmd/quimera-cards
-# Build a tiny HTTP healthcheck binary (static) so we can run container
-# healthchecks even when using a distroless final image.
-ENV CGO_ENABLED=0
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o /app/healthcheck ./cmd/healthcheck
-
 
 ### Final image: distroless base (contains libc and TLS CA certs)
 FROM gcr.io/distroless/base:nonroot
+# FROM golang:1.25.0-bookworm
 
 # Copy binary from builder stage
-COPY --from=builder /app/quimera-cards /quimera-cards
-COPY --from=builder /app/healthcheck /healthcheck
+COPY --from=builder /app/quimera-cards /game/quimera-cards
 
 # Default working dir (where the app will look for chimera_config.json by default)
-WORKDIR /
+WORKDIR /game
 
 # Expose the port the app uses by default
 EXPOSE 8080
 
 # Use non-root user provided by distroless
-USER nonroot
+USER 1000:1000
 
-ENTRYPOINT ["/quimera-cards"]
+ENTRYPOINT ["/game/quimera-cards"]
