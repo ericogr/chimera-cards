@@ -34,9 +34,15 @@ COPY --from=node-builder /src/build /usr/share/nginx/html
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copy entrypoint that writes runtime environment variables into a JS
+# file served to the browser so the SPA can be configured at container start.
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh || true
+
 # Ensure permissions (nginx in this image runs as 'nginx' user for worker processes)
 RUN chown -R nginx:nginx /usr/share/nginx/html || true
 
 EXPOSE 80
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/nginx", "-g", "daemon off;"]

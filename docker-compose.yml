@@ -31,9 +31,12 @@ services:
       args:
         REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
         REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}
+    environment:
+      - REACT_APP_GOOGLE_CLIENT_ID=${REACT_APP_GOOGLE_CLIENT_ID}
+      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-/api}
     image: ${FRONTEND_IMAGE:-quimera-frontend}:${TAG:-latest}
     depends_on:
-    - chimera-backend
+      - chimera-backend
     ports:
     - "3000:80"
     restart: unless-stopped
