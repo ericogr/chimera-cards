@@ -9,8 +9,8 @@ services:
     # the host `backend/data` directory. Set LOCAL_UID/LOCAL_GID in your
     # environment (or .env file) if your host UID differs.
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       SESSION_SECRET: ${SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -36,8 +36,8 @@ services:
     image: ${FRONTEND_IMAGE:-quimera-frontend}:${TAG:-latest}
     depends_on:
       - chimera-backend
-    ports:
-      - "3000:80"
+    expose:
+      - "80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost/ || exit 1"]
@@ -45,3 +45,22 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  caddy:
+    image: ghcr.io/caddybuilds/caddy-cloudflare:latest
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    depends_on:
+    - chimera-backend
+    - chimera-frontend
+    ports:
+    - "8880:80"
+    - "8443:443"
+    environment:
+    - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+    - CADDY_EMAIL=${CADDY_EMAIL}
+    - DOMAIN=${DOMAIN}
+    volumes:
+    - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    - ./infrastructure/caddy/data:/data
+    - ./infrastructure/caddy/config:/config
+    restart: unless-stopped

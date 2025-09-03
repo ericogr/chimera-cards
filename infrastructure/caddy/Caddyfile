@@ -1,0 +1,38 @@
+{
+    # Global options
+    # Email used for Let's Encrypt registration
+    email {env.CADDY_EMAIL}
+}
+
+{env.DOMAIN} {
+    # Compress responses
+    encode gzip
+
+    # Security headers (mirror frontend nginx)
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer-when-downgrade"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Proxy API and auth routes to the backend
+    handle /api* {
+        reverse_proxy chimera-backend:8080
+    }
+
+    handle /auth* {
+        reverse_proxy chimera-backend:8080
+    }
+
+    # Everything else -> frontend static server
+    handle {
+        reverse_proxy chimera-frontend:80
+    }
+
+    tls {
+        ca https://acme-staging-v02.api.letsencrypt.org/directory
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+}
+

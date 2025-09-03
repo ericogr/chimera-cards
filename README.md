@@ -346,3 +346,171 @@ If you want, I can also:
 - add a short example client script that demonstrates the auth + game
   creation flow, or
 - generate a small OpenAPI spec from the route handlers.
+
+---
+
+## Docker Compose with Caddy (Let's Encrypt via Cloudflare)
+
+This project includes a `docker-compose.yml` that can run the backend,
+frontend and a fronting Caddy reverse-proxy that performs TLS termination
+using Let's Encrypt via the Cloudflare DNS challenge.
+
+Below are the practical details and requirements to run this compose
+stack in a development or production-like environment.
+
+### Prerequisites
+
+- Docker and Docker Compose (or the `docker compose` plugin) installed.
+- A domain managed in Cloudflare (the domain must exist in your Cloudflare
+  account).
+- A Cloudflare API token with permission to edit DNS records for the
+  target zone (recommended: a token scoped to `Zone.DNS` with **Edit**
+  permission, or an equivalent token for the zone). Do not use the
+  global API key unless necessary.
+- Port availability on the host: by default the compose maps host ports
+  `8880 -> 80` and `8443 -> 443`. If you want to expose standard HTTP/HTTPS
+  change the ports to `80:80` and `443:443` (requires root/admin on the host).
+
+### Important files & paths
+
+- `docker-compose.yml` — the compose file that runs `chimera-backend`,
+  `chimera-frontend` and `caddy`.
+- `infrastructure/caddy/Caddyfile` — the Caddy configuration used by the
+  `caddy` service (proxy rules for `/api*` and `/auth*`, plus TLS config).
+- Host bind mounts for Caddy data/config (where certificates live):
+  - `./infrastructure/caddy/data` -> `/data` inside the container
+  - `./infrastructure/caddy/config` -> `/config` inside the container
+
+  These folders persist certificates, ACME account data and runtime
+  configuration and are intentionally host-mounted so you can inspect
+  or copy certificates.
+
+### Environment variables (.env)
+
+Create or update the repository root `.env` with the following values
+(example):
+
+```
+# Domain and Cloudflare API token for ACME DNS challenge
+DOMAIN=your.domain.example
+CLOUDFLARE_API_TOKEN=<cloudflare-token-with-dns-edit>
+CADDY_EMAIL=admin@your.domain.example
+
+# App secrets/config
+SESSION_SECRET=change-this-to-a-long-random-string
+REACT_APP_GOOGLE_CLIENT_ID=...
+REACT_APP_API_BASE_URL=/api
+SESSION_SECURE_COOKIE=1
+
+# Optional: if you run backend as non-root and want host UID mapping
+LOCAL_UID=1000
+LOCAL_GID=1000
+```
+
+Notes:
+- `CLOUDFLARE_API_TOKEN` must have DNS edit rights for the zone. A token
+  scoped only to the zone is best practice.
+- `SESSION_SECURE_COOKIE=1` is recommended when serving over HTTPS so the
+  backend sets secure cookies.
+
+### Running the stack
+
+1. Ensure `.env` is populated as above.
+2. (Optional) Pull the Caddy image that already includes the Cloudflare
+   DNS provider plugin:
+
+   ```bash
+   docker compose pull caddy
+   ```
+
+3. Start the services (builds backend/frontend images if needed):
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+4. Watch Caddy logs to confirm ACME activity and certificate issuance:
+
+   ```bash
+   docker compose logs -f caddy
+   ```
+
+### Testing TLS locally (SNI)
+
+Because certificates are issued for your real domain, testing via
+`https://localhost` will fail. Use `curl --resolve` to force DNS while
+keeping the correct SNI header. Replace `your.domain` below with
+`$DOMAIN` from your `.env`:
+
+```bash
+curl -vk --resolve 'your.domain:8443:127.0.0.1' https://your.domain:8443/
+```
+
+If you map the service to `443:443` then omit the custom port:
+
+```bash
+curl -vk --resolve 'your.domain:443:127.0.0.1' https://your.domain/
+```
+
+If the Caddyfile uses the Let's Encrypt staging CA for testing, the
+certificate will be untrusted by browsers — this is expected. Remove the
+`ca https://acme-staging-v02.api.letsencrypt.org/directory` line from
+`infrastructure/caddy/Caddyfile` to request production certificates.
+
+### File locations for issued certificates
+
+On the host (when using the default bind mounts) Caddy stores certs and
+keys under:
+
+```
+infrastructure/caddy/data/caddy/certificates/<issuer>/<domain>/
+```
+
+Examples:
+
+```
+infrastructure/caddy/data/caddy/certificates/acme-staging-v02.api.letsencrypt.org-directory/chimera.ericogr.com.br/chimera.ericogr.com.br.key
+infrastructure/caddy/data/caddy/certificates/acme-staging-v02.api.letsencrypt.org-directory/chimera.ericogr.com.br/chimera.ericogr.com.br.crt
+```
+
+Use `openssl x509 -in <certfile> -text -noout` to inspect certificate
+contents.
+
+### Permissions & common issues
+
+- If Caddy logs show `permission denied` when writing under `/data`,
+  ensure the host bind mount directories are owned by the same UID/GID
+  that the Caddy process uses inside the container. Determine the UID/GID
+  with:
+
+  ```bash
+  docker run --rm --entrypoint sh ghcr.io/caddybuilds/caddy-cloudflare:latest -c 'id -u && id -g'
+  ```
+
+  Then chown the host folders (example for UID/GID `1000:1000`):
+
+  ```bash
+  sudo chown -R 1000:1000 infrastructure/caddy/data infrastructure/caddy/config
+  sudo chmod -R 750 infrastructure/caddy/data infrastructure/caddy/config
+  ```
+
+- If your host enforces SELinux, either add `:Z` to the bind mounts in
+  `docker-compose.yml` or run `chcon` to give Docker the right labels.
+
+### Troubleshooting notes
+
+- Error `module not registered: dns.providers.cloudflare`: the running
+  Caddy binary must include the Cloudflare DNS module. The compose in
+  this repo uses an image that already bundles the provider. If you
+  build a custom Caddy binary, include the Cloudflare module.
+- ACME errors related to Cloudflare typically indicate an invalid token
+  or insufficient token scope (must be able to edit DNS for the zone).
+- If certificates are not issued, check `docker compose logs caddy` for
+  the detailed ACME messages.
+
+---
+
+If you want, I can add a short `docs/` page with quick copy-paste
+commands (for permission fixes, migration, and curl tests). Otherwise
+this section should provide the necessary details to run the compose
+stack with Caddy and Cloudflare DNS-based certificate issuance.
