@@ -1,0 +1,21 @@
+compartment_ocid = "ocid1.compartment.oc1..example_compartment_ocid"
+region = "us-ashburn-1"
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEMn+IZTk3iyb7aLQIMlU/4RTPtpsASNyhEIAKfciLWcAmQi+IayQ2ilmtlV0tuNvHVV7pVazkeWgopwbXcPkS33eQgQ1XbWc/mQZ/oKhj18HG31uvsRSwoW1/F30vLTWwIidTKnx1qbb3wIY/pGHfPjW0zooiWYVVZj/wRvHoyg60vlGwN1s5RQ/kNoOx6zjiBjkoP6SeKzcZWmVnL7VA4efYdrUzGkjhvlQjOgmjorurEcitn4TOVzIWC1L7PhOHrgYYrR6eiC1hSYh0i+veWpIBQD2AP85weWF/Qeh948ayrhPlisgiGZcwLgmZKhl+P42tHDOTKq1TuQfu5TEDz3DUzZIPyHYMGKtJuuVk02PMYuxDMC0sNPU4nitaIVnBRubEUtkRjAB/cj028rVSZm9BeFrrV26rL9SiEoagsPD60j+dkiScGh8jzyo+PDvPg7MFHYTtgMb62zxMoUVuPTri2EwfgvMd+kweKCrWOHaW3TBC7PB8u5KxmrnPtAX1g+vCfrySIda0/NgHRfHZ50zH08iBPjwHuieQ+NMlq4tJon5CCP0LOf5P9Erd+71UaQPJtz50bfL9CJRzhBRR9YQX5pKw141ezCrJDH/KXek6/iP415MNGGIlZZSdmUi3PScGrdcxxLZF4k5Uk+BREQSEsXudB4GSvXWeJAe02w== ericogr@gmail.com"
+image_display_name = "Canonical-Ubuntu-24.04-Minimal-2025.07.23-0"
+shape = "VM.Standard.E2.1.Micro"
+use_flex_shape = false
+ocpus = 1
+memory_in_gbs = 1
+// Boot volume size (GB)
+storage_size_gb = 47
+
+// Application / Load Balancer
+lb_listen_port = 443
+lb_shape = "10Mbps"
+lb_display_name = "quimera-lb"
+backend_port = 8080
+
+instance_display_name = "quimera-instance"
+vcn_cidr = "10.0.0.0/16"
+subnet_cidr = "10.0.1.0/24"
+dns_label = "quimera"

@@ -1,0 +1,7 @@
+# Add this profile to your ~/.oci/config if you want a named profile for Terraform
+[terraform]
+user=ocid1.user.oc1..aaaaaaaawfj2sfnlsotsl6qp25txedjdzsr7qq6jen7jc37ymsealyymiqua
+fingerprint=88:a1:7d:66:88:cd:be:21:b6:d9:5b:b1:a6:e6:62:43
+key_file=infrastructure/bootstrap/oci-creds-20250904005733/oci_api_key.pem
+tenancy=ocid1.tenancy.oc1..aaaaaaaanrs5oc63wehcthr5tpcwpbpfbwtck4a7e67o6ewxvbv3ocdxlhla
+region=sa-saopaulo-1

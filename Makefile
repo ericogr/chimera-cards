@@ -17,10 +17,19 @@
     help \
     docker-build \
     docker-push \
-    docker-publish
+    docker-publish \
+    terraform-init \
+    terraform-plan \
+    terraform-apply \
+    terraform-destroy \
+    terraform-fmt \
+    infra-bootstrap
 
 # Backend binary output directory (relative to backend/)
 BACKEND_OUT_DIR ?= bin
+
+# Terraform working directory
+TF_DIR ?= infrastructure/terraform
 
 # -- Backend Targets --
 backend-build:
@@ -105,6 +114,33 @@ docker-push:
 
 docker-publish: docker-build docker-push
 
+# -- Terraform targets --
+terraform-init:
+	@echo "--- Terraform: init ($(TF_DIR)) ---"
+	@terraform -chdir=$(TF_DIR) init
+
+terraform-plan:
+	@echo "--- Terraform: plan ($(TF_DIR)) ---"
+	@terraform -chdir=$(TF_DIR) plan -var-file=$(TF_DIR)/terraform.tfvars
+
+terraform-apply:
+	@echo "--- Terraform: apply ($(TF_DIR)) ---"
+	@terraform -chdir=$(TF_DIR) apply -var-file=$(TF_DIR)/terraform.tfvars -auto-approve
+
+terraform-destroy:
+	@echo "--- Terraform: destroy ($(TF_DIR)) ---"
+	@terraform -chdir=$(TF_DIR) destroy -var-file=$(TF_DIR)/terraform.tfvars -auto-approve
+
+terraform-fmt:
+	@echo "--- Terraform: fmt ($(TF_DIR)) ---"
+	@terraform -chdir=$(TF_DIR) fmt -recursive
+
+BOOTSTRAP_ARGS ?=
+
+infra-bootstrap:
+	@echo "--- Bootstrapping OCI credentials (infrastructure/bootstrap) ---"
+	@bash infrastructure/bootstrap/bootstrap-oci.sh $(BOOTSTRAP_ARGS)
+
 run:
 	@echo "--- Running All (in parallel) ---"
 	@$(MAKE) backend-run &
@@ -138,4 +174,12 @@ help:
 	@echo "  build               Build both backend and frontend"
 	@echo "  run                 Run backend and frontend concurrently"
 	@echo "  stop | kill         Stop backend and frontend processes"
+	@echo ""
+	@echo "Terraform targets:"
+	@echo "  terraform-init      Initialize Terraform in infrastructure/terraform"
+	@echo "  terraform-plan      Run 'terraform plan' using terraform.tfvars in the Terraform directory"
+	@echo "  terraform-apply     Run 'terraform apply' (auto-approve)"
+	@echo "  terraform-destroy   Run 'terraform destroy' (auto-approve)"
+	@echo "  terraform-fmt       Run 'terraform fmt' on the Terraform directory"
+	@echo "  infra-bootstrap     Create OCI credentials required by Terraform (infrastructure/bootstrap)"
 	@echo "  help                Show this help message"
