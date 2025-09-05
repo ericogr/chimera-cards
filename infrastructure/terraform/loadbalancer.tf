@@ -9,10 +9,6 @@ resource "oci_load_balancer_load_balancer" "lb" {
     minimum_bandwidth_in_mbps = 10
     maximum_bandwidth_in_mbps = 10
   }
-
-  reserved_ips {
-    id = try(oci_core_public_ip.lb_reserved_ip.id, null)
-  }
 }
 
 resource "oci_load_balancer_backend_set" "backend_set" {

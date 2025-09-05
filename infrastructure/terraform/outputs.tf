@@ -10,8 +10,3 @@ output "load_balancer_ips" {
     [for ipobj in oci_load_balancer_load_balancer.lb.ip_address_details : try(ipobj.ip_address, ipobj)]
   )
 }
-
-output "lb_reserved_public_ip" {
-  description = "Reserved public IP assigned to the load balancer (if created)"
-  value       = try(oci_core_public_ip.lb_reserved_ip.ip_address, "")
-}

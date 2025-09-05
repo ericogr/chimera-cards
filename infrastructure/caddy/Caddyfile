@@ -31,7 +31,8 @@
     }
 
     tls {
-        ca https://acme-staging-v02.api.letsencrypt.org/directory
+        # ca https://acme-v02.api.letsencrypt.org/directory # For production use
+        ca https://acme-staging-v02.api.letsencrypt.org/directory # For testing only
         dns cloudflare {env.CLOUDFLARE_API_TOKEN}
     }
 }
