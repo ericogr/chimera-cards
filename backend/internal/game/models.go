@@ -26,11 +26,71 @@ type Animal struct {
 	SkillName        string `json:"skill_name" gorm:"-"`
 	SkillCost        int    `json:"skill_cost" gorm:"-"`
 	SkillDescription string `json:"skill_description" gorm:"-"`
+	// SkillKey is an internal stable identifier for the animal's ability
+	// (e.g. "skill:roar"). It is loaded from the chimera config and used
+	// by the engine when recording `LastAction` and for mapping abilities.
+	SkillKey string `json:"skill_key" gorm:"-"`
+
+	// SkillEffect contains machine-readable parameters that describe the
+	// mechanical behaviour of the animal's ability. Keeping this structured
+	// in the configuration allows adding new animals without changing code.
+	SkillEffect SkillEffect `json:"skill_effect" gorm:"-"`
 }
 
 // TableName overrides the default GORM table name for Animal so the
 // persisted table is `animal_templates` instead of the default `animals`.
 func (Animal) TableName() string { return "animal_templates" }
+
+// SkillEffect is a flexible description of what an animal's special ability
+// does in-game. All fields are optional and will be applied when present.
+type SkillEffect struct {
+	// Opponent stat modifiers
+	OpponentAttackDebuffPercent  int `json:"opponent_attack_debuff_percent"`
+	OpponentAttackDebuffDuration int `json:"opponent_attack_debuff_duration"`
+
+	OpponentAgilityDebuffPercent  int `json:"opponent_agility_debuff_percent"`
+	OpponentAgilityDebuffDuration int `json:"opponent_agility_debuff_duration"`
+
+	// Self buffs
+	AttackBuffPercent  int `json:"attack_buff_percent"`
+	AttackBuffDuration int `json:"attack_buff_duration"`
+
+	// When true the ability causes the attack to ignore the opponent's
+	// defense this round (or for the configured duration if provided).
+	AttackIgnoresDefense         bool `json:"attack_ignores_defense"`
+	AttackIgnoresDefenseDuration int  `json:"attack_ignores_defense_duration"`
+
+	// Some abilities grant priority to the user for the next round.
+	PriorityNextRound bool `json:"priority_next_round"`
+
+	// Defense multiplier applied to self for the given duration.
+	DefenseBuffMultiplier int `json:"defense_buff_multiplier"`
+	DefenseBuffDuration   int `json:"defense_buff_duration"`
+	// Prevent this hybrid from attacking for the configured duration.
+	CannotAttack         bool `json:"cannot_attack"`
+	CannotAttackDuration int  `json:"cannot_attack_duration"`
+
+	// Instant effects
+	RestoreEnergy int `json:"restore_energy"`
+
+	// Swift pounce specific options
+	SwiftAddAgilityDivisor    int `json:"swift_add_agility_divisor"`
+	SwiftIgnoreDefensePercent int `json:"swift_ignore_defense_percent"`
+
+	// Charge options
+	ChargeExtraAttack   int     `json:"charge_extra_attack"`
+	ChargeRecoilPercent float64 `json:"charge_recoil_percent"`
+
+	// Stun options
+	StunChancePercent int `json:"stun_chance_percent"`
+	StunDuration      int `json:"stun_duration"`
+
+	// Reveal / informational ability
+	Reveal bool `json:"reveal"`
+
+	// Misc for future expansion
+	ExecutesPlan bool `json:"executes_plan"`
+}
 
 type Hybrid struct {
 	gorm.Model

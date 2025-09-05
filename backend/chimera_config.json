@@ -10,7 +10,12 @@
       "vigor_cost": 2,
       "skill_name": "Commanding Roar",
       "skill_cost": 3,
-      "skill_description": "Reduces the opponent's Attack by 30% for one round."
+      "skill_description": "Reduces the opponent's Attack by 30% for one round.",
+      "skill_key": "skill:roar",
+      "skill_effect": {
+        "opponent_attack_debuff_percent": 30,
+        "opponent_attack_debuff_duration": 1
+      }
     },
     {
       "name": "Bear",
@@ -22,7 +27,13 @@
       "vigor_cost": 3,
       "skill_name": "Frenzy",
       "skill_cost": 4,
-      "skill_description": "Increases own Attack by 50% this round and ignores the opponent's Defense."
+      "skill_description": "Increases own Attack by 50% this round and ignores the opponent's Defense.",
+      "skill_key": "skill:frenzy",
+      "skill_effect": {
+        "attack_buff_percent": 50,
+        "attack_buff_duration": 1,
+        "attack_ignores_defense": true
+      }
     },
     {
       "name": "Cheetah",
@@ -34,7 +45,13 @@
       "vigor_cost": 2,
       "skill_name": "Swift Pounce",
       "skill_cost": 3,
-      "skill_description": "An attack that cannot be avoided and ignores 40% of the opponent's Defense."
+      "skill_description": "An attack that cannot be avoided and ignores 40% of the opponent's Defense.",
+      "skill_key": "skill:swift_pounce",
+      "skill_effect": {
+        "swift_add_agility_divisor": 2,
+        "swift_ignore_defense_percent": 40,
+        "executes_plan": true
+      }
     },
     {
       "name": "Eagle",
@@ -46,7 +63,11 @@
       "vigor_cost": 1,
       "skill_name": "Strategic Flight",
       "skill_cost": 2,
-      "skill_description": "Guarantees you will attack first next round, regardless of Agility."
+      "skill_description": "Guarantees you will attack first next round, regardless of Agility.",
+      "skill_key": "skill:flight",
+      "skill_effect": {
+        "priority_next_round": true
+      }
     },
     {
       "name": "Rhino",
@@ -58,7 +79,13 @@
       "vigor_cost": 3,
       "skill_name": "Relentless Charge",
       "skill_cost": 4,
-      "skill_description": "Deals massive damage (ATK + 5), but you also take 20% of the damage dealt."
+      "skill_description": "Deals massive damage (ATK + 5), but you also take 20% of the damage dealt.",
+      "skill_key": "skill:charge",
+      "skill_effect": {
+        "charge_extra_attack": 5,
+        "charge_recoil_percent": 0.2,
+        "executes_plan": true
+      }
     },
     {
       "name": "Turtle",
@@ -70,7 +97,14 @@
       "vigor_cost": 3,
       "skill_name": "Iron Shell",
       "skill_cost": 3,
-      "skill_description": "Triples your Defense for one round. You cannot attack this round."
+      "skill_description": "Triples your Defense for one round. You cannot attack this round.",
+      "skill_key": "skill:iron_shell",
+      "skill_effect": {
+        "defense_buff_multiplier": 3,
+        "defense_buff_duration": 1,
+        "cannot_attack": true,
+        "cannot_attack_duration": 1
+      }
     },
     {
       "name": "Gorilla",
@@ -82,7 +116,13 @@
       "vigor_cost": 3,
       "skill_name": "Stunning Blow",
       "skill_cost": 5,
-      "skill_description": "Deals normal damage with a 50% chance to prevent the opponent from acting next round."
+      "skill_description": "Deals normal damage with a 50% chance to prevent the opponent from acting next round.",
+      "skill_key": "skill:stun",
+      "skill_effect": {
+        "stun_chance_percent": 50,
+        "stun_duration": 1,
+        "executes_plan": true
+      }
     },
     {
       "name": "Wolf",
@@ -94,7 +134,11 @@
       "vigor_cost": 1,
       "skill_name": "Pack Tactics",
       "skill_cost": 2,
-      "skill_description": "Restore 4 Energy points."
+      "skill_description": "Restore 4 Energy points.",
+      "skill_key": "skill:pack_tactics",
+      "skill_effect": {
+        "restore_energy": 4
+      }
     },
     {
       "name": "Octopus",
@@ -106,7 +150,12 @@
       "vigor_cost": 2,
       "skill_name": "Ink Curtain",
       "skill_cost": 3,
-      "skill_description": "Reduces the opponent's Agility by 50% for two rounds."
+      "skill_description": "Reduces the opponent's Agility by 50% for two rounds.",
+      "skill_key": "skill:ink",
+      "skill_effect": {
+        "opponent_agility_debuff_percent": 50,
+        "opponent_agility_debuff_duration": 2
+      }
     },
     {
       "name": "Raven",
@@ -118,7 +167,11 @@
       "vigor_cost": 1,
       "skill_name": "Cunning Analysis",
       "skill_cost": 2,
-      "skill_description": "Reveals the opponent hybrid's current Energy and abilities."
+      "skill_description": "Reveals the opponent hybrid's current Energy and abilities.",
+      "skill_key": "skill:reveal",
+      "skill_effect": {
+        "reveal": true
+      }
     }
   ],
   "server": { "address": ":8080" },

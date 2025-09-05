@@ -143,16 +143,20 @@ func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []p
 		switch p.PendingActionType {
 		case game.PendingActionBasicAttack:
 			plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionBasicAttack})
-			self.LastAction = string(ActionBasicAttack)
+			// LastAction is set in applyPreEffects so we don't duplicate that logic here.
 		case game.PendingActionAbility:
 			if a != nil {
-				switch a.Name {
-				case string(game.Cheetah):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillSwiftPounce, animal: a})
-				case string(game.Rhino):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillCharge, animal: a})
-				case string(game.Gorilla):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillStun, animal: a})
+				// If the ability requires an execution step (e.g., performs
+				// direct damage), the configuration should mark it with
+				// SkillEffect.ExecutesPlan = true. Use the configured
+				// skill_key as the action identifier so new animals can be
+				// added in config without touching code.
+				if a.SkillEffect.ExecutesPlan {
+					act := ActionAbility
+					if a.SkillKey != "" {
+						act = ActionKind(a.SkillKey)
+					}
+					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: act, animal: a})
 				}
 			}
 		}
@@ -214,41 +218,98 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 			self.CurrentVIG = 0
 			self.VulnerableThisRound = true
 		}
-		switch ch.Name {
-		case string(game.Lion):
-			opp.AttackDebuffPercent = 30
-			opp.AttackDebuffUntilRound = rc.g.RoundCount
-			self.LastAction = string(ActionSkillRoar)
-			rc.add(p.PlayerName + " ABILITY — ROAR: -30% opponent Attack this round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Bear):
-			self.AttackBuffPercent = 50
-			self.AttackBuffUntilRound = rc.g.RoundCount
-			self.SelfDefenseIgnoredUntilRound = rc.g.RoundCount
-			self.AttackIgnoresDefenseThisRound = true
-			self.LastAction = string(ActionSkillFrenzy)
-			rc.add(p.PlayerName + " ABILITY — FRENZY: +50% Attack and ignores Defense this round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Eagle):
+		// Apply ability effects from configuration rather than a hard-coded
+		// per-animal switch. This lets new animals be added via the
+		// chimera_config.json file without touching engine code.
+		eff := ch.SkillEffect
+
+		// Record a stable last-action key when available (used for UI/logs).
+		if ch.SkillKey != "" {
+			self.LastAction = ch.SkillKey
+		} else {
+			self.LastAction = string(ActionAbility)
+		}
+
+		// Opponent attack debuff
+		if eff.OpponentAttackDebuffPercent > 0 {
+			dur := eff.OpponentAttackDebuffDuration
+			if dur <= 0 {
+				dur = 1
+			}
+			opp.AttackDebuffPercent = eff.OpponentAttackDebuffPercent
+			opp.AttackDebuffUntilRound = rc.g.RoundCount + dur - 1
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": -" + strconv.Itoa(eff.OpponentAttackDebuffPercent) + "% opponent Attack for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Self attack buff + optionally ignore defense
+		if eff.AttackBuffPercent > 0 {
+			dur := eff.AttackBuffDuration
+			if dur <= 0 {
+				dur = 1
+			}
+			self.AttackBuffPercent = eff.AttackBuffPercent
+			self.AttackBuffUntilRound = rc.g.RoundCount + dur - 1
+			if eff.AttackIgnoresDefense {
+				self.AttackIgnoresDefenseThisRound = true
+				if eff.AttackIgnoresDefenseDuration > 0 {
+					self.SelfDefenseIgnoredUntilRound = rc.g.RoundCount + eff.AttackIgnoresDefenseDuration - 1
+				} else {
+					self.SelfDefenseIgnoredUntilRound = rc.g.RoundCount
+				}
+			}
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": +" + strconv.Itoa(eff.AttackBuffPercent) + "% Attack" + func() string {
+				if eff.AttackIgnoresDefense {
+					return " and ignores Defense"
+				}
+				return ""
+			}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Priority
+		if eff.PriorityNextRound {
 			self.PriorityNextRound = true
-			self.LastAction = string(ActionSkillFlight)
-			rc.add(p.PlayerName + " ABILITY — FLIGHT: gains priority next round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Turtle):
-			self.DefenseBuffMultiplier = 3
-			self.DefenseBuffUntilRound = rc.g.RoundCount
-			self.CannotAttackUntilRound = rc.g.RoundCount
-			self.LastAction = string(ActionSkillIronShell)
-			rc.add(p.PlayerName + " ABILITY — IRON SHELL: Defense x3 this round (cannot attack). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Wolf):
-			self.CurrentEnergy += 4
-			self.LastAction = string(ActionSkillPackTactics)
-			rc.add(p.PlayerName + " ABILITY — PACK TACTICS: +4 Energy. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Octopus):
-			opp.AgilityDebuffPercent = 50
-			opp.AgilityDebuffUntilRound = rc.g.RoundCount + 1
-			self.LastAction = string(ActionSkillInk)
-			rc.add(p.PlayerName + " ABILITY — INK CURTAIN: -50% opponent Agility for 2 rounds. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-		case string(game.Raven):
-			self.LastAction = string(ActionSkillReveal)
-			rc.add(p.PlayerName + " ABILITY — REVEAL: show opponent info. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": gains priority next round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Defense buff / cannot attack
+		if eff.DefenseBuffMultiplier > 0 {
+			dur := eff.DefenseBuffDuration
+			if dur <= 0 {
+				dur = 1
+			}
+			self.DefenseBuffMultiplier = eff.DefenseBuffMultiplier
+			self.DefenseBuffUntilRound = rc.g.RoundCount + dur - 1
+			if eff.CannotAttack {
+				self.CannotAttackUntilRound = rc.g.RoundCount + eff.CannotAttackDuration - 1
+			}
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": Defense x" + strconv.Itoa(eff.DefenseBuffMultiplier) + " for " + strconv.Itoa(dur) + " round(s)" + func() string {
+				if eff.CannotAttack {
+					return " (cannot attack)"
+				}
+				return ""
+			}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Restore energy
+		if eff.RestoreEnergy > 0 {
+			self.CurrentEnergy += eff.RestoreEnergy
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": +" + strconv.Itoa(eff.RestoreEnergy) + " Energy. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Opponent agility debuff
+		if eff.OpponentAgilityDebuffPercent > 0 {
+			dur := eff.OpponentAgilityDebuffDuration
+			if dur <= 0 {
+				dur = 1
+			}
+			opp.AgilityDebuffPercent = eff.OpponentAgilityDebuffPercent
+			opp.AgilityDebuffUntilRound = rc.g.RoundCount + dur - 1
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": -" + strconv.Itoa(eff.OpponentAgilityDebuffPercent) + "% opponent Agility for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}
+
+		// Reveal informational ability
+		if eff.Reveal {
+			rc.add(p.PlayerName + " ABILITY — " + ch.SkillName + ": reveal opponent info. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		}
 	case game.PendingActionBasicAttack:
 		prevV := self.CurrentVIG
@@ -386,7 +447,88 @@ func (rc *roundContext) execSwiftPounce(a *plannedAction, oppPlayer *game.Player
 		defEff = 0
 		ignored = true
 	}
+
+	// Default calculation (backwards compatible) uses half of Agility.
 	raw := atqEff - defEff
+
+	// If the animal has a configured skill effect, apply its parameters.
+	if a.animal != nil {
+		eff := a.animal.SkillEffect
+
+		// Partial defense ignore
+		if eff.SwiftIgnoreDefensePercent > 0 {
+			defEff = int(float64(defEff) * (1.0 - float64(eff.SwiftIgnoreDefensePercent)/100.0))
+			if defEff < 0 {
+				defEff = 0
+			}
+		}
+
+		raw = atqEff - defEff
+		if raw < 1 {
+			raw = 1
+		}
+
+		divisor := eff.SwiftAddAgilityDivisor
+		if divisor <= 0 {
+			divisor = 2
+		}
+
+		dmg := raw + int(math.Floor(float64(a.actor.CurrentAgility)/float64(divisor)))
+
+		halved := false
+		if a.actor.AttackHalvedThisRound {
+			dmg = int(math.Floor(float64(dmg) * 0.5))
+			if dmg < 1 {
+				dmg = 1
+			}
+			halved = true
+		}
+
+		appliedVuln := false
+		if a.target.VulnerableThisRound {
+			dmg = int(math.Ceil(float64(dmg) * 1.25))
+			appliedVuln = true
+		}
+
+		a.target.CurrentHitPoints -= dmg
+		rc.add(a.player.PlayerName + " SWIFT POUNCE — Calculation: Attack " + strconv.Itoa(atqEff) + ", Defense " + strconv.Itoa(defEff) + func() string {
+			if ignored {
+				return " (defense ignored)"
+			}
+			return ""
+		}() + "; base damage " + strconv.Itoa(raw) + func() string {
+			if halved {
+				return " (halved due to 0 VIG)"
+			}
+			return ""
+		}() + func() string {
+			if appliedVuln {
+				return "; +25% vs Vulnerable"
+			}
+			return ""
+		}() + "; final damage " + strconv.Itoa(dmg))
+
+		ctxParts := []string{}
+		if a.target.DefendStanceActive {
+			ctxParts = append(ctxParts, "defend bonus")
+		}
+		if a.target.DefenseBuffMultiplier > 0 && a.target.DefenseBuffUntilRound >= rc.g.RoundCount {
+			ctxParts = append(ctxParts, "Iron Shell")
+		}
+		if ignored {
+			ctxParts = append(ctxParts, "ignored defense")
+		}
+		if appliedVuln {
+			ctxParts = append(ctxParts, "+25% vs Vulnerable")
+		}
+		if len(ctxParts) > 0 {
+			rc.add(oppPlayer.PlayerName + "'s " + a.target.Name + " takes " + strconv.Itoa(dmg) + " damage (" + strings.Join(ctxParts, ", ") + ")")
+		} else {
+			rc.add(oppPlayer.PlayerName + "'s " + a.target.Name + " takes " + strconv.Itoa(dmg) + " damage")
+		}
+		return
+	}
+
 	if raw < 1 {
 		raw = 1
 	}
@@ -442,7 +584,13 @@ func (rc *roundContext) execSwiftPounce(a *plannedAction, oppPlayer *game.Player
 }
 
 func (rc *roundContext) execCharge(a *plannedAction, oppPlayer *game.Player) {
-	atqEff := attackWithModifiers(a.actor, rc.g.RoundCount) + 5
+	atqEff := attackWithModifiers(a.actor, rc.g.RoundCount)
+	// Allow configuration to modify the extra attack applied by Charge.
+	if a.animal != nil && a.animal.SkillEffect.ChargeExtraAttack != 0 {
+		atqEff += a.animal.SkillEffect.ChargeExtraAttack
+	} else {
+		atqEff += 5
+	}
 	defEff := defenseWithModifiers(a.target)
 	if a.actor.AttackIgnoresDefenseThisRound {
 		defEff = 0
@@ -462,7 +610,11 @@ func (rc *roundContext) execCharge(a *plannedAction, oppPlayer *game.Player) {
 		dmg = int(math.Ceil(float64(dmg) * 1.25))
 	}
 	a.target.CurrentHitPoints -= dmg
-	recoil := int(float64(dmg) * 0.2)
+	recoilPercent := 0.2
+	if a.animal != nil && a.animal.SkillEffect.ChargeRecoilPercent > 0 {
+		recoilPercent = a.animal.SkillEffect.ChargeRecoilPercent
+	}
+	recoil := int(float64(dmg) * recoilPercent)
 	if recoil < 1 {
 		recoil = 1
 	}
@@ -491,9 +643,20 @@ func (rc *roundContext) execStun(a *plannedAction, oppPlayer *game.Player) {
 		dmg = int(math.Ceil(float64(dmg) * 1.25))
 	}
 	a.target.CurrentHitPoints -= dmg
-	stunned := rand.Intn(2) == 0
+	// Use configured stun chance and duration when available.
+	stunned := false
+	if a.animal != nil && a.animal.SkillEffect.StunChancePercent > 0 {
+		stunned = rand.Intn(100) < a.animal.SkillEffect.StunChancePercent
+	} else {
+		// Backwards compatible default (50% chance)
+		stunned = rand.Intn(2) == 0
+	}
 	if stunned {
-		a.target.StunnedUntilRound = rc.g.RoundCount + 1
+		dur := 1
+		if a.animal != nil && a.animal.SkillEffect.StunDuration > 0 {
+			dur = a.animal.SkillEffect.StunDuration
+		}
+		a.target.StunnedUntilRound = rc.g.RoundCount + dur
 	}
 	rc.add(a.player.PlayerName + " STUN — Calculation: Attack " + strconv.Itoa(atqEff) + ", Defense " + strconv.Itoa(defEff) + "; final damage " + strconv.Itoa(dmg))
 }

@@ -10,16 +10,18 @@ import (
 )
 
 type animalEntry struct {
-	Name             string `json:"name"`
-	HitPoints        int    `json:"hit_points"`
-	Attack           int    `json:"attack"`
-	Defense          int    `json:"defense"`
-	Agility          int    `json:"agility"`
-	Energy           int    `json:"energy"`
-	VigorCost        int    `json:"vigor_cost"`
-	SkillName        string `json:"skill_name"`
-	SkillCost        int    `json:"skill_cost"`
-	SkillDescription string `json:"skill_description"`
+	Name             string           `json:"name"`
+	HitPoints        int              `json:"hit_points"`
+	Attack           int              `json:"attack"`
+	Defense          int              `json:"defense"`
+	Agility          int              `json:"agility"`
+	Energy           int              `json:"energy"`
+	VigorCost        int              `json:"vigor_cost"`
+	SkillName        string           `json:"skill_name"`
+	SkillCost        int              `json:"skill_cost"`
+	SkillDescription string           `json:"skill_description"`
+	SkillKey         string           `json:"skill_key"`
+	SkillEffect      game.SkillEffect `json:"skill_effect"`
 }
 
 type rawConfig struct {
@@ -81,7 +83,34 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 			SkillName:        a.SkillName,
 			SkillCost:        a.SkillCost,
 			SkillDescription: a.SkillDescription,
+			SkillKey:         a.SkillKey,
+			SkillEffect:      a.SkillEffect,
 		})
+	}
+
+	// Cross-entry validation: ensure unique animal names (case-insensitive)
+	// and unique skill_key values. Also enforce that any ability marked to
+	// execute as a plan provides a non-empty skill_key so the engine can
+	// route execution.
+	nameSet := make(map[string]struct{}, len(out))
+	skillSet := make(map[string]struct{}, len(out))
+	for _, aa := range out {
+		ln := strings.ToLower(strings.TrimSpace(aa.Name))
+		if _, exists := nameSet[ln]; exists {
+			return nil, fmt.Errorf("config file %s: duplicate animal name '%s'", path, aa.Name)
+		}
+		nameSet[ln] = struct{}{}
+		if aa.SkillEffect.ExecutesPlan {
+			if strings.TrimSpace(aa.SkillKey) == "" {
+				return nil, fmt.Errorf("config file %s: animal '%s' marked executes_plan but missing 'skill_key'", path, aa.Name)
+			}
+		}
+		if aa.SkillKey != "" {
+			if _, exists := skillSet[aa.SkillKey]; exists {
+				return nil, fmt.Errorf("config file %s: duplicate skill_key '%s'", path, aa.SkillKey)
+			}
+			skillSet[aa.SkillKey] = struct{}{}
+		}
 	}
 
 	addr := ":8080"

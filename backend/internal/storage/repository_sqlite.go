@@ -44,6 +44,8 @@ func (r *sqliteRepository) GetAnimals() ([]game.Animal, error) {
 				animals[i].SkillName = conf.SkillName
 				animals[i].SkillCost = conf.SkillCost
 				animals[i].SkillDescription = conf.SkillDescription
+				animals[i].SkillKey = conf.SkillKey
+				animals[i].SkillEffect = conf.SkillEffect
 			}
 		}
 	}
@@ -78,6 +80,8 @@ func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 						a.SkillName = conf.SkillName
 						a.SkillCost = conf.SkillCost
 						a.SkillDescription = conf.SkillDescription
+						a.SkillKey = conf.SkillKey
+						a.SkillEffect = conf.SkillEffect
 					}
 				}
 			}
@@ -125,6 +129,8 @@ func (r *sqliteRepository) GetAnimalsByIDs(ids []uint) ([]game.Animal, error) {
 				animals[i].SkillName = conf.SkillName
 				animals[i].SkillCost = conf.SkillCost
 				animals[i].SkillDescription = conf.SkillDescription
+				animals[i].SkillKey = conf.SkillKey
+				animals[i].SkillEffect = conf.SkillEffect
 			}
 		}
 	}
