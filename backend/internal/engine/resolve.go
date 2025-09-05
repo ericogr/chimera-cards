@@ -106,9 +106,31 @@ type plannedAction struct {
 	player *game.Player
 	actor  *game.Hybrid
 	target *game.Hybrid
-	action string
+	action ActionKind
 	animal *game.Animal
 }
+
+type ActionKind string
+
+const (
+	ActionNone        ActionKind = ""
+	ActionBasicAttack ActionKind = "basic_attack"
+	ActionDefend      ActionKind = "defend"
+	ActionAbility     ActionKind = "ability"
+	ActionRest        ActionKind = "rest"
+
+	// Ability-specific actions (skill:<name>) used by the resolver.
+	ActionSkillSwiftPounce ActionKind = "skill:swift_pounce"
+	ActionSkillCharge      ActionKind = "skill:charge"
+	ActionSkillStun        ActionKind = "skill:stun"
+	ActionSkillRoar        ActionKind = "skill:roar"
+	ActionSkillFrenzy      ActionKind = "skill:frenzy"
+	ActionSkillFlight      ActionKind = "skill:flight"
+	ActionSkillIronShell   ActionKind = "skill:iron_shell"
+	ActionSkillPackTactics ActionKind = "skill:pack_tactics"
+	ActionSkillInk         ActionKind = "skill:ink"
+	ActionSkillReveal      ActionKind = "skill:reveal"
+)
 
 // buildPlans converts player pending actions into executable plannedAction list.
 func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []plannedAction {
@@ -120,17 +142,17 @@ func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []p
 		}
 		switch p.PendingActionType {
 		case game.PendingActionBasicAttack:
-			plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: "basic_attack"})
-			self.LastAction = "basic_attack"
+			plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionBasicAttack})
+			self.LastAction = string(ActionBasicAttack)
 		case game.PendingActionAbility:
 			if a != nil {
 				switch a.Name {
 				case string(game.Cheetah):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: "skill:swift_pounce", animal: a})
+					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillSwiftPounce, animal: a})
 				case string(game.Rhino):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: "skill:charge", animal: a})
+					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillCharge, animal: a})
 				case string(game.Gorilla):
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: "skill:stun", animal: a})
+					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: ActionSkillStun, animal: a})
 				}
 			}
 		}
@@ -166,7 +188,7 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 		} else {
 			self.DefendStanceActive = false
 		}
-		self.LastAction = "defend"
+		self.LastAction = string(ActionDefend)
 		if prevV > 0 {
 			rc.add(p.PlayerName + " DEFEND: spent 1 VIG (+50% Defense this round)")
 		} else {
@@ -196,36 +218,36 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 		case string(game.Lion):
 			opp.AttackDebuffPercent = 30
 			opp.AttackDebuffUntilRound = rc.g.RoundCount
-			self.LastAction = "skill:roar"
+			self.LastAction = string(ActionSkillRoar)
 			rc.add(p.PlayerName + " ABILITY — ROAR: -30% opponent Attack this round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Bear):
 			self.AttackBuffPercent = 50
 			self.AttackBuffUntilRound = rc.g.RoundCount
 			self.SelfDefenseIgnoredUntilRound = rc.g.RoundCount
 			self.AttackIgnoresDefenseThisRound = true
-			self.LastAction = "skill:frenzy"
+			self.LastAction = string(ActionSkillFrenzy)
 			rc.add(p.PlayerName + " ABILITY — FRENZY: +50% Attack and ignores Defense this round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Eagle):
 			self.PriorityNextRound = true
-			self.LastAction = "skill:flight"
+			self.LastAction = string(ActionSkillFlight)
 			rc.add(p.PlayerName + " ABILITY — FLIGHT: gains priority next round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Turtle):
 			self.DefenseBuffMultiplier = 3
 			self.DefenseBuffUntilRound = rc.g.RoundCount
 			self.CannotAttackUntilRound = rc.g.RoundCount
-			self.LastAction = "skill:iron_shell"
+			self.LastAction = string(ActionSkillIronShell)
 			rc.add(p.PlayerName + " ABILITY — IRON SHELL: Defense x3 this round (cannot attack). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Wolf):
 			self.CurrentEnergy += 4
-			self.LastAction = "skill:pack_tactics"
+			self.LastAction = string(ActionSkillPackTactics)
 			rc.add(p.PlayerName + " ABILITY — PACK TACTICS: +4 Energy. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Octopus):
 			opp.AgilityDebuffPercent = 50
 			opp.AgilityDebuffUntilRound = rc.g.RoundCount + 1
-			self.LastAction = "skill:ink"
+			self.LastAction = string(ActionSkillInk)
 			rc.add(p.PlayerName + " ABILITY — INK CURTAIN: -50% opponent Agility for 2 rounds. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		case string(game.Raven):
-			self.LastAction = "skill:reveal"
+			self.LastAction = string(ActionSkillReveal)
 			rc.add(p.PlayerName + " ABILITY — REVEAL: show opponent info. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 		}
 	case game.PendingActionBasicAttack:
@@ -236,7 +258,7 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 		} else {
 			self.AttackHalvedThisRound = true
 		}
-		self.LastAction = "basic_attack"
+		self.LastAction = string(ActionBasicAttack)
 		if prevV > 0 {
 			rc.add(p.PlayerName + " BASIC ATTACK: spent 1 VIG")
 		} else {
@@ -248,7 +270,7 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 			self.CurrentVIG = self.BaseVIG
 		}
 		self.CurrentEnergy += 2
-		self.LastAction = "rest"
+		self.LastAction = string(ActionRest)
 		rc.add(p.PlayerName + " REST: +2 VIG, +2 ENE (VIG capped at base)")
 	}
 }
@@ -270,13 +292,13 @@ func (rc *roundContext) executePlans(plans []plannedAction) {
 			continue
 		}
 		switch act.action {
-		case "basic_attack":
+		case ActionBasicAttack:
 			rc.execBasicAttack(&act, opponentOf(act.player))
-		case "skill:swift_pounce":
+		case ActionSkillSwiftPounce:
 			rc.execSwiftPounce(&act, opponentOf(act.player))
-		case "skill:charge":
+		case ActionSkillCharge:
 			rc.execCharge(&act, opponentOf(act.player))
-		case "skill:stun":
+		case ActionSkillStun:
 			rc.execStun(&act, opponentOf(act.player))
 		}
 
