@@ -10,7 +10,6 @@ resource "oci_core_internet_gateway" "igw" {
   compartment_id = var.compartment_ocid
   display_name   = "quimera-igw"
   vcn_id         = oci_core_virtual_network.vcn.id
-  is_enabled     = true
 }
 
 resource "oci_core_route_table" "rt" {
@@ -18,12 +17,10 @@ resource "oci_core_route_table" "rt" {
   display_name   = "quimera-rt"
   vcn_id         = oci_core_virtual_network.vcn.id
 
-  route_rules = [
-    {
-      cidr_block        = "0.0.0.0/0"
-      network_entity_id = oci_core_internet_gateway.igw.id
-    }
-  ]
+  route_rules {
+    destination       = "0.0.0.0/0"
+    network_entity_id = oci_core_internet_gateway.igw.id
+  }
 }
 
 resource "oci_core_subnet" "subnet" {
@@ -37,4 +34,3 @@ resource "oci_core_subnet" "subnet" {
   availability_domain         = data.oci_identity_availability_domains.ads.availability_domains[0].name
   prohibit_public_ip_on_vnic  = false
 }
-

@@ -15,3 +15,5 @@ infrastructure/bootstrap/oci-creds-*
 
 # Ignore local Terraform variables (actual values, not the example file)
 infrastructure/terraform/terraform.tfvars
+infrastructure/terraform/.terraform
+infrastructure/terraform/.terraform.lock.hcl

@@ -7,7 +7,9 @@ resource "oci_core_instance" "vm" {
 
   source_details {
     source_type = "image"
-    image_id    = local.image_id
+    source_id   = local.image_id
+    # Set custom boot volume size (in GB) from variable when launching from image
+    boot_volume_size_in_gbs = var.storage_size_gb
   }
 
   create_vnic_details {
@@ -20,9 +22,6 @@ resource "oci_core_instance" "vm" {
     ssh_authorized_keys = var.ssh_public_key
   }
 
-  # Set custom boot volume size (in GB) from variable
-  boot_volume_size_in_gbs = var.storage_size_gb
-
   dynamic "shape_config" {
     for_each = var.use_flex_shape ? [1] : []
     content {
@@ -33,7 +32,8 @@ resource "oci_core_instance" "vm" {
 }
 
 // Get the primary VNIC public IP
-data "oci_core_vnic" "primary_vnic" {
-  vnic_id = oci_core_instance.vm.primary_vnic_id
+// Get the primary VNIC via listing vnic attachments for the instance
+data "oci_core_vnic_attachments" "instance_attachments" {
+  compartment_id = var.compartment_ocid
+  instance_id    = oci_core_instance.vm.id
 }
-

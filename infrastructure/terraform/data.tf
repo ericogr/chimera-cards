@@ -1,5 +1,7 @@
 // Data sources and local resolution
-data "oci_identity_tenancy" "tenancy" {}
+data "oci_identity_tenancy" "tenancy" {
+  tenancy_id = var.tenancy_ocid
+}
 
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
@@ -20,4 +22,3 @@ data "oci_core_images" "selected_image" {
 locals {
   image_id = var.image_ocid != "" ? var.image_ocid : (length(data.oci_core_images.selected_image) > 0 && length(data.oci_core_images.selected_image[0].images) > 0 ? data.oci_core_images.selected_image[0].images[0].id : "")
 }
-

@@ -1,3 +1,4 @@
+tenancy_ocid = "ocid1.tenancy.oc1..example_tenancy_ocid"
 compartment_ocid = "ocid1.compartment.oc1..example_compartment_ocid"
 region = "us-ashburn-1"
 ssh_public_key = "ssh-rsa <your-public-key-here>"
@@ -11,7 +12,6 @@ storage_size_gb = 47
 
 // Application / Load Balancer
 lb_listen_port = 443
-lb_shape = "10Mbps"
 lb_display_name = "quimera-lb"
 backend_port = 8080
 

@@ -1,15 +1,17 @@
 output "instance_public_ip" {
   description = "Public IP of the created instance (primary VNIC)"
-  value       = data.oci_core_vnic.primary_vnic.public_ip
+  value       = oci_core_instance.vm.public_ip
 }
 
 output "load_balancer_ips" {
   description = "Public IP addresses assigned to the load balancer"
-  value       = oci_load_balancer_load_balancer.lb.ip_addresses
+  # ip_addresses can change shape between provider versions; try to normalize
+  value = try(
+    [for ipobj in oci_load_balancer_load_balancer.lb.ip_address_details : try(ipobj.ip_address, ipobj)]
+  )
 }
 
-output "load_balancer_ip" {
-  description = "Primary public IP of the load balancer (first)"
-  value       = length(oci_load_balancer_load_balancer.lb.ip_addresses) > 0 ? oci_load_balancer_load_balancer.lb.ip_addresses[0].ip_address : ""
+output "lb_reserved_public_ip" {
+  description = "Reserved public IP assigned to the load balancer (if created)"
+  value       = try(oci_core_public_ip.lb_reserved_ip.ip_address, "")
 }
-

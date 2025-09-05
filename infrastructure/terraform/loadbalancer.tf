@@ -4,7 +4,15 @@ resource "oci_load_balancer_load_balancer" "lb" {
   display_name   = var.lb_display_name
   subnet_ids     = [oci_core_subnet.subnet.id]
   is_private     = false
-  shape_name     = var.lb_shape
+  shape          = "flexible"
+  shape_details {
+    minimum_bandwidth_in_mbps = 10
+    maximum_bandwidth_in_mbps = 10
+  }
+
+  reserved_ips {
+    id = try(oci_core_public_ip.lb_reserved_ip.id, null)
+  }
 }
 
 resource "oci_load_balancer_backend_set" "backend_set" {
@@ -27,11 +35,10 @@ resource "oci_load_balancer_listener" "listener" {
 }
 
 resource "oci_load_balancer_backend" "backend" {
+  backendset_name = oci_load_balancer_backend_set.backend_set.name
   load_balancer_id = oci_load_balancer_load_balancer.lb.id
-  backend_set_name = oci_load_balancer_backend_set.backend_set.name
-  name             = "backend-instance-1"
-  ip_address       = data.oci_core_vnic.primary_vnic.public_ip
+  # ip_address       = data.oci_core_vnic.primary_vnic.public_ip_address
+  ip_address       = oci_core_instance.vm.private_ip
   port             = var.backend_port
   weight           = 1
 }
-

@@ -9,6 +9,11 @@ variable "compartment_ocid" {
   type        = string
 }
 
+variable "tenancy_ocid" {
+  description = "Tenancy OCID (ocid1.tenancy...) used by some data sources"
+  type        = string
+}
+
 variable "vcn_cidr" {
   description = "VCN CIDR block"
   type        = string
@@ -99,8 +104,15 @@ variable "lb_display_name" {
   default     = "quimera-lb"
 }
 
-variable "lb_shape" {
-  description = "Load balancer shape (eg. 10Mbps, 100Mbps, 4000Mbps). Default 100Mbps"
+variable "user_ocid" {
+  description = "User OCID (ocid1.user.oc1..)"
   type        = string
-  default     = "100Mbps"
+}
+variable "fingerprint" {
+  description = "User OCID (ocid1.user.oc1..)"
+  type        = string
+}
+variable "private_key_path" {
+  description = "User OCID (ocid1.user.oc1..)"
+  type        = string
 }
