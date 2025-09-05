@@ -184,7 +184,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   };
 
   const grid = (target: 'h1' | 'h2') => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(260px, 1fr))', gap: 8 }}>
+    <div className="animals-grid">
       {animals.map((a) => animalCard(a, target))}
     </div>
   );
@@ -192,7 +192,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   return (
     <div style={{ border: '1px solid #333', padding: 16, borderRadius: 8 }}>
       <h3>Create Your Hybrids</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+      <div className="hybrid-creation-grid">
         <section>
           <h4>Hybrid 1</h4>
           {grid('h1')}

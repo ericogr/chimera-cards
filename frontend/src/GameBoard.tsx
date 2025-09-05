@@ -174,7 +174,7 @@ const GameBoard: React.FC = () => {
         </div>
       </main>
 
-      <footer style={{ padding: 16, borderTop: '1px solid #333' }}>
+      <footer className="game-board-footer">
         <div>Round: {game.round_count} | Phase: {game.phase || '-'} | {myTurn ? 'Choose your action' : planning ? 'Waiting opponent/you' : 'Resolving...'}</div>
         <div style={{ marginTop: 6, fontSize: 13, color: '#ccc' }}>
           Your action: {submittedLabel(me)} | Opponent action: {submittedLabel(opponent)}
@@ -292,7 +292,7 @@ const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) =
       {imgSrc && (
         <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} style={{ objectFit: 'cover', borderRadius: 6 }} onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(160px, 1fr))', gap: 6, minWidth: 0 }}>
+      <div className="stats-grid">
         <div>HP: {hybrid.current_pv} / {hybrid.base_pv}</div>
         <div>ATK: {hybrid.current_atq}</div>
         <div>DEF: {hybrid.current_def}</div>

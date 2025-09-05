@@ -49,10 +49,6 @@
   align-items: center;
 }
 
-.player-one {
-  border-right: 1px solid #444;
-}
-
 .player-two {
   /* No border needed on the right for the second player */
 }

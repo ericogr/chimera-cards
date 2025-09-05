@@ -62,3 +62,102 @@
   border-bottom: 2px solid #61dafb;
   padding-bottom: 10px;
 }
+
+/* Desktop: right-align numeric / right-side columns so header and rows match */
+@media (min-width: 701px) {
+  .game-list > div:nth-child(3),
+  .game-list > div:nth-child(4),
+  .game-list > div:nth-child(5),
+  .game-list > div:nth-child(6) {
+    text-align: right;
+  }
+
+  .rank-list > div:nth-child(3),
+  .rank-list > div:nth-child(4),
+  .rank-list > div:nth-child(5) {
+    text-align: right;
+  }
+
+  .game-list, .rank-list {
+    align-items: center;
+  }
+}
+
+/* Mobile responsive adjustments for lobby */
+.join-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Make the input flex and be allowed to shrink so it aligns correctly on the right */
+.join-row input,
+.join-row button {
+  box-sizing: border-box;
+}
+
+.join-row input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.join-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .join-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .join-row input,
+  .join-row button {
+    width: 100%;
+  }
+
+  /* Convert the table-like lists into stacked cards */
+  .game-list,
+  .rank-list {
+    display: block;
+    padding: 10px 12px;
+    border-bottom: 1px solid #444;
+    min-width: 0;
+  }
+
+  /* Hide the header row when using stacked cards */
+  .game-list.game-list-header,
+  .rank-list.rank-list-header {
+    display: none;
+  }
+
+  /* Each cell becomes its own block with a label prefix */
+  .game-list > div,
+  .rank-list > div {
+    display: block;
+    margin-bottom: 8px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .game-list > div:nth-child(1)::before { content: "Game: "; font-weight: 700; }
+  .game-list > div:nth-child(2)::before { content: "Description: "; font-weight: 700; }
+  .game-list > div:nth-child(3)::before { content: "Players: "; font-weight: 700; }
+  .game-list > div:nth-child(4)::before { content: "Code: "; font-weight: 700; }
+  .game-list > div:nth-child(5)::before { content: "Victory: "; font-weight: 700; }
+  .game-list > div:nth-child(6)::before { content: "Resignations: "; font-weight: 700; }
+
+  .rank-list > div:nth-child(1)::before { content: "# "; font-weight: 700; }
+  .rank-list > div:nth-child(2)::before { content: "Name: "; font-weight: 700; }
+  .rank-list > div:nth-child(3)::before { content: "Wins: "; font-weight: 700; }
+  .rank-list > div:nth-child(4)::before { content: "Defeats: "; font-weight: 700; }
+  .rank-list > div:nth-child(5)::before { content: "Resignations: "; font-weight: 700; }
+
+  /* make long descriptions wrap instead of truncating */
+  .game-description {
+    white-space: normal;
+    max-width: none;
+    overflow: visible;
+  }
+}

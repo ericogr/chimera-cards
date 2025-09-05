@@ -153,7 +153,7 @@ const GameRoom: React.FC = () => {
 
   return (
     <div>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 20px', borderBottom: '1px solid #444' }}>
+      <header className="page-header">
         <h3>Game Room #{game.ID} (Code: {game.join_code})</h3>
         <button onClick={leaveGameAndReturn}>Back to Lobby</button>
       </header>

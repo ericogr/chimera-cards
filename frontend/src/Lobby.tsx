@@ -205,7 +205,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
 
   return (
     <div>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 20px', borderBottom: '1px solid #444' }}>
+      <header className="page-header">
         <div>
           <h3 style={{ margin: 0 }}>Welcome, {user.name}!</h3>
           {stats && (
@@ -222,9 +222,9 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
 
       <main style={{ padding: '20px' }}>
         <h2>Game Lobby</h2>
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', gap: '40px', marginBottom: '30px' }}>
+        <div className="lobby-top">
               {/* Create Game Section */}
-              <div style={{ flex: 1, border: '1px solid #444', padding: '20px', borderRadius: '8px' }}>
+              <div>
                 <h4>Create New Game</h4>
                 <input 
                   type="text" 
@@ -256,9 +256,9 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           </div>
 
           {/* Join Game Section */}
-          <div style={{ flex: 1, border: '1px solid #444', padding: '20px', borderRadius: '8px' }}>
+          <div>
             <h4>Join Existing Game</h4>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="join-row">
               <input 
                 type="text" 
                 placeholder="Enter game code" 
@@ -276,7 +276,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
 
         <h4 style={{ marginTop: '40px' }}>Available Public Games</h4>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <div>
+        <div className="table-wrap">
           <div className="game-list game-list-header">
             <div>Game</div>
             <div>Description</div>
@@ -307,7 +307,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       </main>
       <section style={{ padding: '0 20px 40px' }}>
         <h4 style={{ marginTop: '20px' }}>Top 10 Players</h4>
-        <div>
+        <div className="table-wrap">
           <div className="rank-list rank-list-header">
             <div>#</div>
             <div>Name</div>
