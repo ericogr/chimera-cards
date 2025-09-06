@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/game"
 )
 
 type mockRepoSA struct {

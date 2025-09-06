@@ -1,4 +1,4 @@
-module github.com/ericogr/quimera-cards
+module github.com/ericogr/chimera-cards
 
 go 1.25.0
 

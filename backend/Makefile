@@ -2,7 +2,7 @@
 
 .PHONY: all build run clean docker-build docker-push docker-build-push
 
-BINARY_NAME=quimera-cards
+BINARY_NAME=chimera-cards
 OUT_DIR?=.
 
 all: build
@@ -10,7 +10,7 @@ all: build
 build:
 	@echo "Building backend..."
 	@mkdir -p $(OUT_DIR)
-	@go build -o $(OUT_DIR)/$(BINARY_NAME) ./cmd/quimera-cards
+	@go build -o $(OUT_DIR)/$(BINARY_NAME) ./cmd/chimera-cards
 
 run: build
 	@echo "Running backend..."
@@ -20,10 +20,10 @@ clean:
 	@echo "Cleaning backend..."
 	@go clean
 	@rm -f $(OUT_DIR)/$(BINARY_NAME)
-	@rm -f data/quimera.db
+	@rm -f data/chimera.db
 
 # Docker image variables
-IMAGE ?= quimera-backend
+IMAGE ?= chimera-backend
 TAG ?= latest
 DOCKERFILE ?= Dockerfile
 

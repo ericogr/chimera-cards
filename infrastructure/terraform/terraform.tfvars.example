@@ -12,10 +12,10 @@ storage_size_gb = 47
 
 // Application / Load Balancer
 lb_listen_port = 443
-lb_display_name = "quimera-lb"
+lb_display_name = "chimera-lb"
 backend_port = 8080
 
-instance_display_name = "quimera-instance"
+instance_display_name = "chimera-instance"
 vcn_cidr = "10.0.0.0/16"
 subnet_cidr = "10.0.1.0/24"
-dns_label = "quimera"
+dns_label = "chimera"

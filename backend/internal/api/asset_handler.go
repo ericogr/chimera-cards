@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"fmt"
-	"github.com/ericogr/quimera-cards/internal/constants"
-	"github.com/ericogr/quimera-cards/internal/dedupe"
-	"github.com/ericogr/quimera-cards/internal/imageutil"
-	"github.com/ericogr/quimera-cards/internal/logging"
-	"github.com/ericogr/quimera-cards/internal/openaiclient"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/dedupe"
+	"github.com/ericogr/chimera-cards/internal/imageutil"
+	"github.com/ericogr/chimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/openaiclient"
 	"github.com/gin-gonic/gin"
 )
 

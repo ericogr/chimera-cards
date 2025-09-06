@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/constants"
 	"github.com/gin-gonic/gin"
 )
 

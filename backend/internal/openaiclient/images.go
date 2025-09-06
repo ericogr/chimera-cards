@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
-	"github.com/ericogr/quimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/logging"
 )
 
 // Two prompt templates may be provided: one used when generating single

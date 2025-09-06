@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/game"
 )
 
 // GameRepo is the minimal repository interface required by CreateHybrids.

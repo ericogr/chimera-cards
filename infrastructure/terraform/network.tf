@@ -1,20 +1,20 @@
 // VCN, Internet Gateway, Route Table, Subnet
 resource "oci_core_virtual_network" "vcn" {
   compartment_id = var.compartment_ocid
-  display_name   = "quimera-vcn"
+  display_name   = "chimera-vcn"
   cidr_block     = var.vcn_cidr
   dns_label      = var.dns_label
 }
 
 resource "oci_core_internet_gateway" "igw" {
   compartment_id = var.compartment_ocid
-  display_name   = "quimera-igw"
+  display_name   = "chimera-igw"
   vcn_id         = oci_core_virtual_network.vcn.id
 }
 
 resource "oci_core_route_table" "rt" {
   compartment_id = var.compartment_ocid
-  display_name   = "quimera-rt"
+  display_name   = "chimera-rt"
   vcn_id         = oci_core_virtual_network.vcn.id
 
   route_rules {
@@ -26,7 +26,7 @@ resource "oci_core_route_table" "rt" {
 resource "oci_core_subnet" "subnet" {
   compartment_id              = var.compartment_ocid
   vcn_id                      = oci_core_virtual_network.vcn.id
-  display_name                = "quimera-subnet"
+  display_name                = "chimera-subnet"
   cidr_block                  = var.subnet_cidr
   dns_label                   = "${var.dns_label}sub"
   route_table_id              = oci_core_route_table.rt.id

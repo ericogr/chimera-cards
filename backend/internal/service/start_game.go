@@ -3,12 +3,12 @@ package service
 import (
 	"errors"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
-	"github.com/ericogr/quimera-cards/internal/game"
-	"github.com/ericogr/quimera-cards/internal/hybridimage"
-	"github.com/ericogr/quimera-cards/internal/hybridname"
-	"github.com/ericogr/quimera-cards/internal/logging"
-	"github.com/ericogr/quimera-cards/internal/storage"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/hybridimage"
+	"github.com/ericogr/chimera-cards/internal/hybridname"
+	"github.com/ericogr/chimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/storage"
 )
 
 var (

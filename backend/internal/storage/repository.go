@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/ericogr/quimera-cards/internal/game"
+import "github.com/ericogr/chimera-cards/internal/game"
 
 type Repository interface {
 	GetEntities() ([]game.Entity, error)

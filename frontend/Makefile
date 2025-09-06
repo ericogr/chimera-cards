@@ -21,7 +21,7 @@ test:
 	@CI=true npm test -- --watchAll=false
 
 # Docker image variables
-IMAGE ?= quimera-frontend
+IMAGE ?= chimera-frontend
 TAG ?= latest
 DOCKERFILE ?= Dockerfile
 

@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/game"
 )
 
 type entityEntry struct {

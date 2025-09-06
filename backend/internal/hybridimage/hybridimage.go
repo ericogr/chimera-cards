@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
-	"github.com/ericogr/quimera-cards/internal/dedupe"
-	"github.com/ericogr/quimera-cards/internal/imageutil"
-	"github.com/ericogr/quimera-cards/internal/keys"
-	"github.com/ericogr/quimera-cards/internal/logging"
-	"github.com/ericogr/quimera-cards/internal/openaiclient"
-	"github.com/ericogr/quimera-cards/internal/storage"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/dedupe"
+	"github.com/ericogr/chimera-cards/internal/imageutil"
+	"github.com/ericogr/chimera-cards/internal/keys"
+	"github.com/ericogr/chimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/openaiclient"
+	"github.com/ericogr/chimera-cards/internal/storage"
 )
 
 // buildKeyFromNames produces the canonical entity key used to store hybrid

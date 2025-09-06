@@ -1,7 +1,7 @@
 # Infrastructure
 
 This folder contains infrastructure-as-code and helper scripts used to
-provision cloud resources for Quimera Cards.
+provision cloud resources for Chimera Cards.
 
 ## Structure
 
@@ -29,4 +29,3 @@ make terraform-apply
 - The bootstrap script writes a private key to the chosen output directory
   with `0600` permissions — keep that file safe and never commit it to
   source control.
-

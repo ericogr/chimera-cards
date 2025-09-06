@@ -24,7 +24,7 @@ Always follow these principles when generating code:
 - `backend/`: Go API using Gin + GORM.
 - `frontend/`: React + TypeScript (CRA).
   - `src/` components and views, `public/` static assets.
- - Root: `Makefile` (orchestrates both), `go.work` (uses `./backend`). The SQLite file `backend/data/quimera.db` is created at runtime.
+ - Root: `Makefile` (orchestrates both), `go.work` (uses `./backend`). The SQLite file `backend/data/chimera.db` is created at runtime.
 - cmd/
   - Each subfolder under cmd/ represents an application entry point.
   - Example: cmd/myapp/main.go is the main executable for the project.

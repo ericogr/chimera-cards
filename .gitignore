@@ -1,7 +1,7 @@
 .vscode/
 backend/bin/
 GEMINI.md
-backend/quimera.db
+backend/chimera.db
 .gocache/
 
 # Local frontend envs (do not commit secrets)

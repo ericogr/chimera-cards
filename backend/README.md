@@ -1,12 +1,12 @@
 # Backend (Go)
 
-This folder contains the Go backend server (Gin + GORM) used by Quimera
+This folder contains the Go backend server (Gin + GORM) used by Chimera
 Cards.
 
 ## Overview
 
-- Main executable: [`cmd/quimera-cards`](./cmd/quimera-cards)
-- Development DB (SQLite): [`data/quimera.db`](./data/quimera.db)
+- Main executable: [`cmd/chimera-cards`](./cmd/chimera-cards)
+- Development DB (SQLite): [`data/chimera.db`](./data/chimera.db)
 
 ## Prerequisites
 

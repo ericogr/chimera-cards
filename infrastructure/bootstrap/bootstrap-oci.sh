@@ -4,10 +4,10 @@ IFS=$'\n\t'
 
 TS=$(date -u +%Y%m%d%H%M%S)
 ADMIN_PROFILE="DEFAULT"
-NEW_USERNAME="quimera-terraform-${TS}"
+NEW_USERNAME="chimera-terraform-${TS}"
 EMAIL="${NEW_USERNAME}@example.com"
-NEW_GROUPNAME="quimera-terraform-group-${TS}"
-POLICY_NAME="quimera-terraform-policy-${TS}"
+NEW_GROUPNAME="chimera-terraform-group-${TS}"
+POLICY_NAME="chimera-terraform-policy-${TS}"
 OUTDIR="infrastructure/bootstrap/oci-creds-${TS}"
 TARGET_COMP_OCID=""
 TENANCY_OCID=""
@@ -30,9 +30,9 @@ Options:
   -p, --profile PROFILE         OCI CLI profile to use for admin actions (default: DEFAULT)
   -t, --tenancy TENANCY_OCID    Tenancy OCID (will try to read from profile if omitted)
   -c, --compartment COMPARTMENT_OCID  Target compartment OCID for policy (optional)
-  -n, --username USERNAME       Username to create (default: quimera-terraform-<ts>)
+  -n, --username USERNAME       Username to create (default: chimera-terraform-<ts>)
   -e, --email EMAIL             Email address to use for the new user (default: <username>@example.com)
-  -g, --group GROUPNAME         Group name (default: quimera-terraform-group-<ts>)
+  -g, --group GROUPNAME         Group name (default: chimera-terraform-group-<ts>)
   -o, --outdir DIR              Output directory for keys and files (default: infrastructure/bootstrap/oci-creds-<ts>)
   -r, --region REGION           OCI region (will try to read from profile if omitted)
   -h, --help                    Show this help and exit
@@ -121,7 +121,7 @@ if ! printf '%s' "$EMAIL" | grep -qE '^[^@]+@[^@]+\.[^@]+'; then
 fi
 
 USER_OCID=$(oci --profile "$ADMIN_PROFILE" iam user create --compartment-id "$TENANCY_OCID" --name "$NEW_USERNAME" --auth security_token \
-  --description "Terraform user for Quimera (created by bootstrap script)" --email "$EMAIL" --query 'data.id' --raw-output)
+  --description "Terraform user for Chimera (created by bootstrap script)" --email "$EMAIL" --query 'data.id' --raw-output)
 
 if [ -z "$USER_OCID" ]; then
   echo "Failed to create OCI user." >&2
@@ -160,7 +160,7 @@ if [ -z "$TARGET_COMP_OCID" ]; then
   else
     echo "Compartment 'chimera-cards' not found. Creating a new compartment under the tenancy..."
     CREATED_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment create --compartment-id "$TENANCY_OCID" --name "chimera-cards" \
-      --description "Compartment for Quimera resources (created by bootstrap script)" --query 'data.id' --raw-output --auth security_token 2>/dev/null || true)
+      --description "Compartment for Chimera resources (created by bootstrap script)" --query 'data.id' --raw-output --auth security_token 2>/dev/null || true)
     if [ -n "$CREATED_COMP_OCID" ] && [ "$CREATED_COMP_OCID" != "None" ]; then
       TARGET_COMP_OCID="$CREATED_COMP_OCID"
       echo "Created compartment 'chimera-cards': $TARGET_COMP_OCID"

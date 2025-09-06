@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"github.com/ericogr/quimera-cards/internal/engine"
-	"github.com/ericogr/quimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/engine"
+	"github.com/ericogr/chimera-cards/internal/game"
 )
 
 var (

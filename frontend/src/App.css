@@ -67,14 +67,14 @@
   background-color: #357ae8;
 }
 
-.quimera-logo {
+.welcome-logo {
   width: 150px;
   height: 150px;
   margin-bottom: 20px;
 }
 
 @media (max-width: 600px) {
-  .quimera-logo {
+  .welcome-logo {
     width: 100px;
     height: 100px;
   }

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
-	"github.com/ericogr/quimera-cards/internal/game"
-	"github.com/ericogr/quimera-cards/internal/service"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

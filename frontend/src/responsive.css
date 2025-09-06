@@ -132,7 +132,7 @@
 }
 
 @media (max-width: 600px) {
-  .quimera-logo { width: 96px; height: 96px; }
+  .welcome-logo { width: 96px; height: 96px; }
   .game-list, .rank-list { min-width: 600px; }
   .game-board-container { font-size: 14px; }
   .google-login-button { padding: 10px 16px; font-size: 14px; }

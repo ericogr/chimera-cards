@@ -1,4 +1,4 @@
-# Quimera - Terraform (OCI)
+# Chimera - Terraform (OCI)
 
 Este diretório contém a automação Terraform usada para provisionar a
 infraestrutura Oracle Cloud (VCN, subnets, instâncias e Load Balancer).

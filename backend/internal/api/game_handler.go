@@ -1,6 +1,6 @@
 package api
 
-import "github.com/ericogr/quimera-cards/internal/storage"
+import "github.com/ericogr/chimera-cards/internal/storage"
 
 // GameHandler groups all game-related HTTP handlers.
 type GameHandler struct {

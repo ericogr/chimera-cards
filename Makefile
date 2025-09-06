@@ -52,7 +52,7 @@ backend-test:
 backend-stop:
 	@echo "--- Stopping Backend ---"
 	# Try killing by binary name
-	-@pkill -f '(^|/)quimera-cards( |$)' 2>/dev/null || true
+	-@pkill -f '(^|/)chimera-cards( |$)' 2>/dev/null || true
 	# Try killing by port (Linux)
 	-@fuser -k 8080/tcp 2>/dev/null || true
 	# Fallback using lsof if available

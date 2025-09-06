@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ericogr/quimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/constants"
 )
 
 type jwtClaims struct {

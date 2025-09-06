@@ -4,7 +4,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ${BACKEND_IMAGE:-quimera-backend}:${TAG:-latest}
+    image: ${BACKEND_IMAGE:-chimera-backend}:${TAG:-latest}
     # Run as the local UID/GID to avoid permissions issues when bind-mounting
     # the host `backend/data` directory. Set LOCAL_UID/LOCAL_GID in your
     # environment (or .env file) if your host UID differs.
@@ -17,7 +17,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       CHIMERA_CONFIG: /game/chimera_config.json
-      CHIMERA_DB: /game/data/quimera.db
+      CHIMERA_DB: /game/data/chimera.db
     volumes:
       - ./backend/chimera_config.json:/game/chimera_config.json:ro
       - ./backend/data:/game/data:rw
@@ -33,7 +33,7 @@ services:
     environment:
       - REACT_APP_GOOGLE_CLIENT_ID=${REACT_APP_GOOGLE_CLIENT_ID}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-/api}
-    image: ${FRONTEND_IMAGE:-quimera-frontend}:${TAG:-latest}
+    image: ${FRONTEND_IMAGE:-chimera-frontend}:${TAG:-latest}
     depends_on:
       - chimera-backend
     expose:

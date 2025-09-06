@@ -29,7 +29,7 @@ variable "subnet_cidr" {
 variable "dns_label" {
   description = "DNS label used for VCN/subnet hostnames"
   type        = string
-  default     = "quimera"
+  default     = "chimera"
 }
 
 variable "ssh_public_key" {
@@ -95,13 +95,13 @@ variable "storage_size_gb" {
 variable "instance_display_name" {
   description = "Display name for the compute instance"
   type        = string
-  default     = "quimera-instance"
+  default     = "chimera-instance"
 }
 
 variable "lb_display_name" {
   description = "Display name for the load balancer"
   type        = string
-  default     = "quimera-lb"
+  default     = "chimera-lb"
 }
 
 variable "user_ocid" {

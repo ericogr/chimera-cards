@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import QuimeraLogo from './QuimeraLogo';
 import { Routes, Route } from 'react-router-dom';
 import { useGoogleLogin, CodeResponse } from '@react-oauth/google';
 import { apiFetch } from './api';
@@ -71,8 +70,8 @@ const App: React.FC = () => {
     return (
       <div className="App">
         <header className="App-header">
-          <QuimeraLogo />
-          <h1>Quimera Cards</h1>
+          <img src="/welcome_logo.png" alt="Welcome Logo" className="welcome-logo" />
+          <h1>Chimera Cards</h1>
           <div>
             <p>Please log in to continue</p>
             {error && <p className="error-message">{error}</p>}

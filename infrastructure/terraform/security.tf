@@ -2,7 +2,7 @@
 resource "oci_core_security_list" "sec_list" {
   compartment_id = var.compartment_ocid
   vcn_id         = oci_core_virtual_network.vcn.id
-  display_name   = "quimera-sec-list"
+  display_name   = "chimera-sec-list"
 
   ingress_security_rules {
     protocol = "6"

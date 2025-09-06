@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/ericogr/quimera-cards/internal/game"
-	"github.com/ericogr/quimera-cards/internal/imageutil"
-	"github.com/ericogr/quimera-cards/internal/logging"
-	"github.com/ericogr/quimera-cards/internal/openaiclient"
+	"github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/imageutil"
+	"github.com/ericogr/chimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/openaiclient"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

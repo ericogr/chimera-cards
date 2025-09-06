@@ -19,14 +19,14 @@ COPY . ./
 
 # Build the server binary. Use CGO as github.com/mattn/go-sqlite3 requires it.
 ENV CGO_ENABLED=1 GOOS=linux GOARCH=amd64
-RUN go build -a -installsuffix cgo -ldflags "-s -w" -o /app/quimera-cards ./cmd/quimera-cards
+RUN go build -a -installsuffix cgo -ldflags "-s -w" -o /app/chimera-cards ./cmd/chimera-cards
 
 ### Final image: distroless base (contains libc and TLS CA certs)
 FROM gcr.io/distroless/base:nonroot
 # FROM golang:1.25.0-bookworm
 
 # Copy binary from builder stage
-COPY --from=builder /app/quimera-cards /game/quimera-cards
+COPY --from=builder /app/chimera-cards /game/chimera-cards
 
 # Default working dir (where the app will look for chimera_config.json by default)
 WORKDIR /game
@@ -37,4 +37,4 @@ EXPOSE 8080
 # Use non-root user provided by distroless
 USER 1000:1000
 
-ENTRYPOINT ["/game/quimera-cards"]
+ENTRYPOINT ["/game/chimera-cards"]
