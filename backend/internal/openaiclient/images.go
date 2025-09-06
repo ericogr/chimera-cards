@@ -15,23 +15,48 @@ import (
 	"github.com/ericogr/quimera-cards/internal/logging"
 )
 
-// imagePromptTemplate can be set at application startup to customize the
-// prompt used when requesting image generation from OpenAI. Use the token
-// "{{animals}}" in the template where the comma-separated animal names
-// should be substituted.
-var imagePromptTemplate string
+// Two prompt templates may be provided: one used when generating single
+// animal portraits (singleImagePromptTemplate) and another used when
+// generating hybrid images (hybridImagePromptTemplate). Each template may
+// include the token "{{animals}}" which will be replaced by the comma-
+// separated animal names.
+var singleImagePromptTemplate string
+var hybridImagePromptTemplate string
 
-// SetImagePromptTemplate sets a custom prompt template for image
-// generation. Call this during app initialization if you wish to override
-// the built-in default.
-func SetImagePromptTemplate(t string) {
-	imagePromptTemplate = strings.TrimSpace(t)
+// SetSingleImagePromptTemplate sets the prompt template used when
+// generating images for a single animal.
+func SetSingleImagePromptTemplate(t string) {
+	singleImagePromptTemplate = strings.TrimSpace(t)
 }
 
-// GenerateImageFromNames calls the OpenAI Images API to generate a single PNG
-// image (256/1024 depending on constants) for the provided animal names.
-// It returns the raw image bytes (PNG) or an error.
-func GenerateImageFromNames(ctx context.Context, animalNames []string) ([]byte, error) {
+// SetHybridImagePromptTemplate sets the prompt template used when
+// generating images for hybrids composed of multiple animals.
+func SetHybridImagePromptTemplate(t string) {
+	hybridImagePromptTemplate = strings.TrimSpace(t)
+}
+
+// GenerateAnimalImage generates an image for a single animal using the
+// configured animal prompt template (or a sensible default if missing).
+func GenerateAnimalImage(ctx context.Context, animalName string) ([]byte, error) {
+	if strings.TrimSpace(animalName) == "" {
+		return nil, fmt.Errorf("animalName must be non-empty")
+	}
+	return generateImageWithTemplate(ctx, singleImagePromptTemplate, []string{animalName})
+}
+
+// GenerateHybridImage generates an image for a hybrid composed of 1..3
+// animals using the configured hybrid prompt template (or a sensible
+// default if missing).
+func GenerateHybridImage(ctx context.Context, animalNames []string) ([]byte, error) {
+	if len(animalNames) == 0 || len(animalNames) > 3 {
+		return nil, fmt.Errorf("animalNames must contain 1..3 items")
+	}
+	return generateImageWithTemplate(ctx, hybridImagePromptTemplate, animalNames)
+}
+
+// generateImageWithTemplate is an internal helper that forms the prompt
+// from the provided template (or a default) and calls the OpenAI API.
+func generateImageWithTemplate(ctx context.Context, template string, animalNames []string) ([]byte, error) {
 	if len(animalNames) == 0 || len(animalNames) > 3 {
 		return nil, fmt.Errorf("animalNames must contain 1..3 items")
 	}
@@ -41,15 +66,10 @@ func GenerateImageFromNames(ctx context.Context, animalNames []string) ([]byte, 
 		return nil, fmt.Errorf("%s not set", constants.EnvOpenAIAPIKey)
 	}
 
-	// Build prompt from template. The openaiclient package exposes a
-	// configurable prompt template (see SetImagePromptTemplate). The
-	// template should contain the token "{{animals}}" which will be
-	// substituted with a comma-separated list of animal names. If no
-	// custom template was provided, a sensible default is used.
 	animalsPart := strings.Join(animalNames, ", ")
-	prompt := imagePromptTemplate
+	prompt := template
 	if prompt == "" {
-		// default template that works for 1..3 animals
+		// default hybrid-style template used when no custom template provided
 		prompt = "Create a single PNG image of {{animals}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature."
 	}
 	prompt = strings.ReplaceAll(prompt, "{{animals}}", animalsPart)
@@ -64,7 +84,7 @@ func GenerateImageFromNames(ctx context.Context, animalNames []string) ([]byte, 
 
 	// Log the prompt before sending the request so operators can see what
 	// was asked to the image API when a generation happens.
-	logging.Info("hybrid-image openai prompt", logging.Fields{"animals": animalsPart, "prompt": prompt})
+	logging.Info("openai image prompt", logging.Fields{"animals": animalsPart, "prompt": prompt})
 
 	b, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))

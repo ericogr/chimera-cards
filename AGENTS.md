@@ -74,6 +74,8 @@ Always follow these principles when generating code:
 - Go: format with `gofmt -s -w .` (or `go fmt ./...`), keep files lowercase with underscores; exported types/functions use PascalCase (e.g., `type Game`, `NewHandler`). Run `go vet ./...` before PRs.
 - React/TS: components in PascalCase (`GameRoom.tsx`), hooks/cfg camelCase. Keep styles in adjacent `.css` files.
 - Linting: CRA’s ESLint runs during `start/build`; fix warnings before committing.
+- Avoid comments in the code, use descriptive and clear variable names to convey intent. Prefer functions to divide responsibilities and simplify processes. Produce clean, consistent, and minimalist code.
+- Do not include compatibility unless explicitly requested by the user.
 
 ## Testing Guidelines
 - Frontend: React Testing Library; place tests as `*.test.tsx` next to code. Run `make frontend-test` or `npm --prefix frontend test`.

@@ -47,7 +47,7 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 		defer cancel()
 
 		logging.Info("hybrid-image generating via OpenAI", logging.Fields{"animal_key": key, "animals": strings.Join(animalNames, " + ")})
-		imgBytes, err := openaiclient.GenerateImageFromNames(ctx, animalNames)
+		imgBytes, err := openaiclient.GenerateHybridImage(ctx, animalNames)
 		if err != nil {
 			return nil, err
 		}

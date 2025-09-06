@@ -60,7 +60,7 @@ func ensureAnimalImages(db *gorm.DB, animalsFromConfig []game.Animal) {
 		// Generate using OpenAI (single-name prompt) and resize to 256x256.
 		logging.Info("generating animal image", logging.Fields{"animal_id": a.ID, "name": a.Name})
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
-		imgBytes, err := openaiclient.GenerateImageFromNames(ctx, []string{a.Name})
+		imgBytes, err := openaiclient.GenerateAnimalImage(ctx, a.Name)
 		cancel()
 		if err != nil {
 			logging.Error("failed to generate image for animal", err, logging.Fields{"animal_id": a.ID, "name": a.Name})

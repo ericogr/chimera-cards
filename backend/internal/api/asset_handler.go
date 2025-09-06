@@ -54,7 +54,7 @@ func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
-		imgBytes, err := openaiclient.GenerateImageFromNames(ctx, []string{a.Name})
+		imgBytes, err := openaiclient.GenerateAnimalImage(ctx, a.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +147,7 @@ func (h *GameHandler) ServeHybridAsset(c *gin.Context) {
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
-		imgBytes, err := openaiclient.GenerateImageFromNames(ctx, names)
+		imgBytes, err := openaiclient.GenerateHybridImage(ctx, names)
 		if err != nil {
 			return nil, err
 		}

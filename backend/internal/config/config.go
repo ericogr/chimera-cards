@@ -33,7 +33,8 @@ type rawConfig struct {
 	// Use the string token {{animals}} where the comma-separated list of
 	// animal names will be substituted. If not provided, a sensible
 	// default is used by the OpenAI client.
-	ImagePrompt string `json:"image_prompt"`
+	SingleImagePrompt string `json:"single_image_prompt"`
+	HybridImagePrompt string `json:"hybrid_image_prompt"`
 	// Optional name prompt template used to generate hybrid names.
 	// Use the token {{animals}} where the comma-separated list of animal
 	// names will be substituted. If omitted, a default prompt is used.
@@ -45,7 +46,10 @@ type LoadedConfig struct {
 	Animals       []game.Animal
 	ServerAddress string
 	// Optional image prompt template loaded from config
-	ImagePromptTemplate string
+	// Optional single-animal image prompt template loaded from config
+	SingleImagePromptTemplate string
+	// Optional hybrid image prompt template loaded from config
+	HybridImagePromptTemplate string
 	// Optional name prompt template loaded from config
 	NamePromptTemplate string
 }
@@ -119,10 +123,11 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 	}
 
 	return &LoadedConfig{
-		Animals:             out,
-		ServerAddress:       addr,
-		ImagePromptTemplate: strings.TrimSpace(rc.ImagePrompt),
-		NamePromptTemplate:  strings.TrimSpace(rc.NamePrompt),
+		Animals:                   out,
+		ServerAddress:             addr,
+		SingleImagePromptTemplate: strings.TrimSpace(rc.SingleImagePrompt),
+		HybridImagePromptTemplate: strings.TrimSpace(rc.HybridImagePrompt),
+		NamePromptTemplate:        strings.TrimSpace(rc.NamePrompt),
 	}, nil
 }
 

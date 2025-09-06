@@ -25,13 +25,17 @@ func main() {
 	}
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
-		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional server.address"})
+		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional keys: server.address, single_image_prompt, hybrid_image_prompt"})
 	}
 
-	// If the configuration provides an image prompt template, apply it
-	// to the OpenAI client so image generation uses the configured text.
-	if cfg.ImagePromptTemplate != "" {
-		openaiclient.SetImagePromptTemplate(cfg.ImagePromptTemplate)
+	// If the configuration provides image prompt templates, apply them to
+	// the OpenAI client so animal and hybrid image generation use the
+	// configured texts.
+	if cfg.SingleImagePromptTemplate != "" {
+		openaiclient.SetSingleImagePromptTemplate(cfg.SingleImagePromptTemplate)
+	}
+	if cfg.HybridImagePromptTemplate != "" {
+		openaiclient.SetHybridImagePromptTemplate(cfg.HybridImagePromptTemplate)
 	}
 
 	// If the configuration provides a name prompt template, apply it to

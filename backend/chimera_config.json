@@ -175,6 +175,7 @@
     }
   ],
   "server": { "address": ":8080" },
-  "image_prompt": "Create a single PNG with transparent background of a hybrid creature that combines the distinctive features of {{animals}} into one cohesive animal. It must be a single creature, not multiple animals. The subject is the animal hybrid only, not a human or humanoid character. Bold comic-book style with exaggerated heroic proportions, dramatic shading, vibrant colors, and clean thick outlines. Depict the hybrid creature in an energetic action pose (running, leaping, or charging) with dynamic composition and cinematic perspective. No text or logos.",
+  "single_image_prompt": "Create a single PNG with transparent background of the animal '{{animals}}' in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic pose, no text or logos, transparent background. The image should depict a single animal character suitable for an icon/portrait.",
+  "hybrid_image_prompt": "Create a single PNG with transparent background of a hybrid creature that combines the distinctive features of {{animals}} into one cohesive creature. It must be a single creature, not multiple animals. The subject is the hybrid creature only, not a human or humanoid. Bold comic-book style with exaggerated heroic proportions, dramatic shading, vibrant colors, clean thick outlines, and an action pose. No text or logos.",
   "name_prompt": "Given these animal names: {{animals}}. Create a short, fun, single-name hybrid that combines them. The name must not be offensive, must not contain profanity, and must not resemble or sound like a curse word. Return only the name."
 }
