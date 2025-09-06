@@ -13,12 +13,12 @@ var (
 	ErrPlayerNotInGame            = errors.New("player not in game")
 	ErrNoActiveHybrid             = errors.New("no active hybrid")
 	ErrHybridHasNoSelectedAbility = errors.New("hybrid has no selected ability")
-	ErrAbilityMismatch            = errors.New("ability must match the hybrid's selected animal")
+	ErrAbilityMismatch            = errors.New("ability must match the hybrid's selected entity")
 )
 
 // SubmitAction stores a player's chosen action and resolves the round if both players submitted.
 // Returns the updated game and a boolean indicating whether the round was resolved.
-func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game.PendingActionType, animalID uint) (*game.Game, bool, error) {
+func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game.PendingActionType, entityID uint) (*game.Game, bool, error) {
 	g, err := repo.GetGameByID(gameID)
 	if err != nil || g == nil {
 		return nil, false, ErrGameNotFound
@@ -56,16 +56,16 @@ func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game
 	current.HasSubmittedAction = true
 	current.PendingActionType = actionType
 	if actionType == game.PendingActionAbility {
-		if active.SelectedAbilityAnimalID == nil {
+		if active.SelectedAbilityEntityID == nil {
 			return nil, false, ErrHybridHasNoSelectedAbility
 		}
-		if animalID != 0 && animalID != *active.SelectedAbilityAnimalID {
+		if entityID != 0 && entityID != *active.SelectedAbilityEntityID {
 			return nil, false, ErrAbilityMismatch
 		}
-		aid := *active.SelectedAbilityAnimalID
-		current.PendingActionAnimalID = &aid
+		aid := *active.SelectedAbilityEntityID
+		current.PendingActionEntityID = &aid
 	} else {
-		current.PendingActionAnimalID = nil
+		current.PendingActionEntityID = nil
 	}
 
 	resolved := false

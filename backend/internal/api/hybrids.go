@@ -12,10 +12,10 @@ import (
 )
 
 type CreateHybridSpec struct {
-	AnimalIDs []uint `json:"animal_ids"`
-	// SelectedAnimalID must be one of AnimalIDs and will define the special
+	EntityIDs []uint `json:"entity_ids"`
+	// SelectedEntityID must be one of EntityIDs and will define the special
 	// ability available for this hybrid during combat.
-	SelectedAnimalID uint `json:"selected_animal_id"`
+	SelectedEntityID uint `json:"selected_entity_id"`
 }
 
 type CreateHybridsPayload struct {
@@ -24,8 +24,8 @@ type CreateHybridsPayload struct {
 	Hybrid2    CreateHybridSpec `json:"hybrid2"`
 }
 
-func sumAnimalStats(animals []game.Animal) (hitPoints, attack, defense, agility, energy int) {
-	for _, a := range animals {
+func sumEntityStats(entities []game.Entity) (hitPoints, attack, defense, agility, energy int) {
+	for _, a := range entities {
 		hitPoints += a.HitPoints
 		attack += a.Attack
 		defense += a.Defense
@@ -35,8 +35,8 @@ func sumAnimalStats(animals []game.Animal) (hitPoints, attack, defense, agility,
 	return
 }
 
-// Vigor cost per animal is configurable via the chimera_config.json and
-// stored on each Animal as `VigorCost`.
+// Vigor cost per entity is configurable via the chimera_config.json and
+// stored on each Entity as `VigorCost`.
 
 // CreateHybrids stores two hybrids for a player in a game.
 func (h *GameHandler) CreateHybrids(c *gin.Context) {
@@ -53,8 +53,8 @@ func (h *GameHandler) CreateHybrids(c *gin.Context) {
 
 	srvReq := service.CreateHybridsRequest{
 		PlayerUUID: req.PlayerUUID,
-		Hybrid1:    service.CreateHybridSpec{AnimalIDs: req.Hybrid1.AnimalIDs, SelectedAnimalID: req.Hybrid1.SelectedAnimalID},
-		Hybrid2:    service.CreateHybridSpec{AnimalIDs: req.Hybrid2.AnimalIDs, SelectedAnimalID: req.Hybrid2.SelectedAnimalID},
+		Hybrid1:    service.CreateHybridSpec{EntityIDs: req.Hybrid1.EntityIDs, SelectedEntityID: req.Hybrid1.SelectedEntityID},
+		Hybrid2:    service.CreateHybridSpec{EntityIDs: req.Hybrid2.EntityIDs, SelectedEntityID: req.Hybrid2.SelectedEntityID},
 	}
 
 	if err := service.CreateHybrids(h.repo, uint(gameID), srvReq); err != nil {
@@ -68,7 +68,7 @@ func (h *GameHandler) CreateHybrids(c *gin.Context) {
 		case service.ErrHybridsAlreadyCreated:
 			c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrHybridsAlreadyCreated})
 			return
-		case service.ErrInvalidHybridCount, service.ErrInvalidSelectedAbility, service.ErrAnimalReused, service.ErrInvalidAnimals:
+		case service.ErrInvalidHybridCount, service.ErrInvalidSelectedAbility, service.ErrEntityReused, service.ErrInvalidEntities:
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		default:

@@ -57,20 +57,20 @@ CHIMERA_CONFIG="./chimera_config.json"
 ## Configuration file (`chimera_config.json`)
 
 The server reads `chimera_config.json` (path may be set via the `CHIMERA_CONFIG`
-env var). This file defines the animals and several templates used at runtime.
+env var). This file defines the entities and several templates used at runtime.
 
-- `animal_list`: array of animal objects with fields such as `name`,
+- `entity_list`: array of entity objects with fields such as `name`,
   `hit_points`, `attack`, `defense`, `agility`, `energy`, `vigor_cost`,
   `skill_name`, `skill_cost`, `skill_description`, `skill_key` and a
   `skill_effect` object describing the mechanical behaviour of the ability.
-- `single_image_prompt`: prompt template used when generating a single-animal
-  portrait (used at startup and by the animal asset endpoint). Use the token
-  `{{animals}}` where the animal name should be substituted.
+- `single_image_prompt`: prompt template used when generating a single-entity
+  portrait (used at startup and by the entity asset endpoint). Use the token
+  `{{entities}}` where the entity name should be substituted.
 - `hybrid_image_prompt`: prompt template used when generating hybrid images
-  (used by hybrid image generation). Use `{{animals}}` to inject the comma-
-  separated animal names in the prompt.
+  (used by hybrid image generation). Use `{{entities}}` to inject the comma-
+  separated entity names in the prompt.
 
-Example: the single-animal prompt is used when seeding/creating animal
+Example: the single-entity prompt is used when seeding/creating entity
 portraits at startup; the hybrid prompt is used when generating final hybrid
 images. Keep the prompts in `chimera_config.json` to make image styling
 adjustable without code changes.

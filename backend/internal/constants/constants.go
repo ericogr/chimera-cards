@@ -53,9 +53,9 @@ var (
 // Routes used by the backend router
 const (
 	RouteAPIPrefix          = "/api"
-	RouteAnimals            = "/animals"
-	RouteAnimalsImage       = "/animals/image"
-	RouteAssetsAnimals      = "/assets/animals"
+	RouteEntities           = "/entities"
+	RouteEntitiesImage      = "/entities/image"
+	RouteAssetsEntities     = "/assets/entities"
 	RouteAssetsHybrids      = "/assets/hybrids"
 	RoutePublicGames        = "/public-games"
 	RouteLeaderboard        = "/leaderboard"
@@ -86,7 +86,7 @@ const (
 	ErrMissingGoogleEnv       = "Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET in environment"
 	ErrInvalidGameID          = "Invalid game ID"
 	ErrGameNotFound           = "Game not found"
-	ErrFailedFetchAnimals     = "Failed to fetch animals"
+	ErrFailedFetchEntities    = "Failed to fetch entities"
 	ErrFailedFetchGames       = "Failed to fetch games"
 	ErrFailedEncodeGames      = "Failed to encode games"
 	ErrFailedFetchLeaderboard = "Failed to fetch leaderboard"
@@ -132,9 +132,9 @@ const (
 // animal_image specific errors and formats
 const (
 	ErrIDsParamRequired               = "ids query parameter is required (e.g. ids=1 or ids=1,2)"
-	ErrIDsCountRange                  = "must provide between 1 and 3 animal ids"
+	ErrIDsCountRange                  = "must provide between 1 and 3 entity ids"
 	ErrInvalidIDFmt                   = "invalid id: %s"
-	ErrAnimalsNotFoundFmt             = "animals not found: %s"
+	ErrEntitiesNotFoundFmt            = "entities not found: %s"
 	ErrEnvNotSetFmt                   = "%s not set on server"
 	ErrFailedCreateRequest            = "Failed to create request"
 	ErrRequestToOpenAIFailed          = "Request to OpenAI failed"

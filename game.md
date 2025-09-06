@@ -2,13 +2,13 @@
 
 ## Core Concept
 
-Players combine the essence of 2–3 distinct animals to forge two unique hybrid creatures. Each hybrid inherits strengths and weaknesses from its progenitors’ traits. The goal is to use foresight, stamina management, and tactical bluffing to defeat the opponent’s two hybrids in tense, simultaneous-action combat.
+Players combine the essence of 2–3 distinct entities to forge two unique hybrid creatures. Each hybrid inherits strengths and weaknesses from its progenitors’ traits. The goal is to use foresight, stamina management, and tactical bluffing to defeat the opponent’s two hybrids in tense, simultaneous-action combat.
 
 This system keeps battles sharp and decisive — hybrids can unleash powerful abilities, but dwindling stamina and creeping fatigue ensure that every round pushes the fight toward a dramatic finish.
 
 ## 1. Beast Attributes
 
-To keep the game focused and streamlined, each animal is defined by a set of core attributes. Every base animal has a fixed distribution of points across its stats, ensuring that no creature is strictly better — only specialized in a unique role.
+To keep the game focused and streamlined, each entity is defined by a set of core attributes. Every base entity has a fixed distribution of points across its stats, ensuring that no creature is strictly better — only specialized in a unique role.
 
 | Name       | Abbr. | Description                                                                |
 | ---------- | ----- | -------------------------------------------------------------------------- |
@@ -21,14 +21,14 @@ To keep the game focused and streamlined, each animal is defined by a set of cor
 
 ### Energy vs. Vigor
 
-- Energy fuels abilities and regenerates slowly. Energy is intentionally scarce: each animal contributes little ENE (0–1) by role, and a hybrid's base ENE is clamped between 1 and 3 at creation.
+- Energy fuels abilities and regenerates slowly. Energy is intentionally scarce: each entity contributes little ENE (0–1) by role, and a hybrid's base ENE is clamped between 1 and 3 at creation.
 - Vigor is the wear-and-tear of combat — if it runs out, your hybrid’s effectiveness collapses.
 
-## 2. The 10 Fundamental Animals
+## 2. The 10 Fundamental Entities
 
 ⚠ HP values have been reduced by ~25% to keep battles shorter.
 
-| Animal     | HP | ATK | DEF | AGI | ENE | Special Ability (Energy Cost)                                                              |
+| Entity     | HP | ATK | DEF | AGI | ENE | Special Ability (Energy Cost)                                                              |
 | ---------- | -- | --- | --- | --- | --- | ------------------------------------------------------------------------------------------ |
 | Lion       | 4  | 8   | 4   | 5   | 2   | Commanding Roar (3 ENE): Reduces opponent’s ATK by 30% for one round.                     |
 | Bear       | 6  | 7   | 5   | 2   | 3   | Frenzy (4 ENE): Increases own ATK by 50% this round, ignoring DEF.                        |
@@ -45,8 +45,8 @@ To keep the game focused and streamlined, each animal is defined by a set of cor
 
 ### Phase 1: Creation
 
-- Selection: Each player secretly chooses 2–3 different animals to create Hybrid 1, then another 2–3 different animals to create Hybrid 2. The same animal cannot appear in both hybrids of the same player.
-- Calculation: A hybrid’s attributes are the sum of its chosen animals. HP and stats add directly. For Special Abilities, the player must select exactly ONE of the hybrid’s animals to define the hybrid’s unique ability for the whole match.
+- Selection: Each player secretly chooses 2–3 different entities to create Hybrid 1, then another 2–3 different entities to create Hybrid 2. The same entity cannot appear in both hybrids of the same player.
+- Calculation: A hybrid’s attributes are the sum of its chosen entities. HP and stats add directly. For Special Abilities, the player must select exactly ONE of the hybrid’s entities to define the hybrid’s unique ability for the whole match.
 - Revelation: Both players reveal Hybrid 1 and place it in the arena. Hybrid 2 remains hidden in reserve until needed.
 
 ### Phase 2: Combat

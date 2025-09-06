@@ -8,9 +8,9 @@ package dedupe
 import "golang.org/x/sync/singleflight"
 
 // NameGroup deduplicates hybrid name generation requests keyed by the
-// canonicalized list of animal IDs (e.g. "1,3,7").
+// canonicalized list of entity IDs (e.g. "1,3,7").
 var NameGroup singleflight.Group
 
 // ImageGroup deduplicates image generation requests keyed by a unique
-// string (for hybrids we use "hybrid:<key>", for animals "animal:<id>").
+// string (for hybrids we use "hybrid:<key>", for entities "entity:<id>").
 var ImageGroup singleflight.Group

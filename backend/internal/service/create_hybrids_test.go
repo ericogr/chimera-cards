@@ -9,7 +9,7 @@ import (
 
 type mockRepo struct {
 	games       map[uint]*game.Game
-	animals     map[uint]game.Animal
+	entities    map[uint]game.Entity
 	updatedGame *game.Game
 }
 
@@ -20,12 +20,12 @@ func (m *mockRepo) GetGameByID(id uint) (*game.Game, error) {
 	return nil, ErrGameNotFound
 }
 
-func (m *mockRepo) GetAnimalsByIDs(ids []uint) ([]game.Animal, error) {
-	res := make([]game.Animal, 0, len(ids))
+func (m *mockRepo) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
+	res := make([]game.Entity, 0, len(ids))
 	for _, id := range ids {
-		a, ok := m.animals[id]
+		a, ok := m.entities[id]
 		if !ok {
-			return nil, ErrInvalidAnimals
+			return nil, ErrInvalidEntities
 		}
 		res = append(res, a)
 	}
@@ -43,21 +43,21 @@ func (m *mockRepo) UpdateStatsOnGameEnd(g *game.Game, resignedEmail string) erro
 }
 
 func TestCreateHybridsSuccess(t *testing.T) {
-	// Prepare animals
-	animals := map[uint]game.Animal{
-		1: {Model: game.Animal{}.Model, Name: "Lion", HitPoints: 4, Attack: 8, Defense: 4, Agility: 5, Energy: 0},
-		2: {Model: game.Animal{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
-		3: {Model: game.Animal{}.Model, Name: "Wolf", HitPoints: 4, Attack: 5, Defense: 4, Agility: 6, Energy: 1},
-		4: {Model: game.Animal{}.Model, Name: "Octopus", HitPoints: 5, Attack: 2, Defense: 5, Agility: 4, Energy: 1},
+// Prepare entities
+	entities := map[uint]game.Entity{
+		1: {Model: game.Entity{}.Model, Name: "Lion", HitPoints: 4, Attack: 8, Defense: 4, Agility: 5, Energy: 0},
+		2: {Model: game.Entity{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
+		3: {Model: game.Entity{}.Model, Name: "Wolf", HitPoints: 4, Attack: 5, Defense: 4, Agility: 6, Energy: 1},
+		4: {Model: game.Entity{}.Model, Name: "Octopus", HitPoints: 5, Attack: 2, Defense: 5, Agility: 4, Energy: 1},
 	}
 
 	g := &game.Game{Players: []game.Player{{PlayerUUID: "p1"}}}
-	mr := &mockRepo{games: map[uint]*game.Game{42: g}, animals: animals}
+	mr := &mockRepo{games: map[uint]*game.Game{42: g}, entities: entities}
 
 	req := CreateHybridsRequest{
 		PlayerUUID: "p1",
-		Hybrid1:    CreateHybridSpec{AnimalIDs: []uint{1, 2}, SelectedAnimalID: 1},
-		Hybrid2:    CreateHybridSpec{AnimalIDs: []uint{3, 4}, SelectedAnimalID: 3},
+		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
+		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{3, 4}, SelectedEntityID: 3},
 	}
 
 	if err := CreateHybrids(mr, 42, req); err != nil {
@@ -87,25 +87,25 @@ func TestCreateHybridsSuccess(t *testing.T) {
 }
 
 func TestCreateHybrids_ReusedAnimal(t *testing.T) {
-	animals := map[uint]game.Animal{
-		1: {Model: game.Animal{}.Model, Name: "Lion", HitPoints: 4, Attack: 8, Defense: 4, Agility: 5, Energy: 0},
-		2: {Model: game.Animal{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
-		3: {Model: game.Animal{}.Model, Name: "Wolf", HitPoints: 4, Attack: 5, Defense: 4, Agility: 6, Energy: 1},
+	entities := map[uint]game.Entity{
+		1: {Model: game.Entity{}.Model, Name: "Lion", HitPoints: 4, Attack: 8, Defense: 4, Agility: 5, Energy: 0},
+		2: {Model: game.Entity{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
+		3: {Model: game.Entity{}.Model, Name: "Wolf", HitPoints: 4, Attack: 5, Defense: 4, Agility: 6, Energy: 1},
 	}
 	g := &game.Game{Players: []game.Player{{PlayerUUID: "p1"}}}
-	mr := &mockRepo{games: map[uint]*game.Game{100: g}, animals: animals}
+	mr := &mockRepo{games: map[uint]*game.Game{100: g}, entities: entities}
 
 	req := CreateHybridsRequest{
 		PlayerUUID: "p1",
-		Hybrid1:    CreateHybridSpec{AnimalIDs: []uint{1, 2}, SelectedAnimalID: 1},
-		Hybrid2:    CreateHybridSpec{AnimalIDs: []uint{2, 3}, SelectedAnimalID: 3},
+		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
+		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{2, 3}, SelectedEntityID: 3},
 	}
 
 	err := CreateHybrids(mr, 100, req)
-	if err == nil {
-		t.Fatalf("expected error for reused animal, got nil")
-	}
-	if !reflect.DeepEqual(err, ErrAnimalReused) {
-		t.Fatalf("expected ErrAnimalReused, got %v", err)
+    if err == nil {
+        t.Fatalf("expected error for reused entity, got nil")
+    }
+	if !reflect.DeepEqual(err, ErrEntityReused) {
+		t.Fatalf("expected ErrEntityReused, got %v", err)
 	}
 }

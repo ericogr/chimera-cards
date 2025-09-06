@@ -13,43 +13,43 @@ import (
 
 type sqliteRepository struct {
 	db *gorm.DB
-	// configByName maps lowercase animal name -> config definition (stats).
-	configByName map[string]game.Animal
+	// configByName maps lowercase entity name -> config definition (stats).
+	configByName map[string]game.Entity
 }
 
-func NewSQLiteRepository(db *gorm.DB, configAnimals []game.Animal) Repository {
-	m := make(map[string]game.Animal, len(configAnimals))
-	for _, a := range configAnimals {
+func NewSQLiteRepository(db *gorm.DB, configEntities []game.Entity) Repository {
+	m := make(map[string]game.Entity, len(configEntities))
+	for _, a := range configEntities {
 		m[strings.ToLower(a.Name)] = a
 	}
 	return &sqliteRepository{db: db, configByName: m}
 }
 
-func (r *sqliteRepository) GetAnimals() ([]game.Animal, error) {
-	var animals []game.Animal
-	// Exclude the internal "None" animal from selection lists.
-	if err := r.db.Where("name != ?", string(game.None)).Find(&animals).Error; err != nil {
+func (r *sqliteRepository) GetEntities() ([]game.Entity, error) {
+	var entities []game.Entity
+	// Exclude the internal "None" entity from selection lists.
+	if err := r.db.Where("name != ?", string(game.None)).Find(&entities).Error; err != nil {
 		return nil, err
 	}
 	// Override stats from config when available (config is source of truth)
-	for i := range animals {
+	for i := range entities {
 		if r.configByName != nil {
-			if conf, ok := r.configByName[strings.ToLower(animals[i].Name)]; ok {
-				animals[i].HitPoints = conf.HitPoints
-				animals[i].Attack = conf.Attack
-				animals[i].Defense = conf.Defense
-				animals[i].Agility = conf.Agility
-				animals[i].Energy = conf.Energy
-				animals[i].VigorCost = conf.VigorCost
-				animals[i].SkillName = conf.SkillName
-				animals[i].SkillCost = conf.SkillCost
-				animals[i].SkillDescription = conf.SkillDescription
-				animals[i].SkillKey = conf.SkillKey
-				animals[i].SkillEffect = conf.SkillEffect
+			if conf, ok := r.configByName[strings.ToLower(entities[i].Name)]; ok {
+				entities[i].HitPoints = conf.HitPoints
+				entities[i].Attack = conf.Attack
+				entities[i].Defense = conf.Defense
+				entities[i].Agility = conf.Agility
+				entities[i].Energy = conf.Energy
+				entities[i].VigorCost = conf.VigorCost
+				entities[i].SkillName = conf.SkillName
+				entities[i].SkillCost = conf.SkillCost
+				entities[i].SkillDescription = conf.SkillDescription
+				entities[i].SkillKey = conf.SkillKey
+				entities[i].SkillEffect = conf.SkillEffect
 			}
 		}
 	}
-	return animals, nil
+	return entities, nil
 }
 
 func (r *sqliteRepository) CreateGame(g *game.Game) error {
@@ -59,17 +59,17 @@ func (r *sqliteRepository) CreateGame(g *game.Game) error {
 func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 	var g game.Game
 
-	err := r.db.Preload("Players.Hybrids.BaseAnimals").First(&g, id).Error
+	err := r.db.Preload("Players.Hybrids.BaseEntities").First(&g, id).Error
 	if err != nil {
 		return nil, err
 	}
-	// Override stats from config for preloaded base animals so the
-	// frontend receives the complete animal information (skill name, costs, etc.).
+	// Override stats from config for preloaded base entities so the
+	// frontend receives the complete entity information (skill name, costs, etc.).
 	if r.configByName != nil {
 		for pi := range g.Players {
 			for hi := range g.Players[pi].Hybrids {
-				for ai := range g.Players[pi].Hybrids[hi].BaseAnimals {
-					a := &g.Players[pi].Hybrids[hi].BaseAnimals[ai]
+				for ai := range g.Players[pi].Hybrids[hi].BaseEntities {
+					a := &g.Players[pi].Hybrids[hi].BaseEntities[ai]
 					if conf, ok := r.configByName[strings.ToLower(a.Name)]; ok {
 						a.HitPoints = conf.HitPoints
 						a.Attack = conf.Attack
@@ -89,15 +89,15 @@ func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 	}
 
 	// Compute the display name for hybrids on every load. The hybrid name
-	// is a concatenation of its base animal names (sorted) but is not
+	// is a concatenation of its base entity names (sorted) but is not
 	// persisted in the database anymore (it's derived). Populate the
 	// `Name` field so API responses include it.
 	for pi := range g.Players {
 		for hi := range g.Players[pi].Hybrids {
 			h := &g.Players[pi].Hybrids[hi]
-			names := make([]string, len(h.BaseAnimals))
-			for ai := range h.BaseAnimals {
-				names[ai] = h.BaseAnimals[ai].Name
+			names := make([]string, len(h.BaseEntities))
+			for ai := range h.BaseEntities {
+				names[ai] = h.BaseEntities[ai].Name
 			}
 			sort.Slice(names, func(i, j int) bool { return strings.ToLower(names[i]) < strings.ToLower(names[j]) })
 			h.Name = strings.Join(names, " + ")
@@ -110,31 +110,31 @@ func (r *sqliteRepository) UpdateGame(g *game.Game) error {
 	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Save(g).Error
 }
 
-func (r *sqliteRepository) GetAnimalsByIDs(ids []uint) ([]game.Animal, error) {
-	var animals []game.Animal
-	err := r.db.Where("id IN ?", ids).Find(&animals).Error
+func (r *sqliteRepository) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
+	var entities []game.Entity
+	err := r.db.Where("id IN ?", ids).Find(&entities).Error
 	if err != nil {
-		return animals, err
+		return entities, err
 	}
 	// Override stats from config
-	for i := range animals {
+	for i := range entities {
 		if r.configByName != nil {
-			if conf, ok := r.configByName[strings.ToLower(animals[i].Name)]; ok {
-				animals[i].HitPoints = conf.HitPoints
-				animals[i].Attack = conf.Attack
-				animals[i].Defense = conf.Defense
-				animals[i].Agility = conf.Agility
-				animals[i].Energy = conf.Energy
-				animals[i].VigorCost = conf.VigorCost
-				animals[i].SkillName = conf.SkillName
-				animals[i].SkillCost = conf.SkillCost
-				animals[i].SkillDescription = conf.SkillDescription
-				animals[i].SkillKey = conf.SkillKey
-				animals[i].SkillEffect = conf.SkillEffect
+			if conf, ok := r.configByName[strings.ToLower(entities[i].Name)]; ok {
+				entities[i].HitPoints = conf.HitPoints
+				entities[i].Attack = conf.Attack
+				entities[i].Defense = conf.Defense
+				entities[i].Agility = conf.Agility
+				entities[i].Energy = conf.Energy
+				entities[i].VigorCost = conf.VigorCost
+				entities[i].SkillName = conf.SkillName
+				entities[i].SkillCost = conf.SkillCost
+				entities[i].SkillDescription = conf.SkillDescription
+				entities[i].SkillKey = conf.SkillKey
+				entities[i].SkillEffect = conf.SkillEffect
 			}
 		}
 	}
-	return animals, nil
+	return entities, nil
 }
 
 func (r *sqliteRepository) GetPublicGames() ([]game.Game, error) {
@@ -169,13 +169,13 @@ func (r *sqliteRepository) RemovePlayerByUUID(gameID uint, playerUUID string) er
 
 	var p game.Player
 	if err := tx.Where("game_id = ? AND player_uuid = ?", gameID, playerUUID).
-		Preload("Hybrids.BaseAnimals").First(&p).Error; err != nil {
+		Preload("Hybrids.BaseEntities").First(&p).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	for _, h := range p.Hybrids {
-		if err := tx.Model(&h).Association("BaseAnimals").Clear(); err != nil {
+		if err := tx.Model(&h).Association("BaseEntities").Clear(); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -291,13 +291,13 @@ func (r *sqliteRepository) GetTopPlayers(limit int) ([]game.User, error) {
 	return users, nil
 }
 
-// SaveAnimalImage stores PNG bytes for the specified animal ID in the DB.
-func (r *sqliteRepository) SaveAnimalImage(animalID uint, pngBytes []byte) error {
-	return r.db.Model(&game.Animal{}).Where("id = ?", animalID).Update("image_png", pngBytes).Error
+// SaveEntityImage stores PNG bytes for the specified entity ID in the DB.
+func (r *sqliteRepository) SaveEntityImage(entityID uint, pngBytes []byte) error {
+	return r.db.Model(&game.Entity{}).Where("id = ?", entityID).Update("image_png", pngBytes).Error
 }
 
-func (r *sqliteRepository) GetAnimalByName(name string) (*game.Animal, error) {
-	var a game.Animal
+func (r *sqliteRepository) GetEntityByName(name string) (*game.Entity, error) {
+	var a game.Entity
 	if err := r.db.Where("lower(name) = ?", strings.ToLower(name)).First(&a).Error; err != nil {
 		return nil, err
 	}
@@ -317,11 +317,11 @@ func (r *sqliteRepository) GetAnimalByName(name string) (*game.Animal, error) {
 	return &a, nil
 }
 
-// NOTE: lookup by numeric animal IDs was removed in favor of canonical
-// name-key lookup (`GetGeneratedNameByAnimalKey`). This keeps the cache
+// NOTE: lookup by numeric entity IDs was removed in favor of canonical
+// name-key lookup (`GetGeneratedNameByEntityKey`). This keeps the cache
 // stable across DB recreations where numeric IDs can change.
 
-func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames, generatedName string) error {
+func (r *sqliteRepository) SaveGeneratedNameForEntityIDs(ids []uint, entityNames, generatedName string) error {
 	if len(ids) < 2 || len(ids) > 3 {
 		return gorm.ErrInvalidData
 	}
@@ -340,24 +340,24 @@ func (r *sqliteRepository) SaveGeneratedNameForAnimalIDs(ids []uint, animalNames
 		a3 = 0
 	}
 
-	// Build canonical animal key from the provided human-readable string.
-	// The caller passes `animalNames` typically as "Name1 + Name2".
-	animalKey := keys.AnimalKeyFromNames(strings.Split(animalNames, " + "))
+	// Build canonical entity key from the provided human-readable string.
+	// The caller passes `entityNames` typically as "Name1 + Name2".
+	entityKey := keys.EntityKeyFromNames(strings.Split(entityNames, " + "))
 
-	h := game.HybridGeneratedName{Animal1Key: a1, Animal2Key: a2, Animal3Key: a3, GeneratedName: generatedName, AnimalKey: animalKey}
-	// Use upsert semantics keyed by `animal_key` so that if a minimal record
+	h := game.HybridGeneratedName{Entity1Key: a1, Entity2Key: a2, Entity3Key: a3, GeneratedName: generatedName, EntityKey: entityKey}
+	// Use upsert semantics keyed by `entity_key` so that if a minimal record
 	// was previously created (for example when saving an image only) we
-	// update it with the generated name and numeric animal keys instead
-	// of failing due to the unique constraint on `animal_key`.
+	// update it with the generated name and numeric entity keys instead
+	// of failing due to the unique constraint on `entity_key`.
 	return r.db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "animal_key"}},
-		DoUpdates: clause.AssignmentColumns([]string{"animal1_key", "animal2_key", "animal3_key", "generated_name"}),
+		Columns:   []clause.Column{{Name: "entity_key"}},
+		DoUpdates: clause.AssignmentColumns([]string{"entity1_key", "entity2_key", "entity3_key", "generated_name"}),
 	}).Create(&h).Error
 }
 
 func (r *sqliteRepository) GetHybridImageByKey(key string) ([]byte, error) {
 	var h game.HybridGeneratedName
-	if err := r.db.Where("animal_key = ?", key).First(&h).Error; err != nil {
+	if err := r.db.Where("entity_key = ?", key).First(&h).Error; err != nil {
 		return nil, err
 	}
 	return h.ImagePNG, nil
@@ -365,7 +365,7 @@ func (r *sqliteRepository) GetHybridImageByKey(key string) ([]byte, error) {
 
 func (r *sqliteRepository) SaveHybridImageByKey(key string, png []byte) error {
 	// Try to update existing record first
-	res := r.db.Model(&game.HybridGeneratedName{}).Where("animal_key = ?", key).Update("image_png", png)
+	res := r.db.Model(&game.HybridGeneratedName{}).Where("entity_key = ?", key).Update("image_png", png)
 	if res.Error != nil {
 		return res.Error
 	}
@@ -373,17 +373,17 @@ func (r *sqliteRepository) SaveHybridImageByKey(key string, png []byte) error {
 		return nil
 	}
 	// Otherwise create a minimal record
-	h := game.HybridGeneratedName{AnimalKey: key, ImagePNG: png}
+	h := game.HybridGeneratedName{EntityKey: key, ImagePNG: png}
 	return r.db.Create(&h).Error
 }
 
-// GetGeneratedNameByAnimalKey looks up the generated hybrid name by the
-// canonical animal key (lowercase names joined by underscores). This is a
+// GetGeneratedNameByEntityKey looks up the generated hybrid name by the
+// canonical entity key (lowercase names joined by underscores). This is a
 // fallback when numeric IDs do not match cached rows (for example, when
-// the database was recreated and animal IDs changed but names stayed the same).
-func (r *sqliteRepository) GetGeneratedNameByAnimalKey(key string) (*game.HybridGeneratedName, error) {
+// the database was recreated and entity IDs changed but names stayed the same).
+func (r *sqliteRepository) GetGeneratedNameByEntityKey(key string) (*game.HybridGeneratedName, error) {
 	var h game.HybridGeneratedName
-	if err := r.db.Where("animal_key = ?", key).First(&h).Error; err != nil {
+	if err := r.db.Where("entity_key = ?", key).First(&h).Error; err != nil {
 		return nil, err
 	}
 	return &h, nil

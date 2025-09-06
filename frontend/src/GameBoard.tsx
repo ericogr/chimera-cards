@@ -6,7 +6,7 @@ import iconDefend from './images/defend.svg';
 import iconRest from './images/rest.svg';
 import iconAbility from './images/ability.svg';
 import iconEnd from './images/end_match.svg';
-import { Game, Player, Hybrid, Animal, AnimalName } from './types';
+import { Game, Player, Hybrid, Entity, EntityName } from './types';
 import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
@@ -75,18 +75,18 @@ const GameBoard: React.FC = () => {
 
   const vigCostFor = (animalName: string) => {
     switch (animalName) {
-      case AnimalName.Lion:
-      case AnimalName.Cheetah:
-      case AnimalName.Octopus:
+      case EntityName.Lion:
+      case EntityName.Cheetah:
+      case EntityName.Octopus:
         return 2;
-      case AnimalName.Bear:
-      case AnimalName.Rhino:
-      case AnimalName.Turtle:
-      case AnimalName.Gorilla:
+      case EntityName.Bear:
+      case EntityName.Rhino:
+      case EntityName.Turtle:
+      case EntityName.Gorilla:
         return 3;
-      case AnimalName.Eagle:
-      case AnimalName.Wolf:
-      case AnimalName.Raven:
+      case EntityName.Eagle:
+      case EntityName.Wolf:
+      case EntityName.Raven:
         return 1;
       default:
         return 2;
@@ -96,8 +96,8 @@ const GameBoard: React.FC = () => {
   const currentActionLabel = () => {
     if (!planning || !me?.pending_action_type) return '';
     if (me.pending_action_type === 'ability') {
-      const animal = myActive?.base_animals?.find(a => a.ID === me.pending_action_animal_id);
-      return animal ? `Ability: ${animal.skill_name}` : 'Ability';
+      const entity = myActive?.base_entities?.find(a => a.ID === me.pending_action_entity_id);
+      return entity ? `Ability: ${entity.skill_name}` : 'Ability';
     }
     if (me.pending_action_type === 'basic_attack') return 'Basic Attack';
     if (me.pending_action_type === 'defend') return 'Defend';
@@ -105,7 +105,7 @@ const GameBoard: React.FC = () => {
     return '';
   };
 
-  const submitAction = async (action_type: 'basic_attack' | 'defend' | 'ability' | 'rest', animal?: Animal) => {
+  const submitAction = async (action_type: 'basic_attack' | 'defend' | 'ability' | 'rest', entity?: Entity) => {
     try {
       if (actingRef.current || submitting || me?.has_submitted_action) return;
       actingRef.current = true;
@@ -116,7 +116,7 @@ const GameBoard: React.FC = () => {
       const res = await apiFetch(`${constants.API_GAMES}/${gameId}/action`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-        body: JSON.stringify({ player_uuid: playerUUID, action_type, animal_id: animal?.ID }),
+        body: JSON.stringify({ player_uuid: playerUUID, action_type, entity_id: entity?.ID }),
       });
       if (!res.ok) throw new Error(await res.text());
     } catch (e: any) {
@@ -235,8 +235,8 @@ const GameBoard: React.FC = () => {
               <div className="action-desc">Increase defense this round. Spends VIG if available.</div>
             </div>
             {(() => {
-              const selId = myActive.selected_ability_animal_id;
-              const ability = myActive.base_animals?.find(a => a.ID === selId);
+              const selId = myActive.selected_ability_entity_id;
+              const ability = myActive.base_entities?.find(a => a.ID === selId) as Entity | undefined;
               if (!ability) return null;
               const notEnoughEnergy = (myActive?.current_ene || 0) < ability.skill_cost;
               return (
@@ -285,7 +285,7 @@ export default GameBoard;
 const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) => {
   if (!hybrid) return <div />;
 
-  const imgSrc = hybridAssetUrlFromNames((hybrid?.base_animals || []).map(a => a.name));
+  const imgSrc = hybridAssetUrlFromNames((hybrid?.base_entities || []).map(a => a.name));
 
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>

@@ -20,7 +20,7 @@ func (m *mockRepoSA) GetGameByID(id uint) (*game.Game, error) {
 	return nil, ErrGameNotFound
 }
 
-func (m *mockRepoSA) GetAnimalsByIDs(ids []uint) ([]game.Animal, error) {
+func (m *mockRepoSA) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
 	return nil, nil
 }
 

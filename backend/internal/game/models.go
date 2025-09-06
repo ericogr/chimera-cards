@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Animal struct {
+type Entity struct {
 	gorm.Model
 	Name string `json:"name"`
 	// The following fields are configured via the server config (chimera_config.json)
@@ -19,29 +19,29 @@ type Animal struct {
 	Agility   int `json:"agi" gorm:"-"`
 	Energy    int `json:"ene" gorm:"-"`
 	VigorCost int `json:"vigor_cost" gorm:"-"`
-	// ImagePNG stores the 256x256 PNG bytes for this animal. It is
+    // ImagePNG stores the 256x256 PNG bytes for this entity. It is
 	// intentionally omitted from JSON responses (`json:"-"`) and stored
 	// as a BLOB in the database column `image_png`.
 	ImagePNG         []byte `json:"-" gorm:"column:image_png;type:blob"`
 	SkillName        string `json:"skill_name" gorm:"-"`
 	SkillCost        int    `json:"skill_cost" gorm:"-"`
 	SkillDescription string `json:"skill_description" gorm:"-"`
-	// SkillKey is an internal stable identifier for the animal's ability
-	// (e.g. "skill:roar"). It is loaded from the chimera config and used
-	// by the engine when recording `LastAction` and for mapping abilities.
+    // SkillKey is an internal stable identifier for the entity's ability
+    // (e.g. "skill:roar"). It is loaded from the chimera config and used
+    // by the engine when recording `LastAction` and for mapping abilities.
 	SkillKey string `json:"skill_key" gorm:"-"`
 
 	// SkillEffect contains machine-readable parameters that describe the
-	// mechanical behaviour of the animal's ability. Keeping this structured
-	// in the configuration allows adding new animals without changing code.
+    // mechanical behaviour of the entity's ability. Keeping this structured
+    // in the configuration allows adding new entities without changing code.
 	SkillEffect SkillEffect `json:"skill_effect" gorm:"-"`
 }
 
-// TableName overrides the default GORM table name for Animal so the
-// persisted table is `animal_templates` instead of the default `animals`.
-func (Animal) TableName() string { return "animal_templates" }
+// TableName overrides the default GORM table name for Entity so the
+// persisted table is `entity_templates` instead of the default `entities`.
+func (Entity) TableName() string { return "entity_templates" }
 
-// SkillEffect is a flexible description of what an animal's special ability
+// SkillEffect is a flexible description of what an entity's special ability
 // does in-game. All fields are optional and will be applied when present.
 type SkillEffect struct {
 	// Opponent stat modifiers
@@ -95,9 +95,9 @@ type SkillEffect struct {
 type Hybrid struct {
 	gorm.Model
 	PlayerID uint `json:"-"`
-	// Name is a derived, non-persistent display field built from the
-	// hybrid's base animals (e.g. "Lion + Raven"). It is intentionally
-	// ignored by GORM so the database does not store redundant data.
+    // Name is a derived, non-persistent display field built from the
+    // hybrid's base entities (e.g. "Lion + Raven"). It is intentionally
+    // ignored by GORM so the database does not store redundant data.
 	Name string `json:"name" gorm:"-"`
 	// GeneratedName is the AI-created final name for the hybrid. It is
 	// empty until the game is started (both players created hybrids and
@@ -106,7 +106,7 @@ type Hybrid struct {
 	// concatenation (e.g. "Lion + Raven").
 	GeneratedName string `json:"generated_name"`
 	// Use a descriptive join table name for the many-to-many relation.
-	BaseAnimals      []Animal `json:"base_animals" gorm:"many2many:hybrid_base_animals;"`
+	BaseEntities     []Entity `json:"base_entities" gorm:"many2many:hybrid_base_entities;"`
 	BaseHitPoints    int      `json:"base_pv"`
 	CurrentHitPoints int      `json:"current_pv"`
 	BaseAttack       int      `json:"base_atq"`
@@ -119,9 +119,9 @@ type Hybrid struct {
 	CurrentEnergy    int      `json:"current_ene"`
 	BaseVIG          int      `json:"base_vig"`
 	CurrentVIG       int      `json:"current_vig"`
-	// SelectedAbilityAnimalID stores the ID of the animal whose special ability
-	// is available for this hybrid (chosen among its 2–3 base animals).
-	SelectedAbilityAnimalID *uint `json:"selected_ability_animal_id"`
+	// SelectedAbilityEntityID stores the ID of the entity whose special ability
+	// is available for this hybrid (chosen among its 2–3 base entities).
+	SelectedAbilityEntityID *uint `json:"selected_ability_entity_id"`
 	IsActive                bool  `json:"is_active"`
 	IsDefeated              bool  `json:"is_defeated"`
 
@@ -154,7 +154,7 @@ type Player struct {
 	HasCreated            bool              `json:"has_created"`
 	HasSubmittedAction    bool              `json:"has_submitted_action"`
 	PendingActionType     PendingActionType `json:"pending_action_type"`
-	PendingActionAnimalID *uint             `json:"pending_action_animal_id"`
+	PendingActionEntityID *uint             `json:"pending_action_entity_id"`
 }
 
 // Store per-game participants in a dedicated table for clarity
@@ -205,31 +205,31 @@ const (
 	PendingActionSkip        PendingActionType = "skip"
 )
 
-// HybridGeneratedName stores AI-generated names for a canonical animal combination
-// (identified by a sorted, comma-separated list of animal IDs). This allows
+// HybridGeneratedName stores AI-generated names for a canonical entity combination
+// (identified by a sorted, comma-separated list of entity IDs). This allows
 // the server to cache names produced by the OpenAI API and avoid duplicate
-// calls for the same animal set.
+// calls for the same entity set.
 type HybridGeneratedName struct {
 	gorm.Model
-	// Store up to three animal IDs in separate columns so lookups can use
-	// explicit constraints. The third key uses 0 to represent "no animal",
+	// Store up to three entity IDs in separate columns so lookups can use
+	// explicit constraints. The third key uses 0 to represent "no entity",
 	// which makes uniqueness constraints simpler (no NULLs).
-	Animal1Key uint `json:"animal1_key" gorm:"column:animal1_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
-	Animal2Key uint `json:"animal2_key" gorm:"column:animal2_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
-	Animal3Key uint `json:"animal3_key" gorm:"column:animal3_key;uniqueIndex:idx_hybrid_generated_cache_animals"`
+	Entity1Key uint `json:"entity1_key" gorm:"column:entity1_key;uniqueIndex:idx_hybrid_generated_cache_entities"`
+	Entity2Key uint `json:"entity2_key" gorm:"column:entity2_key;uniqueIndex:idx_hybrid_generated_cache_entities"`
+	Entity3Key uint `json:"entity3_key" gorm:"column:entity3_key;uniqueIndex:idx_hybrid_generated_cache_entities"`
 
-	// Associations to enforce foreign key constraints to the animals table.
-	Animal1 Animal `gorm:"foreignKey:Animal1Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	Animal2 Animal `gorm:"foreignKey:Animal2Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
-	// Keep association pointer for convenience; when Animal3Key is 0 there is
+	// Associations to enforce foreign key constraints to the entities table.
+	Entity1 Entity `gorm:"foreignKey:Entity1Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	Entity2 Entity `gorm:"foreignKey:Entity2Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	// Keep association pointer for convenience; when Entity3Key is 0 there is
 	// intentionally no associated row.
-	Animal3 Animal `gorm:"foreignKey:Animal3Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
+	Entity3 Entity `gorm:"foreignKey:Entity3Key;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;"`
 
 	GeneratedName string `json:"generated_name"`
-	// Canonical key for this animal combination (names sorted alphabetically,
+	// Canonical key for this entity combination (names sorted alphabetically,
 	// lowercase, separated by underscore). Used to lookup/store the hybrid
-	// image associated with this animal set.
-	AnimalKey string `json:"animal_key" gorm:"uniqueIndex"`
+	// image associated with this entity set.
+	EntityKey string `json:"entity_key" gorm:"uniqueIndex"`
 
 	// ImagePNG stores the 256x256 PNG bytes for the hybrid image.
 	ImagePNG []byte `json:"-" gorm:"column:image_png;type:blob"`
@@ -240,39 +240,39 @@ type HybridGeneratedName struct {
 // `hybrid_generated_names`.
 func (HybridGeneratedName) TableName() string { return "hybrid_generated_cache" }
 
-// BeforeSave is a GORM hook that ensures animal key columns are stored in
+// BeforeSave is a GORM hook that ensures entity key columns are stored in
 // ascending order (smallest ID first). This guarantees a canonical
-// representation for a set of animals so database uniqueness constraints
+// representation for a set of entities so database uniqueness constraints
 // can be applied regardless of the order provided by the caller.
 func (h *HybridGeneratedName) BeforeSave(tx *gorm.DB) (err error) {
 	// Collect non-zero IDs so that 0 (meaning "none") is not considered in
-	// the sorting. This ensures two-animal combinations are stored as
-	// (min, max, 0) and three-animal combinations as (min, mid, max).
+    // the sorting. This ensures two-entity combinations are stored as
+    // (min, max, 0) and three-entity combinations as (min, mid, max).
 	ids := make([]uint, 0, 3)
-	if h.Animal1Key != 0 {
-		ids = append(ids, h.Animal1Key)
+	if h.Entity1Key != 0 {
+		ids = append(ids, h.Entity1Key)
 	}
-	if h.Animal2Key != 0 {
-		ids = append(ids, h.Animal2Key)
+	if h.Entity2Key != 0 {
+		ids = append(ids, h.Entity2Key)
 	}
-	if h.Animal3Key != 0 {
-		ids = append(ids, h.Animal3Key)
+	if h.Entity3Key != 0 {
+		ids = append(ids, h.Entity3Key)
 	}
 
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 
 	// Assign back. Fill missing slots with 0 so the DB column is always set.
-	h.Animal1Key = 0
-	h.Animal2Key = 0
-	h.Animal3Key = 0
+	h.Entity1Key = 0
+	h.Entity2Key = 0
+	h.Entity3Key = 0
 	if len(ids) > 0 {
-		h.Animal1Key = ids[0]
+		h.Entity1Key = ids[0]
 	}
 	if len(ids) > 1 {
-		h.Animal2Key = ids[1]
+		h.Entity2Key = ids[1]
 	}
 	if len(ids) > 2 {
-		h.Animal3Key = ids[2]
+		h.Entity3Key = ids[2]
 	}
 	return nil
 }

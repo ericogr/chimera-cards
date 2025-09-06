@@ -1,9 +1,9 @@
 // Centralized frontend constants for API endpoints and headers
 export const API_PREFIX = '/api';
 
-export const API_ANIMALS = `${API_PREFIX}/animals`;
-export const API_ANIMALS_IMAGE = `${API_PREFIX}/animals/image`;
-export const API_ASSETS_ANIMALS = `${API_PREFIX}/assets/animals`;
+export const API_ENTITIES = `${API_PREFIX}/entities`;
+export const API_ENTITIES_IMAGE = `${API_PREFIX}/entities/image`;
+export const API_ASSETS_ENTITIES = `${API_PREFIX}/assets/entities`;
 export const API_ASSETS_HYBRIDS = `${API_PREFIX}/assets/hybrids`;
 export const API_PUBLIC_GAMES = `${API_PREFIX}/public-games`;
 export const API_LEADERBOARD = `${API_PREFIX}/leaderboard`;

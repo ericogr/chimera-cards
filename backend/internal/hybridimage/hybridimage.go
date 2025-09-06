@@ -15,24 +15,24 @@ import (
 	"github.com/ericogr/quimera-cards/internal/storage"
 )
 
-// buildKeyFromNames produces the canonical animal key used to store hybrid
+// buildKeyFromNames produces the canonical entity key used to store hybrid
 // images and generated names. It lower-cases, replaces spaces with
 // underscores and sorts the parts so the key is order-independent.
-// buildKeyFromNames removed; use keys.AnimalKeyFromNames instead.
+// buildKeyFromNames removed; use keys.EntityKeyFromNames instead.
 
 // EnsureHybridImage guarantees a hybrid image exists in the repository for
-// the provided animal names. If the image is missing it will be generated
+// the provided entity names. If the image is missing it will be generated
 // via the OpenAI Images API, resized and saved. Concurrent requests for the
 // same key are deduplicated using singleflight.
-func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
-	if len(animalNames) == 0 {
-		return fmt.Errorf("no animal names provided")
+func EnsureHybridImage(repo storage.Repository, entityNames []string) error {
+	if len(entityNames) == 0 {
+		return fmt.Errorf("no entity names provided")
 	}
-	key := keys.AnimalKeyFromNames(animalNames)
+	key := keys.EntityKeyFromNames(entityNames)
 
 	// Fast path: already in DB
 	if img, err := repo.GetHybridImageByKey(key); err == nil && len(img) > 0 {
-		logging.Info("hybrid-image cache hit", logging.Fields{"animal_key": key, "size_bytes": len(img)})
+		logging.Info("hybrid-image cache hit", logging.Fields{"entity_key": key, "size_bytes": len(img)})
 		return nil
 	}
 
@@ -46,8 +46,8 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
 
-		logging.Info("hybrid-image generating via OpenAI", logging.Fields{"animal_key": key, "animals": strings.Join(animalNames, " + ")})
-		imgBytes, err := openaiclient.GenerateHybridImage(ctx, animalNames)
+		logging.Info("hybrid-image generating via OpenAI", logging.Fields{"entity_key": key, "entities": strings.Join(entityNames, " + ")})
+		imgBytes, err := openaiclient.GenerateHybridImage(ctx, entityNames)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func EnsureHybridImage(repo storage.Repository, animalNames []string) error {
 		if err := repo.SaveHybridImageByKey(key, out); err != nil {
 			logging.Error("failed to save hybrid image", err, logging.Fields{constants.LogFieldKey: key})
 		} else {
-			logging.Info("hybrid-image generated and saved", logging.Fields{"animal_key": key, "size_bytes": len(out)})
+			logging.Info("hybrid-image generated and saved", logging.Fields{"entity_key": key, "size_bytes": len(out)})
 		}
 		return out, nil
 	})

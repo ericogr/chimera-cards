@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animal } from './types';
+import { Entity } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
-import { animalAssetUrl } from './utils/keys';
+import { entityAssetUrl } from './utils/keys';
 
 interface Props {
   gameId: string;
@@ -10,71 +10,71 @@ interface Props {
 }
 
 interface HybridSpecState {
-  animalIds: number[];
-  selectedAnimalId?: number;
+  entityIds: number[];
+  selectedEntityId?: number;
 }
 
 const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
-  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [h1, setH1] = useState<HybridSpecState>({ animalIds: [], selectedAnimalId: undefined });
-  const [h2, setH2] = useState<HybridSpecState>({ animalIds: [], selectedAnimalId: undefined });
+  const [h1, setH1] = useState<HybridSpecState>({ entityIds: [], selectedEntityId: undefined });
+  const [h2, setH2] = useState<HybridSpecState>({ entityIds: [], selectedEntityId: undefined });
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
   const playerUUID = localStorage.getItem('player_uuid') || '';
 
   useEffect(() => {
-    const fetchAnimals = async () => {
+    const fetchEntities = async () => {
       try {
-        const res = await apiFetch(constants.API_ANIMALS);
-        if (!res.ok) throw new Error('Failed to load animals');
-        const data: Animal[] = await res.json();
-        setAnimals(data);
+        const res = await apiFetch(constants.API_ENTITIES);
+        if (!res.ok) throw new Error('Failed to load entities');
+        const data: Entity[] = await res.json();
+        setEntities(data);
       } catch (e: any) {
-        setError(e.message || 'Error loading animals');
+        setError(e.message || 'Error loading entities');
       } finally {
         setLoading(false);
       }
     };
-    fetchAnimals();
+    fetchEntities();
   }, []);
 
-  const usedIds = useMemo(() => new Set([...h1.animalIds, ...h2.animalIds]), [h1, h2]);
+  const usedIds = useMemo(() => new Set([...h1.entityIds, ...h2.entityIds]), [h1, h2]);
   const toggleAnimalSelection = (target: 'h1' | 'h2', id: number) => {
     if (submitting) return;
     const src = target === 'h1' ? h1 : h2;
     const setter = target === 'h1' ? setH1 : setH2;
-    const isUsedElsewhere = usedIds.has(id) && !src.animalIds.includes(id);
+    const isUsedElsewhere = usedIds.has(id) && !src.entityIds.includes(id);
     if (isUsedElsewhere) return;
-    const picked = src.animalIds.includes(id)
-      ? src.animalIds.filter((x) => x !== id)
-      : src.animalIds.length < 3
-      ? [...src.animalIds, id]
-      : src.animalIds; // allow up to 3
-    const updated = { ...src, animalIds: picked } as HybridSpecState;
+    const picked = src.entityIds.includes(id)
+      ? src.entityIds.filter((x) => x !== id)
+      : src.entityIds.length < 3
+      ? [...src.entityIds, id]
+      : src.entityIds; // allow up to 3
+    const updated = { ...src, entityIds: picked } as HybridSpecState;
     // Reset selected ability if it no longer belongs to the chosen set
-    if (updated.selectedAnimalId && !updated.animalIds.includes(updated.selectedAnimalId)) {
-      updated.selectedAnimalId = undefined;
+    if (updated.selectedEntityId && !updated.entityIds.includes(updated.selectedEntityId)) {
+      updated.selectedEntityId = undefined;
     }
     setter(updated);
   };
 
   const isValidSelection =
-    h1.animalIds.length >= 2 && h1.animalIds.length <= 3 &&
-    h2.animalIds.length >= 2 && h2.animalIds.length <= 3 &&
-    h1.animalIds.every((id) => !h2.animalIds.includes(id)) &&
-    !!h1.selectedAnimalId &&
-    !!h2.selectedAnimalId;
+    h1.entityIds.length >= 2 && h1.entityIds.length <= 3 &&
+    h2.entityIds.length >= 2 && h2.entityIds.length <= 3 &&
+    h1.entityIds.every((id) => !h2.entityIds.includes(id)) &&
+    !!h1.selectedEntityId &&
+    !!h2.selectedEntityId;
 
-  const idToName = new Map(animals.map(a => [a.ID, a.name] as const));
+  const idToName = new Map(entities.map(a => [a.ID, a.name] as const));
   const computeName = (ids: number[]) => {
     if (ids.length === 0) return '';
     const names = ids.map(id => idToName.get(id) || '').filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'));
     return names.join(' + ');
   };
-  const h1Name = computeName(h1.animalIds);
-  const h2Name = computeName(h2.animalIds);
+  const h1Name = computeName(h1.entityIds);
+  const h2Name = computeName(h2.entityIds);
 
   const handleSubmit = async () => {
     if (!isValidSelection || actingRef.current || submitting) return;
@@ -86,8 +86,8 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
       body: JSON.stringify({
           player_uuid: playerUUID,
-          hybrid1: { animal_ids: h1.animalIds, selected_animal_id: h1.selectedAnimalId },
-          hybrid2: { animal_ids: h2.animalIds, selected_animal_id: h2.selectedAnimalId },
+          hybrid1: { entity_ids: h1.entityIds, selected_entity_id: h1.selectedEntityId },
+          hybrid2: { entity_ids: h2.entityIds, selected_entity_id: h2.selectedEntityId },
         }),
       });
       if (!res.ok) {
@@ -103,17 +103,17 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
     }
   };
 
-  if (loading) return <div>Loading animals...</div>;
+  if (loading) return <div>Loading entities...</div>;
   if (error) return <div>Error: {error}</div>;
 
   const imageSrcFor = (name: string) => {
-    return animalAssetUrl(name);
+    return entityAssetUrl(name);
   };
 
-  const animalCard = (a: Animal, target: 'h1' | 'h2') => {
+  const animalCard = (a: Entity, target: 'h1' | 'h2') => {
     const src = target === 'h1' ? h1 : h2;
-    const disabled = usedIds.has(a.ID) && !src.animalIds.includes(a.ID);
-    const selected = src.animalIds.includes(a.ID);
+    const disabled = usedIds.has(a.ID) && !src.entityIds.includes(a.ID);
+    const selected = src.entityIds.includes(a.ID);
     return (
       <div
         key={`${target}-${a.ID}`}
@@ -147,7 +147,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
             </div>
             <div style={{ fontSize: 12 }}>{a.skill_name} (Cost {a.skill_cost})</div>
             {(() => {
-              const isPicked = src.animalIds.includes(a.ID);
+              const isPicked = src.entityIds.includes(a.ID);
               return (
                 <div
                   style={{
@@ -163,14 +163,14 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
                       <input
                         type="radio"
                         name={`${target}-selected-ability`}
-                        checked={src.selectedAnimalId === a.ID}
+                        checked={src.selectedEntityId === a.ID}
                         onChange={() => {
                           const setter = target === 'h1' ? setH1 : setH2;
-                          setter({ ...src, selectedAnimalId: a.ID });
+                          setter({ ...src, selectedEntityId: a.ID });
                         }}
                         disabled={!selected}
                       />
-                      <span>Use this animal's special ability</span>
+                      <span>Use this entity's special ability</span>
                     </label>
                   )}
                 </div>
@@ -184,8 +184,8 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   };
 
   const grid = (target: 'h1' | 'h2') => (
-    <div className="animals-grid">
-      {animals.map((a) => animalCard(a, target))}
+    <div className="entities-grid">
+      {entities.map((a) => animalCard(a, target))}
     </div>
   );
 
@@ -196,13 +196,13 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
         <section>
           <h4>Hybrid 1</h4>
           {grid('h1')}
-          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 animals and choose 1 special ability among them</div>
+          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 entities and choose 1 special ability among them</div>
           <div style={{ fontSize: 12, marginTop: 4, color: '#ccc' }}>Name (auto): {h1Name || '-'}</div>
         </section>
         <section>
           <h4>Hybrid 2</h4>
           {grid('h2')}
-          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 animals (no overlap with Hybrid 1) and choose 1 special ability</div>
+          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
           <div style={{ fontSize: 12, marginTop: 4, color: '#ccc' }}>Name (auto): {h2Name || '-'}</div>
         </section>
         <button onClick={handleSubmit} disabled={!isValidSelection || submitting} style={{ padding: '10px 16px' }}>

@@ -64,7 +64,7 @@ func StartGame(repo storage.Repository, g *game.Game) error {
 	for i := range g.Players {
 		g.Players[i].HasSubmittedAction = false
 		g.Players[i].PendingActionType = game.PendingActionNone
-		g.Players[i].PendingActionAnimalID = nil
+		g.Players[i].PendingActionEntityID = nil
 		for j := range g.Players[i].Hybrids {
 			if g.Players[i].Hybrids[j].IsActive && !g.Players[i].Hybrids[j].IsDefeated {
 				g.Players[i].Hybrids[j].CurrentEnergy += 1
@@ -94,9 +94,9 @@ func generateNamesAndImages(repo storage.Repository, g *game.Game) error {
 	for i := range g.Players {
 		for j := range g.Players[i].Hybrids {
 			hbd := &g.Players[i].Hybrids[j]
-			names := make([]string, len(hbd.BaseAnimals))
-			for k := range hbd.BaseAnimals {
-				names[k] = hbd.BaseAnimals[k].Name
+			names := make([]string, len(hbd.BaseEntities))
+			for k := range hbd.BaseEntities {
+				names[k] = hbd.BaseEntities[k].Name
 			}
 
 			if gen, source, err := hybridname.GetOrCreateGeneratedName(repo, names); err == nil && gen != "" {

@@ -16,9 +16,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ServeAnimalAsset serves animal images stored in the DB. URL format:
-// /api/assets/animals/<name>.png
-func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
+// ServeEntityAsset serves entity images stored in the DB. URL format:
+// /api/assets/entities/<name>.png
+func (h *GameHandler) ServeEntityAsset(c *gin.Context) {
 	file := c.Param("file") // includes leading '/'
 	if strings.HasPrefix(file, "/") {
 		file = file[1:]
@@ -29,8 +29,8 @@ func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
 	}
 
 	name := strings.TrimSuffix(file, path.Ext(file))
-	// Lookup animal by name (case-insensitive)
-	a, err := h.repo.GetAnimalByName(name)
+	// Lookup entity by name (case-insensitive)
+	a, err := h.repo.GetEntityByName(name)
 	if err != nil || a == nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -45,16 +45,16 @@ func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
 	}
 
 	// Not found in DB — deduplicate concurrent generation using singleflight.
-	logging.Info("animal image not found in DB; generating (or joining existing)", logging.Fields{"name": a.Name})
-	key := fmt.Sprintf("animal:%d", a.ID)
+	logging.Info("entity image not found in DB; generating (or joining existing)", logging.Fields{"name": a.Name})
+	key := fmt.Sprintf("entity:%d", a.ID)
 	ch := dedupe.ImageGroup.DoChan(key, func() (interface{}, error) {
 		// Re-check DB in case another goroutine saved it while we were queued.
-		if a2, err := h.repo.GetAnimalByName(a.Name); err == nil && a2 != nil && len(a2.ImagePNG) > 0 {
+		if a2, err := h.repo.GetEntityByName(a.Name); err == nil && a2 != nil && len(a2.ImagePNG) > 0 {
 			return a2.ImagePNG, nil
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 		defer cancel()
-		imgBytes, err := openaiclient.GenerateAnimalImage(ctx, a.Name)
+		imgBytes, err := openaiclient.GenerateEntityImage(ctx, a.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -62,8 +62,8 @@ func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
 		if err != nil {
 			return nil, err
 		}
-		if err := h.repo.SaveAnimalImage(a.ID, out); err != nil {
-			logging.Error("failed to save generated animal image", err, logging.Fields{"animal_id": a.ID})
+		if err := h.repo.SaveEntityImage(a.ID, out); err != nil {
+			logging.Error("failed to save generated entity image", err, logging.Fields{"entity_id": a.ID})
 		}
 		return out, nil
 	})
@@ -91,7 +91,7 @@ func (h *GameHandler) ServeAnimalAsset(c *gin.Context) {
 }
 
 // ServeHybridAsset serves or generates a hybrid image identified by a key
-// formed by joining animal names (sorted alphabetically, lowercase) with
+// formed by joining entity names (sorted alphabetically, lowercase) with
 // underscores. URL format: /api/assets/hybrids/<name1>_<name2>.png
 func (h *GameHandler) ServeHybridAsset(c *gin.Context) {
 	file := c.Param("file")
@@ -114,7 +114,7 @@ func (h *GameHandler) ServeHybridAsset(c *gin.Context) {
 		return
 	}
 
-	// Not found: reconstruct names from key and map to canonical animal names
+	// Not found: reconstruct names from key and map to canonical entity names
 	parts := strings.Split(key, "_")
 	names := make([]string, 0, len(parts))
 	for _, p := range parts {
@@ -122,7 +122,7 @@ func (h *GameHandler) ServeHybridAsset(c *gin.Context) {
 		if p == "" {
 			continue
 		}
-		if a, err := h.repo.GetAnimalByName(p); err == nil && a != nil {
+		if a, err := h.repo.GetEntityByName(p); err == nil && a != nil {
 			names = append(names, a.Name)
 		} else {
 			// Fallback: replace underscores with spaces and title-case

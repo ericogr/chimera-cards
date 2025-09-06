@@ -1,7 +1,7 @@
  # Quimera Cards
 
 Quimera Cards is a web-based tactical turn-based combat game where each
-player builds two hybrids (each composed of 2–3 animals) and battles in
+player builds two hybrids (each composed of 2–3 entities) and battles in
 simultaneous-planning rounds. The backend is written in Go (Gin + GORM)
 and the frontend is a React + TypeScript single-page app.
 
@@ -43,4 +43,3 @@ See the module READMEs for detailed, focused documentation:
 - [`frontend/README.md`](frontend/README.md) — frontend dev server, build and test commands.
 - [`infrastructure/README.md`](infrastructure/README.md) — bootstrap helper and Terraform workflow.
 - [`game.md`](game.md) — full game mechanics documentation.
-

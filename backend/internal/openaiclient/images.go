@@ -16,63 +16,63 @@ import (
 )
 
 // Two prompt templates may be provided: one used when generating single
-// animal portraits (singleImagePromptTemplate) and another used when
+// entity portraits (singleImagePromptTemplate) and another used when
 // generating hybrid images (hybridImagePromptTemplate). Each template may
-// include the token "{{animals}}" which will be replaced by the comma-
-// separated animal names.
+// include the token "{{entities}}" which will be replaced by the comma-
+// separated entity names.
 var singleImagePromptTemplate string
 var hybridImagePromptTemplate string
 
 // SetSingleImagePromptTemplate sets the prompt template used when
-// generating images for a single animal.
+// generating images for a single entity.
 func SetSingleImagePromptTemplate(t string) {
 	singleImagePromptTemplate = strings.TrimSpace(t)
 }
 
 // SetHybridImagePromptTemplate sets the prompt template used when
-// generating images for hybrids composed of multiple animals.
+// generating images for hybrids composed of multiple entities.
 func SetHybridImagePromptTemplate(t string) {
-	hybridImagePromptTemplate = strings.TrimSpace(t)
+    hybridImagePromptTemplate = strings.TrimSpace(t)
 }
 
-// GenerateAnimalImage generates an image for a single animal using the
-// configured animal prompt template (or a sensible default if missing).
-func GenerateAnimalImage(ctx context.Context, animalName string) ([]byte, error) {
-	if strings.TrimSpace(animalName) == "" {
-		return nil, fmt.Errorf("animalName must be non-empty")
+// GenerateEntityImage generates an image for a single entity using the
+// configured entity prompt template (or a sensible default if missing).
+func GenerateEntityImage(ctx context.Context, entityName string) ([]byte, error) {
+	if strings.TrimSpace(entityName) == "" {
+		return nil, fmt.Errorf("entityName must be non-empty")
 	}
-	return generateImageWithTemplate(ctx, singleImagePromptTemplate, []string{animalName})
+	return generateImageWithTemplate(ctx, singleImagePromptTemplate, []string{entityName})
 }
 
 // GenerateHybridImage generates an image for a hybrid composed of 1..3
-// animals using the configured hybrid prompt template (or a sensible
+// entities using the configured hybrid prompt template (or a sensible
 // default if missing).
-func GenerateHybridImage(ctx context.Context, animalNames []string) ([]byte, error) {
-	if len(animalNames) == 0 || len(animalNames) > 3 {
-		return nil, fmt.Errorf("animalNames must contain 1..3 items")
-	}
-	return generateImageWithTemplate(ctx, hybridImagePromptTemplate, animalNames)
+func GenerateHybridImage(ctx context.Context, entityNames []string) ([]byte, error) {
+    if len(entityNames) == 0 || len(entityNames) > 3 {
+        return nil, fmt.Errorf("entityNames must contain 1..3 items")
+    }
+    return generateImageWithTemplate(ctx, hybridImagePromptTemplate, entityNames)
 }
 
 // generateImageWithTemplate is an internal helper that forms the prompt
 // from the provided template (or a default) and calls the OpenAI API.
-func generateImageWithTemplate(ctx context.Context, template string, animalNames []string) ([]byte, error) {
-	if len(animalNames) == 0 || len(animalNames) > 3 {
-		return nil, fmt.Errorf("animalNames must contain 1..3 items")
-	}
+func generateImageWithTemplate(ctx context.Context, template string, entityNames []string) ([]byte, error) {
+    if len(entityNames) == 0 || len(entityNames) > 3 {
+        return nil, fmt.Errorf("entityNames must contain 1..3 items")
+    }
 
 	apiKey := os.Getenv(constants.EnvOpenAIAPIKey)
 	if apiKey == "" {
 		return nil, fmt.Errorf("%s not set", constants.EnvOpenAIAPIKey)
 	}
 
-	animalsPart := strings.Join(animalNames, ", ")
-	prompt := template
+    entitiesPart := strings.Join(entityNames, ", ")
+    prompt := template
 	if prompt == "" {
 		// default hybrid-style template used when no custom template provided
-		prompt = "Create a single PNG image of {{animals}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each animal into a cohesive single creature."
+		prompt = "Create a single PNG image of {{entities}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each entity into a cohesive single creature."
 	}
-	prompt = strings.ReplaceAll(prompt, "{{animals}}", animalsPart)
+    prompt = strings.ReplaceAll(prompt, "{{entities}}", entitiesPart)
 
 	payload := map[string]interface{}{
 		"prompt":  prompt,
@@ -84,7 +84,7 @@ func generateImageWithTemplate(ctx context.Context, template string, animalNames
 
 	// Log the prompt before sending the request so operators can see what
 	// was asked to the image API when a generation happens.
-	logging.Info("openai image prompt", logging.Fields{"animals": animalsPart, "prompt": prompt})
+    logging.Info("openai image prompt", logging.Fields{"entities": entitiesPart, "prompt": prompt})
 
 	b, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))

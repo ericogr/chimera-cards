@@ -3,22 +3,22 @@ package storage
 import "github.com/ericogr/quimera-cards/internal/game"
 
 type Repository interface {
-	GetAnimals() ([]game.Animal, error)
+	GetEntities() ([]game.Entity, error)
 	GetPublicGames() ([]game.Game, error)
 	CreateGame(g *game.Game) error
 	GetGameByID(id uint) (*game.Game, error)
 	FindGameByJoinCode(code string) (*game.Game, error)
 	UpdateGame(g *game.Game) error
-	GetAnimalsByIDs(ids []uint) ([]game.Animal, error)
-	// SaveAnimalImage stores a PNG blob for the given animal ID.
-	SaveAnimalImage(animalID uint, pngBytes []byte) error
+	GetEntitiesByIDs(ids []uint) ([]game.Entity, error)
+	// SaveEntityImage stores a PNG blob for the given entity ID.
+	SaveEntityImage(entityID uint, pngBytes []byte) error
 
-	// GetAnimalByName returns an animal by its name (case-insensitive).
-	GetAnimalByName(name string) (*game.Animal, error)
-	// Generated name cache (lookup by canonical animal key)
+	// GetEntityByName returns an entity by its name (case-insensitive).
+	GetEntityByName(name string) (*game.Entity, error)
+	// Generated name cache (lookup by canonical entity key)
 	// e.g. key = "lion_raven"
-	GetGeneratedNameByAnimalKey(key string) (*game.HybridGeneratedName, error)
-	SaveGeneratedNameForAnimalIDs(ids []uint, animalNames, generatedName string) error
+	GetGeneratedNameByEntityKey(key string) (*game.HybridGeneratedName, error)
+	SaveGeneratedNameForEntityIDs(ids []uint, entityNames, generatedName string) error
 	// Hybrid image storage
 	GetHybridImageByKey(key string) ([]byte, error)
 	SaveHybridImageByKey(key string, png []byte) error

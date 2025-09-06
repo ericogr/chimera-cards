@@ -9,7 +9,7 @@ import (
 	"github.com/ericogr/quimera-cards/internal/game"
 )
 
-type animalEntry struct {
+type entityEntry struct {
 	Name             string           `json:"name"`
 	HitPoints        int              `json:"hit_points"`
 	Attack           int              `json:"attack"`
@@ -24,29 +24,30 @@ type animalEntry struct {
 	SkillEffect      game.SkillEffect `json:"skill_effect"`
 }
 
-type rawConfig struct {
-	AnimalList []animalEntry `json:"animal_list"`
+ type rawConfig struct {
+ 	EntityList []entityEntry `json:"entity_list"`
 	Server     *struct {
 		Address string `json:"address"`
 	} `json:"server"`
-	// Optional image prompt template used to generate animal/hybrid images.
-	// Use the string token {{animals}} where the comma-separated list of
-	// animal names will be substituted. If not provided, a sensible
-	// default is used by the OpenAI client.
-	SingleImagePrompt string `json:"single_image_prompt"`
+    // Optional image prompt template used to generate entity/hybrid images.
+    // Use the string token {{entities}} where the comma-separated list of
+    // entity names will be substituted. If not provided, a sensible
+    // default is used by the OpenAI client.
+    // Optional single-entity image prompt template loaded from config
+    SingleImagePrompt string `json:"single_image_prompt"`
 	HybridImagePrompt string `json:"hybrid_image_prompt"`
-	// Optional name prompt template used to generate hybrid names.
-	// Use the token {{animals}} where the comma-separated list of animal
-	// names will be substituted. If omitted, a default prompt is used.
+    // Optional name prompt template used to generate hybrid names.
+    // Use the token {{entities}} where the comma-separated list of entity
+    // names will be substituted. If omitted, a default prompt is used.
 	NamePrompt string `json:"name_prompt"`
 }
 
-// LoadedConfig contains animals to seed and the server address to bind to.
+// LoadedConfig contains entities to seed and the server address to bind to.
 type LoadedConfig struct {
-	Animals       []game.Animal
+	Entities      []game.Entity
 	ServerAddress string
 	// Optional image prompt template loaded from config
-	// Optional single-animal image prompt template loaded from config
+	// Optional single-entity image prompt template loaded from config
 	SingleImagePromptTemplate string
 	// Optional hybrid image prompt template loaded from config
 	HybridImagePromptTemplate string
@@ -54,8 +55,8 @@ type LoadedConfig struct {
 	NamePromptTemplate string
 }
 
-// LoadConfig reads the configuration file at path and returns animals and
-// server address. It requires the key `animal_list` (snake_case).
+ // LoadConfig reads the configuration file at path and returns entities and
+ // server address. It requires the key `entity_list` (snake_case).
 func LoadConfig(path string) (*LoadedConfig, error) {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -66,17 +67,16 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		return nil, fmt.Errorf("failed to parse config file %s: %w", path, err)
 	}
 
-	entries := rc.AnimalList
-	if len(entries) == 0 {
-		return nil, fmt.Errorf("config file %s: animal_list is empty (provide 'animal_list' array)", path)
-	}
-
-	out := make([]game.Animal, 0, len(entries))
+ 	entries := rc.EntityList
+    if len(entries) == 0 {
+        return nil, fmt.Errorf("config file %s: entity_list is empty (provide 'entity_list' array)", path)
+    }
+	out := make([]game.Entity, 0, len(entries))
 	for _, a := range entries {
-		if a.Name == "" {
-			return nil, fmt.Errorf("config file %s: animal entry missing 'name'", path)
-		}
-		out = append(out, game.Animal{
+        if a.Name == "" {
+            return nil, fmt.Errorf("config file %s: entity entry missing 'name'", path)
+        }
+		out = append(out, game.Entity{
 			Name:             a.Name,
 			HitPoints:        a.HitPoints,
 			Attack:           a.Attack,
@@ -92,22 +92,22 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		})
 	}
 
-	// Cross-entry validation: ensure unique animal names (case-insensitive)
-	// and unique skill_key values. Also enforce that any ability marked to
-	// execute as a plan provides a non-empty skill_key so the engine can
-	// route execution.
+    // Cross-entry validation: ensure unique entity names (case-insensitive)
+    // and unique skill_key values. Also enforce that any ability marked to
+    // execute as a plan provides a non-empty skill_key so the engine can
+    // route execution.
 	nameSet := make(map[string]struct{}, len(out))
 	skillSet := make(map[string]struct{}, len(out))
 	for _, aa := range out {
 		ln := strings.ToLower(strings.TrimSpace(aa.Name))
-		if _, exists := nameSet[ln]; exists {
-			return nil, fmt.Errorf("config file %s: duplicate animal name '%s'", path, aa.Name)
-		}
+        if _, exists := nameSet[ln]; exists {
+            return nil, fmt.Errorf("config file %s: duplicate entity name '%s'", path, aa.Name)
+        }
 		nameSet[ln] = struct{}{}
 		if aa.SkillEffect.ExecutesPlan {
-			if strings.TrimSpace(aa.SkillKey) == "" {
-				return nil, fmt.Errorf("config file %s: animal '%s' marked executes_plan but missing 'skill_key'", path, aa.Name)
-			}
+            if strings.TrimSpace(aa.SkillKey) == "" {
+                return nil, fmt.Errorf("config file %s: entity '%s' marked executes_plan but missing 'skill_key'", path, aa.Name)
+            }
 		}
 		if aa.SkillKey != "" {
 			if _, exists := skillSet[aa.SkillKey]; exists {
@@ -123,7 +123,7 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 	}
 
 	return &LoadedConfig{
-		Animals:                   out,
+		Entities:                  out,
 		ServerAddress:             addr,
 		SingleImagePromptTemplate: strings.TrimSpace(rc.SingleImagePrompt),
 		HybridImagePromptTemplate: strings.TrimSpace(rc.HybridImagePrompt),
@@ -131,4 +131,4 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 	}, nil
 }
 
-// (No compatibility wrapper) Use LoadConfig to obtain animals and server address.
+// (No compatibility wrapper) Use LoadConfig to obtain entities and server address.

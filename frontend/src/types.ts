@@ -1,4 +1,4 @@
-export interface Animal {
+export interface Entity {
   ID: number;
   name: string;
   pv: number;
@@ -12,9 +12,9 @@ export interface Animal {
   skill_description: string;
 }
 
-// Canonical animal names used across the frontend.
+// Canonical entity names used across the frontend.
 // Keeping names in a single enum reduces typos and eases maintenance.
-export enum AnimalName {
+export enum EntityName {
   Lion = 'Lion',
   Bear = 'Bear',
   Cheetah = 'Cheetah',
@@ -31,8 +31,8 @@ export interface Hybrid {
   ID: number;
   name: string;
   generated_name?: string;
-  base_animals: Animal[];
-  selected_ability_animal_id?: number;
+  base_entities: Entity[];
+  selected_ability_entity_id?: number;
   base_pv: number;
   current_pv: number;
   base_atq: number;
@@ -60,7 +60,7 @@ export interface Player {
   has_created: boolean;
   has_submitted_action?: boolean;
   pending_action_type?: string;
-  pending_action_animal_id?: number;
+  pending_action_entity_id?: number;
   hybrids: Hybrid[];
 }
 

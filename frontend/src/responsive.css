@@ -113,7 +113,7 @@
 
 /* Hybrid creation grids */
 .hybrid-creation-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-.animals-grid {
+.entities-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(180px, 1fr));
   gap: 8px;
@@ -128,7 +128,7 @@
   .player-area { width: 100%; }
   .player-one { border-right: none; border-bottom: 1px solid #444; }
   .stats-grid { grid-template-columns: 1fr; }
-  .animals-grid { grid-template-columns: 1fr; }
+  .entities-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {

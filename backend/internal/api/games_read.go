@@ -8,14 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListAnimals returns all available animals.
-func (h *GameHandler) ListAnimals(c *gin.Context) {
-	animals, err := h.repo.GetAnimals()
+// ListEntities returns all available entities.
+func (h *GameHandler) ListEntities(c *gin.Context) {
+	entities, err := h.repo.GetEntities()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchAnimals})
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchEntities})
 		return
 	}
-	c.JSON(http.StatusOK, animals)
+	c.JSON(http.StatusOK, entities)
 }
 
 // ListPublicGames returns all public games waiting for players or in progress.

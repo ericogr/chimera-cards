@@ -1,11 +1,11 @@
 package game
 
-// AnimalName represents a canonical animal name used across the codebase.
+// EntityName represents a canonical entity name used across the codebase.
 // Using constants avoids typos and keeps references consistent.
-type AnimalName string
+type EntityName string
 
 const (
-	// None represents an absent animal (used internally to mark "no third animal").
+	// None represents an absent entity (used internally to mark "no third entity").
 	// Its ID is represented by 0 in code and DB fields.
-	None AnimalName = "None"
+	None EntityName = "None"
 )

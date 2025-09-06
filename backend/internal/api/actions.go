@@ -14,7 +14,7 @@ import (
 type ActionRequest struct {
 	PlayerUUID string `json:"player_uuid"`
 	ActionType string `json:"action_type"`
-	AnimalID   uint   `json:"animal_id"`
+	EntityID   uint   `json:"entity_id"`
 }
 
 // SubmitAction stores a player's chosen action for the current round.
@@ -45,7 +45,7 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 	// Delegate to service layer
 	// Convert raw action_type string to the typed PendingActionType
 	actionType := game.PendingActionType(req.ActionType)
-	g2, resolved, err := service.SubmitAction(h.repo, uint(gameID), req.PlayerUUID, actionType, req.AnimalID)
+	g2, resolved, err := service.SubmitAction(h.repo, uint(gameID), req.PlayerUUID, actionType, req.EntityID)
 	if err != nil {
 		switch err {
 		case service.ErrGameNotFound:

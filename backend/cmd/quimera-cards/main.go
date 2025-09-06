@@ -16,21 +16,21 @@ import (
 
 func main() {
 	checkEnvVars([]string{constants.EnvSessionSecret, constants.EnvGoogleClientID, constants.EnvGoogleClientSecret, constants.EnvOpenAIAPIKey})
-	// Load animal configuration file (required). Path may be provided via
-	// CHIMERA_CONFIG env var or defaults to ./chimera_config.json in the
-	// current working directory.
+    // Load entity configuration file (required). Path may be provided via
+    // CHIMERA_CONFIG env var or defaults to ./chimera_config.json in the
+    // current working directory.
 	configPath := os.Getenv("CHIMERA_CONFIG")
 	if configPath == "" {
 		configPath = "./chimera_config.json"
 	}
-	cfg, err := config.LoadConfig(configPath)
-	if err != nil {
-		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'animal_list' array of animal objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional keys: server.address, single_image_prompt, hybrid_image_prompt"})
-	}
+    cfg, err := config.LoadConfig(configPath)
+    if err != nil {
+        logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'entity_list' array of entity objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional keys: server.address, single_image_prompt, hybrid_image_prompt"})
+    }
 
-	// If the configuration provides image prompt templates, apply them to
-	// the OpenAI client so animal and hybrid image generation use the
-	// configured texts.
+    // If the configuration provides image prompt templates, apply them to
+    // the OpenAI client so entity and hybrid image generation use the
+    // configured texts.
 	if cfg.SingleImagePromptTemplate != "" {
 		openaiclient.SetSingleImagePromptTemplate(cfg.SingleImagePromptTemplate)
 	}
@@ -50,12 +50,12 @@ func main() {
 	if dbPath == "" {
 		dbPath = "./data/quimera.db"
 	}
-	db, err := storage.OpenAndMigrate(dbPath, cfg.Animals)
+	db, err := storage.OpenAndMigrate(dbPath, cfg.Entities)
 	if err != nil {
 		logging.Fatal("Failed to initialize database", err, nil)
 	}
 
-	repo := storage.NewSQLiteRepository(db, cfg.Animals)
+	repo := storage.NewSQLiteRepository(db, cfg.Entities)
 	handler := api.NewGameHandler(repo)
 	authHandler := api.NewAuthHandler()
 
@@ -64,7 +64,7 @@ func main() {
 	apiRoutes := router.Group(constants.RouteAPIPrefix)
 	{
 		// Public endpoints
-		apiRoutes.GET(constants.RouteAnimals, handler.ListAnimals)
+		apiRoutes.GET(constants.RouteEntities, handler.ListEntities)
 		apiRoutes.GET(constants.RoutePublicGames, handler.ListPublicGames)
 		apiRoutes.GET(constants.RouteLeaderboard, handler.ListLeaderboard)
 
@@ -73,7 +73,7 @@ func main() {
 		protected.Use(api.AuthRequired())
 
 		// Image and asset endpoints are protected — they require an authenticated session
-		protected.GET(constants.RouteAssetsAnimals+"/*file", handler.ServeAnimalAsset)
+		protected.GET(constants.RouteAssetsEntities+"/*file", handler.ServeEntityAsset)
 		protected.GET(constants.RouteAssetsHybrids+"/*file", handler.ServeHybridAsset)
 
 		protected.GET(constants.RoutePlayerStats, handler.GetPlayerStats)

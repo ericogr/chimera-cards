@@ -50,7 +50,7 @@ func attackWithModifiers(h *game.Hybrid, round int) int {
 	return a
 }
 
-// Vigor cost is now stored on each Animal as `VigorCost` (configured in chimera_config.json).
+// Vigor cost is now stored on each Entity as `VigorCost` (configured in chimera_config.json).
 
 // --- Round context and helpers ----------------------------------------
 type roundContext struct {
@@ -88,14 +88,14 @@ func findActiveHybrid(p *game.Player) *game.Hybrid {
 	return nil
 }
 
-// getChosen returns the animal object referenced by pid inside a hybrid.
-func getChosen(h *game.Hybrid, pid *uint) *game.Animal {
+// getChosen returns the entity object referenced by pid inside a hybrid.
+func getChosen(h *game.Hybrid, pid *uint) *game.Entity {
 	if pid == nil {
 		return nil
 	}
-	for i := range h.BaseAnimals {
-		if h.BaseAnimals[i].ID == *pid {
-			return &h.BaseAnimals[i]
+	for i := range h.BaseEntities {
+		if h.BaseEntities[i].ID == *pid {
+			return &h.BaseEntities[i]
 		}
 	}
 	return nil
@@ -107,7 +107,7 @@ type plannedAction struct {
 	actor  *game.Hybrid
 	target *game.Hybrid
 	action ActionKind
-	animal *game.Animal
+	entity *game.Entity
 }
 
 type ActionKind string
@@ -136,9 +136,9 @@ const (
 func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []plannedAction {
 	plans := make([]plannedAction, 0, 4)
 	mapPlan := func(p *game.Player, self, opp *game.Hybrid) {
-		var a *game.Animal
+		var a *game.Entity
 		if p.PendingActionType == game.PendingActionAbility {
-			a = getChosen(self, p.PendingActionAnimalID)
+			a = getChosen(self, p.PendingActionEntityID)
 		}
 		switch p.PendingActionType {
 		case game.PendingActionBasicAttack:
@@ -149,14 +149,14 @@ func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []p
 				// If the ability requires an execution step (e.g., performs
 				// direct damage), the configuration should mark it with
 				// SkillEffect.ExecutesPlan = true. Use the configured
-				// skill_key as the action identifier so new animals can be
+				// skill_key as the action identifier so new entities can be
 				// added in config without touching code.
 				if a.SkillEffect.ExecutesPlan {
 					act := ActionAbility
 					if a.SkillKey != "" {
 						act = ActionKind(a.SkillKey)
 					}
-					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: act, animal: a})
+					plans = append(plans, plannedAction{player: p, actor: self, target: opp, action: act, entity: a})
 				}
 			}
 		}
@@ -199,7 +199,7 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 			rc.add(p.PlayerName + " DEFEND: 0 VIG — no defense bonus")
 		}
 	case game.PendingActionAbility:
-		ch := getChosen(self, p.PendingActionAnimalID)
+		ch := getChosen(self, p.PendingActionEntityID)
 		if ch == nil {
 			return
 		}
@@ -219,7 +219,7 @@ func (rc *roundContext) applyPreEffects(p *game.Player, self, opp *game.Hybrid) 
 			self.VulnerableThisRound = true
 		}
 		// Apply ability effects from configuration rather than a hard-coded
-		// per-animal switch. This lets new animals be added via the
+		// per-entity switch. This lets new entities be added via the
 		// chimera_config.json file without touching engine code.
 		eff := ch.SkillEffect
 
@@ -451,9 +451,9 @@ func (rc *roundContext) execSwiftPounce(a *plannedAction, oppPlayer *game.Player
 	// Default calculation (backwards compatible) uses half of Agility.
 	raw := atqEff - defEff
 
-	// If the animal has a configured skill effect, apply its parameters.
-	if a.animal != nil {
-		eff := a.animal.SkillEffect
+	// If the entity has a configured skill effect, apply its parameters.
+	if a.entity != nil {
+		eff := a.entity.SkillEffect
 
 		// Partial defense ignore
 		if eff.SwiftIgnoreDefensePercent > 0 {
@@ -586,8 +586,8 @@ func (rc *roundContext) execSwiftPounce(a *plannedAction, oppPlayer *game.Player
 func (rc *roundContext) execCharge(a *plannedAction, oppPlayer *game.Player) {
 	atqEff := attackWithModifiers(a.actor, rc.g.RoundCount)
 	// Allow configuration to modify the extra attack applied by Charge.
-	if a.animal != nil && a.animal.SkillEffect.ChargeExtraAttack != 0 {
-		atqEff += a.animal.SkillEffect.ChargeExtraAttack
+	if a.entity != nil && a.entity.SkillEffect.ChargeExtraAttack != 0 {
+		atqEff += a.entity.SkillEffect.ChargeExtraAttack
 	} else {
 		atqEff += 5
 	}
@@ -611,8 +611,8 @@ func (rc *roundContext) execCharge(a *plannedAction, oppPlayer *game.Player) {
 	}
 	a.target.CurrentHitPoints -= dmg
 	recoilPercent := 0.2
-	if a.animal != nil && a.animal.SkillEffect.ChargeRecoilPercent > 0 {
-		recoilPercent = a.animal.SkillEffect.ChargeRecoilPercent
+	if a.entity != nil && a.entity.SkillEffect.ChargeRecoilPercent > 0 {
+		recoilPercent = a.entity.SkillEffect.ChargeRecoilPercent
 	}
 	recoil := int(float64(dmg) * recoilPercent)
 	if recoil < 1 {
@@ -645,16 +645,16 @@ func (rc *roundContext) execStun(a *plannedAction, oppPlayer *game.Player) {
 	a.target.CurrentHitPoints -= dmg
 	// Use configured stun chance and duration when available.
 	stunned := false
-	if a.animal != nil && a.animal.SkillEffect.StunChancePercent > 0 {
-		stunned = rand.Intn(100) < a.animal.SkillEffect.StunChancePercent
+	if a.entity != nil && a.entity.SkillEffect.StunChancePercent > 0 {
+		stunned = rand.Intn(100) < a.entity.SkillEffect.StunChancePercent
 	} else {
 		// Backwards compatible default (50% chance)
 		stunned = rand.Intn(2) == 0
 	}
 	if stunned {
 		dur := 1
-		if a.animal != nil && a.animal.SkillEffect.StunDuration > 0 {
-			dur = a.animal.SkillEffect.StunDuration
+		if a.entity != nil && a.entity.SkillEffect.StunDuration > 0 {
+			dur = a.entity.SkillEffect.StunDuration
 		}
 		a.target.StunnedUntilRound = rc.g.RoundCount + dur
 	}
@@ -719,7 +719,7 @@ func (rc *roundContext) finalizeRound() {
 		for i := range rc.g.Players {
 			rc.g.Players[i].HasSubmittedAction = false
 			rc.g.Players[i].PendingActionType = game.PendingActionNone
-			rc.g.Players[i].PendingActionAnimalID = nil
+			rc.g.Players[i].PendingActionEntityID = nil
 			for j := range rc.g.Players[i].Hybrids {
 				if rc.g.Players[i].Hybrids[j].IsActive && !rc.g.Players[i].Hybrids[j].IsDefeated {
 					// +1 ENE at round start
