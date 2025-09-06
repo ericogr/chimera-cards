@@ -32,7 +32,7 @@ make terraform-apply
 
 ## Steps to prepare the VM (Ubuntu 24.04 — tested)
 
-Assumptions
+**Assumptions**
 - The VM runs Ubuntu (tested on 24.04).
 - You have the VM public IP and can SSH as `ubuntu@<IP>` (the default cloud image user).
 - You have built the Docker images locally (see the repo Makefiles) and have SSH access from your machine to the VM.
@@ -186,15 +186,47 @@ docker compose up -d
   ```
 - If Caddy manages TLS for your domain, check DNS and firewall rules to allow ports 80 and 443.
 
-13) (Optional) Basic firewall (ufw)
+### Local smoke test (HTTPS)
+
+After the stack is up (`docker compose up -d`) you can perform a quick HTTPS smoke test that forces the configured domain to resolve to the local host. This is useful when DNS is not yet pointing to the server but you want to verify Caddy, TLS routing and the frontend/backend are serving requests.
+
+1. Confirm the domain configured for Caddy: open the deployment `.env` file in your deployment directory (for example `~/chimera-cards/.env`) and note the `DOMAIN` value. Example:
+
 ```bash
-sudo ufw allow OpenSSH
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
+grep -E '^DOMAIN=' .env || echo 'DOMAIN is not set in .env'
 ```
 
-Notes & security recommendations
+2. Run `curl` on the same host where `docker compose` is running (the VM). Replace `example.com` with the domain from your `.env` file:
+
+```bash
+curl -vk --resolve 'example.com:8443:127.0.0.1' https://example.com:8443/
+```
+
+Notes:
+- `--resolve 'example.com:8443:127.0.0.1'` tells `curl` to resolve DNS for `example.com:8443` to `127.0.0.1` (localhost).
+- `https://example.com:8443/` requests HTTPS to that host and port. In this compose setup the host port `8443` maps to container port `443` (see `docker-compose.yml`).
+- `-k` disables TLS certificate verification for testing; remove it if you expect a valid certificate.
+
+3. Run `curl` from your workstation (different host)
+
+If you run the command from a different machine (for example your workstation), replace `127.0.0.1` with the VM public IP address:
+
+```bash
+curl -vk --resolve 'example.com:8443:198.51.100.23' https://example.com:8443/
+```
+
+Replace `198.51.100.23` with the VM's actual public IP.
+
+4. Interpreting results
+- A successful test usually returns HTTP `200` and the frontend HTML (for `/`) or the backend response for API paths.
+- Use `curl -I` or `curl -v` to inspect headers and TLS details.
+
+5. Troubleshooting
+- If the connection is refused, check that Caddy is running and listening on host port `8443`: `docker compose ps` and `docker compose logs caddy`.
+- Ensure the `DOMAIN` value in `.env` matches the domain used in the `--resolve` argument.
+- If testing from a remote host, ensure firewalls/security groups allow access to port `8443` on the VM.
+
+### Notes & security recommendations
 - Do NOT copy private keys between users; copy only `authorized_keys`.
 - Avoid using `NOPASSWD:ALL` in sudo unless you understand the risk.
 - Keep `.env` and any private keys off source control.

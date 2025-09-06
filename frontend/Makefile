@@ -10,6 +10,7 @@ install:
 
 start:
 	@echo "Starting frontend development server..."
+	@bash ./scripts/generate-env-config.sh
 	@npm start
 
 build:

@@ -18,6 +18,11 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Runtime configuration provided at container start (generated from REACT_APP_* environment variables)
+  const runtimeConfig = (window as any)._env_ || {};
+  const requiredRuntimeKeys = ['REACT_APP_GOOGLE_CLIENT_ID', 'REACT_APP_API_BASE_URL'];
+  const missingRuntimeKeys = requiredRuntimeKeys.filter(k => !(runtimeConfig[k] && String(runtimeConfig[k]).trim() !== ''));
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -70,6 +75,12 @@ const App: React.FC = () => {
     return (
       <div className="App">
         <header className="App-header">
+          {missingRuntimeKeys.length > 0 && (
+            <div className="runtime-config-warning">
+              Runtime configuration incomplete: missing {missingRuntimeKeys.join(', ')}. Set the corresponding
+              `REACT_APP_` environment variables for the frontend container (for example, in `docker-compose.yml`).
+            </div>
+          )}
           <img src="/welcome_logo.png" alt="Welcome Logo" className="welcome-logo" />
           <h1>Chimera Cards</h1>
           <div>
@@ -86,6 +97,12 @@ const App: React.FC = () => {
 
   return (
     <div className="main-app-container">
+      {missingRuntimeKeys.length > 0 && (
+        <div className="runtime-config-warning">
+          Runtime configuration incomplete: missing {missingRuntimeKeys.join(', ')}. Set the corresponding
+          `REACT_APP_` environment variables for the frontend container (for example, in `docker-compose.yml`).
+        </div>
+      )}
       <Routes>
         <Route path="/" element={<Lobby user={user} onLogout={handleLogout} />} />
         <Route path="/game/:gameId" element={<GameRoom />} />

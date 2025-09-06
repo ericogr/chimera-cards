@@ -1,16 +1,10 @@
 version: '3.8'
 services:
   chimera-backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     image: ${BACKEND_IMAGE:-chimera-backend}:${TAG:-latest}
-    # Run as the local UID/GID to avoid permissions issues when bind-mounting
-    # the host `backend/data` directory. Set LOCAL_UID/LOCAL_GID in your
-    # environment (or .env file) if your host UID differs.
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     expose:
-      - "8080"
+    - "8080"
     environment:
       SESSION_SECRET: ${SESSION_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -19,25 +13,19 @@ services:
       CHIMERA_CONFIG: /game/chimera_config.json
       CHIMERA_DB: /game/data/chimera.db
     volumes:
-      - ./backend/chimera_config.json:/game/chimera_config.json:ro
-      - ./backend/data:/game/data:rw
+    - ./backend/chimera_config.json:/game/chimera_config.json:ro
+    - ./backend/data:/game/data:rw
     restart: unless-stopped
 
   chimera-frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
-        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}
     environment:
-      - REACT_APP_GOOGLE_CLIENT_ID=${REACT_APP_GOOGLE_CLIENT_ID}
-      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL:-/api}
+      REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
+      REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}
     image: ${FRONTEND_IMAGE:-chimera-frontend}:${TAG:-latest}
     depends_on:
-      - chimera-backend
+    - chimera-backend
     expose:
-      - "80"
+    - "80"
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O- http://localhost/ || exit 1"]
@@ -56,9 +44,9 @@ services:
     - "8880:80"
     - "8443:443"
     environment:
-    - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
-    - CADDY_EMAIL=${CADDY_EMAIL}
-    - DOMAIN=${DOMAIN}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CADDY_EMAIL: ${CADDY_EMAIL}
+      DOMAIN: ${DOMAIN}
     volumes:
     - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
     - ./infrastructure/caddy/data:/data
