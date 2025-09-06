@@ -36,8 +36,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy entrypoint that writes runtime environment variables into a JS
 # file served to the browser so the SPA can be configured at container start.
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY scripts/env-config.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh || true
+# Ensure the script writes the config into the nginx html folder at runtime
+ENV TARGET=/usr/share/nginx/html/env-config.js
 
 # Ensure permissions (nginx in this image runs as 'nginx' user for worker processes)
 RUN chown -R nginx:nginx /usr/share/nginx/html || true

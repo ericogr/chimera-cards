@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   chimera-backend:
+    container_name: chimera-backend
     image: ${BACKEND_IMAGE:-chimera-backend}:${TAG:-latest}
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     expose:
@@ -18,10 +19,11 @@ services:
     restart: unless-stopped
 
   chimera-frontend:
+    container_name: chimera-frontend
+    image: ${FRONTEND_IMAGE:-chimera-frontend}:${TAG:-latest}
     environment:
       REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
       REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}
-    image: ${FRONTEND_IMAGE:-chimera-frontend}:${TAG:-latest}
     depends_on:
     - chimera-backend
     expose:
@@ -35,6 +37,7 @@ services:
       start_period: 10s
 
   caddy:
+    container_name: chimera-caddy
     image: ghcr.io/caddybuilds/caddy-cloudflare:latest
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     depends_on:
