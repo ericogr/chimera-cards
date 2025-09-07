@@ -94,6 +94,10 @@ DEF cannot go below 0. This ensures the battle escalates quickly and prevents st
 - The controlling player immediately brings Hybrid 2 into the arena.
 - Victory is declared when one player defeats both enemy hybrids.
 
+Note on resignations: if a player chooses to resign/end the match, the act is
+recorded as a resignation for that player (used for stats). No victory is
+awarded to the opponent when a resignation occurs.
+
 ## 6. Balancing Risks and Solutions
 
 - The Untouchable Speedster (max AGI): Balanced by low HP/DEF. Fatigue ensures fragile hybrids collapse in prolonged fights.

@@ -283,7 +283,9 @@ func (h *GameHandler) EndGame(c *gin.Context) {
 	g.Phase = "resolved"
 	g.Winner = ""
 
-	// If a player is specified, assign victory to the opponent (resignation)
+    // If a player is specified, count it as a resignation for that player.
+    // Do NOT assign victory to the opponent: resignations only increment
+    // the quitter's resignation stat and do not award a win to anyone.
 	var req EndGamePayload
 	_ = c.ShouldBindJSON(&req) // optional body; ignore errors
 	if req.PlayerUUID != "" && len(g.Players) == 2 {
@@ -296,10 +298,11 @@ func (h *GameHandler) EndGame(c *gin.Context) {
 			loser = &g.Players[1]
 			winner = &g.Players[0]
 		}
-		if loser != nil && winner != nil {
-			g.Winner = winner.PlayerName
-			g.Message = "Player resigned: " + loser.PlayerName + "; victory to " + winner.PlayerName
-		}
+        if loser != nil {
+            // Mark a human-friendly message that someone resigned. Do not set
+            // `g.Winner` so the opponent does not receive a win.
+            g.Message = "Player resigned: " + loser.PlayerName
+        }
 	}
 	if g.Message == "" {
 		g.Message = "Game ended by a player"

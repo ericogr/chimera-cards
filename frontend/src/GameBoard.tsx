@@ -265,7 +265,7 @@ const GameBoard: React.FC = () => {
             <img src={iconEnd} alt="End" className="btn-icon" />
             End Match
           </button>
-          <div className="action-desc">Forfeit the match — ends combat and counts as a forfeit by your player.</div>
+          <div className="action-desc">Forfeit the match — ends combat and records a resignation for your player (no victory awarded to the opponent).</div>
         </div>
 
         {planning && (
