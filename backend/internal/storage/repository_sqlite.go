@@ -15,14 +15,19 @@ type sqliteRepository struct {
 	db *gorm.DB
 	// configByName maps lowercase entity name -> config definition (stats).
 	configByName map[string]game.Entity
+
+	// publicGamesTTL controls how long newly created public games remain
+	// listed by GetPublicGames (e.g. 5m). This value is provided by the
+	// server configuration (chimera_config.json).
+	publicGamesTTL time.Duration
 }
 
-func NewSQLiteRepository(db *gorm.DB, configEntities []game.Entity) Repository {
+func NewSQLiteRepository(db *gorm.DB, configEntities []game.Entity, publicGamesTTL time.Duration) Repository {
 	m := make(map[string]game.Entity, len(configEntities))
 	for _, a := range configEntities {
 		m[strings.ToLower(a.Name)] = a
 	}
-	return &sqliteRepository{db: db, configByName: m}
+	return &sqliteRepository{db: db, configByName: m, publicGamesTTL: publicGamesTTL}
 }
 
 func (r *sqliteRepository) GetEntities() ([]game.Entity, error) {
@@ -139,8 +144,8 @@ func (r *sqliteRepository) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
 
 func (r *sqliteRepository) GetPublicGames() ([]game.Game, error) {
 	var games []game.Game
-	fiveMinutesAgo := time.Now().Add(-5 * time.Minute)
-	if err := r.db.Preload("Players").Where("private = ? AND created_at > ?", false, fiveMinutesAgo).Order("created_at desc").Find(&games).Error; err != nil {
+	cutoff := time.Now().Add(-r.publicGamesTTL)
+	if err := r.db.Preload("Players").Where("private = ? AND created_at > ?", false, cutoff).Order("created_at desc").Find(&games).Error; err != nil {
 		return nil, err
 	}
 	// Only return games with at least one player

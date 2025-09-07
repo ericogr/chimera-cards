@@ -55,7 +55,7 @@ func main() {
 		logging.Fatal("Failed to initialize database", err, nil)
 	}
 
-	repo := storage.NewSQLiteRepository(db, cfg.Entities)
+	repo := storage.NewSQLiteRepository(db, cfg.Entities, cfg.PublicGamesTTL)
 	handler := api.NewGameHandler(repo)
 	authHandler := api.NewAuthHandler()
 
