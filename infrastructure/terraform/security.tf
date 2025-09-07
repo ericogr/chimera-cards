@@ -33,7 +33,7 @@ resource "oci_core_security_list" "sec_list" {
 
   ingress_security_rules {
     protocol = "6"
-    source   = "0.0.0.0/0"
+    source   =  var.subnet_cidr
     tcp_options {
         min = var.backend_https_port
         max = var.backend_https_port
@@ -42,7 +42,7 @@ resource "oci_core_security_list" "sec_list" {
 
   ingress_security_rules {
     protocol = "6"
-    source   = "0.0.0.0/0"
+    source   =  var.subnet_cidr
     tcp_options {
         min = var.backend_http_port
         max = var.backend_http_port
