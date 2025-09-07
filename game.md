@@ -6,7 +6,7 @@ Players combine the essence of 2–3 distinct entities to forge two unique hybri
 
 This system keeps battles sharp and decisive — hybrids can unleash powerful abilities, but dwindling stamina and creeping fatigue ensure that every round pushes the fight toward a dramatic finish.
 
-## 1. Beast Attributes
+## 1. Entity Attributes
 
 To keep the game focused and streamlined, each entity is defined by a set of core attributes. Every base entity has a fixed distribution of points across its stats, ensuring that no creature is strictly better — only specialized in a unique role.
 
@@ -25,8 +25,6 @@ To keep the game focused and streamlined, each entity is defined by a set of cor
 - Vigor is the wear-and-tear of combat — if it runs out, your hybrid’s effectiveness collapses.
 
 ## 2. The 10 Fundamental Entities
-
-⚠ HP values have been reduced by ~25% to keep battles shorter.
 
 | Entity     | HP | ATK | DEF | AGI | ENE | Special Ability (Energy Cost)                                                              |
 | ---------- | -- | --- | --- | --- | --- | ------------------------------------------------------------------------------------------ |

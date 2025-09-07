@@ -23,6 +23,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
   const playerUUID = localStorage.getItem('player_uuid') || '';
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const fetchEntities = async () => {
@@ -190,8 +191,25 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   );
 
   return (
-    <div style={{ border: '1px solid #333', padding: 16, borderRadius: 8 }}>
-      <h3>Create Your Hybrids</h3>
+    <div style={{ border: '1px solid #333', padding: 16, borderRadius: 8, position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button
+          type="button"
+          onClick={() => setShowHelp(true)}
+          style={{
+            background: 'transparent',
+            color: '#61dafb',
+            border: '1px solid #61dafb',
+            padding: '6px 10px',
+            borderRadius: 6,
+            cursor: 'pointer',
+            fontSize: 14,
+          }}
+        >
+          Help
+        </button>
+        <h3 style={{ margin: 0 }}>Create Your Hybrids</h3>
+      </div>
       <div className="hybrid-creation-grid">
         <section>
           <h4>Hybrid 1</h4>
@@ -210,6 +228,49 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
         </button>
         <div style={{ fontSize: 12, color: '#aaa' }}>* Names are generated automatically by the game.</div>
       </div>
+      {showHelp && (
+        <div
+          onClick={() => setShowHelp(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              color: '#000',
+              borderRadius: 8,
+              padding: '18px 20px',
+              maxWidth: 680,
+              width: '100%',
+              boxSizing: 'border-box',
+              textAlign: 'center',
+              fontSize: 16,
+              lineHeight: 1.4,
+            }}
+          >
+            <div style={{ textAlign: 'left' }}>
+              <ul style={{ paddingLeft: 18, margin: 0 }}>
+                <li style={{ marginBottom: 8 }}>Pick 2–3 entities for each hybrid.</li>
+                <li style={{ marginBottom: 8 }}>Create two different hybrids — hybrids cannot share the same entity.</li>
+                <li style={{ marginBottom: 8 }}>For each hybrid, choose one of the selected entities to enable its special ability.</li>
+                <li>Tap <strong>"Create Hybrids"</strong> to save.</li>
+              </ul>
+            </div>
+            <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>Tap anywhere to close</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
