@@ -146,7 +146,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
             <div style={{ fontSize: 12, color: '#ccc' }}>
               HP {a.pv} | ATK {a.atq} | DEF {a.def} | AGI {a.agi} | ENE {a.ene} | VIG {a.vigor_cost ?? '-'}
             </div>
-            <div style={{ fontSize: 12 }}>{a.skill_name} (Cost {a.skill_cost})</div>
+            <div style={{ fontSize: 12 }}>{a.skill?.name} (Cost {a.skill?.cost})</div>
             {(() => {
               const isPicked = src.entityIds.includes(a.ID);
               return (

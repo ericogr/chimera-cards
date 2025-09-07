@@ -7,9 +7,13 @@ export interface Entity {
   agi: number;
   ene: number;
   vigor_cost?: number;
-  skill_name: string;
-  skill_cost: number;
-  skill_description: string;
+  skill?: {
+    name: string;
+    description?: string;
+    cost?: number;
+    key?: string;
+    effect?: any;
+  };
 }
 
 // Canonical entity names used across the frontend.

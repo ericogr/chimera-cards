@@ -61,8 +61,8 @@ env var). This file defines the entities and several templates used at runtime.
 
 - `entity_list`: array of entity objects with fields such as `name`,
   `hit_points`, `attack`, `defense`, `agility`, `energy`, `vigor_cost`,
-  `skill_name`, `skill_cost`, `skill_description`, `skill_key` and a
-  `skill_effect` object describing the mechanical behaviour of the ability.
+  and a nested `skill` object (e.g. `skill": { "name", "description", "cost", "key", "effect" }`) describing the human-facing
+  metadata and the machine-readable `effect` parameters used by the engine.
 - `single_image_prompt`: prompt template used when generating a single-entity
   portrait (used at startup and by the entity asset endpoint). Use the token
   `{{entities}}` where the entity name should be substituted.

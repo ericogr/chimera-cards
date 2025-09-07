@@ -97,7 +97,7 @@ const GameBoard: React.FC = () => {
     if (!planning || !me?.pending_action_type) return '';
     if (me.pending_action_type === 'ability') {
       const entity = myActive?.base_entities?.find(a => a.ID === me.pending_action_entity_id);
-      return entity ? `Ability: ${entity.skill_name}` : 'Ability';
+      return entity ? `Ability: ${entity.skill?.name || 'Ability'}` : 'Ability';
     }
     if (me.pending_action_type === 'basic_attack') return 'Basic Attack';
     if (me.pending_action_type === 'defend') return 'Defend';
@@ -213,15 +213,15 @@ const GameBoard: React.FC = () => {
               const selId = myActive.selected_ability_entity_id;
               const ability = myActive.base_entities?.find(a => a.ID === selId) as Entity | undefined;
               if (!ability) return null;
-              const notEnoughEnergy = (myActive?.current_ene || 0) < ability.skill_cost;
+              const notEnoughEnergy = (myActive?.current_ene || 0) < (ability.skill?.cost || 0);
               return (
                 <div className="action-row">
                   <button className="icon-btn" onClick={() => submitAction('ability', ability)} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null || notEnoughEnergy}>
                     <img src={iconAbility} alt="Ability" className="btn-icon" />
-                    {ability.skill_name}
+                    {ability.skill?.name}
                   </button>
                   <div className="action-desc">
-                    {ability.skill_description} — ENE {ability.skill_cost}, VIG {vigCostFor(ability.name)}
+                    {ability.skill?.description} — ENE {ability.skill?.cost}, VIG {vigCostFor(ability.name)}
                   </div>
                 </div>
               );

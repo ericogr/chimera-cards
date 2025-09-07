@@ -23,18 +23,10 @@ type Entity struct {
 	// intentionally omitted from JSON responses (`json:"-"`) and stored
 	// as a BLOB in the database column `image_png`.
 	ImagePNG         []byte `json:"-" gorm:"column:image_png;type:blob"`
-	SkillName        string `json:"skill_name" gorm:"-"`
-	SkillCost        int    `json:"skill_cost" gorm:"-"`
-	SkillDescription string `json:"skill_description" gorm:"-"`
-	// SkillKey is an internal stable identifier for the entity's ability
-	// (e.g. "skill:roar"). It is loaded from the chimera config and used
-	// by the engine when recording `LastAction` and for mapping abilities.
-	SkillKey string `json:"skill_key" gorm:"-"`
-
-	// SkillEffect contains machine-readable parameters that describe the
-	// mechanical behaviour of the entity's ability. Keeping this structured
-	// in the configuration allows adding new entities without changing code.
-	SkillEffect SkillEffect `json:"skill_effect" gorm:"-"`
+	// Skill contains the nested skill configuration (human-friendly and
+	// machine-readable parts). It is not persisted in the DB (gorm:"-")
+	// but will be exposed in API responses as a nested object.
+	Skill Skill `json:"skill" gorm:"-"`
 }
 
 // TableName overrides the default GORM table name for Entity so the
@@ -79,6 +71,17 @@ type SkillEffect struct {
     // parameters (priority, reveal, charge/stun execution flags). Those
     // options have been removed to simplify the ability system — remaining
     // fields describe pure buffs/debuffs and instant effects only.
+}
+
+// Skill is a compact wrapper combining the human-readable metadata for an
+// ability (name, description, cost, key) with the structured machine
+// parameters contained in SkillEffect. Keep it non-persistent.
+type Skill struct {
+    Name        string      `json:"name" gorm:"-"`
+    Description string      `json:"description" gorm:"-"`
+    Cost        int         `json:"cost" gorm:"-"`
+    Key         string      `json:"key" gorm:"-"`
+    Effect      SkillEffect `json:"effect" gorm:"-"`
 }
 
 type Hybrid struct {

@@ -25,7 +25,7 @@ func main() {
 	}
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
-		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'entity_list' array of entity objects (name,hit_points,attack,defense,agility,energy,skill_name,skill_cost,skill_description) and optional keys: server.address, single_image_prompt, hybrid_image_prompt"})
+		logging.Fatal("Missing or invalid chimera configuration", err, logging.Fields{"config_path": configPath, "hint": "create a chimera_config.json with an 'entity_list' array of entity objects (name,hit_points,attack,defense,agility,energy,vigor_cost,skill{name,description,cost,key,effect}) and optional keys: server.address, single_image_prompt, hybrid_image_prompt"})
 	}
 
 	// If the configuration provides image prompt templates, apply them to

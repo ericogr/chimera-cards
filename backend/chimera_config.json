@@ -8,13 +8,15 @@
       "agility": 5,
       "energy": 0,
       "vigor_cost": 2,
-      "skill_name": "Commanding Roar",
-      "skill_cost": 3,
-      "skill_description": "Reduces the opponent's Attack by 30% for one round.",
-      "skill_key": "skill:roar",
-      "skill_effect": {
-        "opponent_attack_debuff_percent": 30,
-        "opponent_attack_debuff_duration": 1
+      "skill": {
+        "name": "Commanding Roar",
+        "description": "Reduces the opponent's Attack by 30% for one round.",
+        "cost": 3,
+        "key": "skill:roar",
+        "effect": {
+          "opponent_attack_debuff_percent": 30,
+          "opponent_attack_debuff_duration": 1
+        }
       }
     },
     {
@@ -25,14 +27,16 @@
       "agility": 2,
       "energy": 0,
       "vigor_cost": 3,
-      "skill_name": "Frenzy",
-      "skill_cost": 4,
-      "skill_description": "Increases own Attack by 50% this round and ignores the opponent's Defense.",
-      "skill_key": "skill:frenzy",
-      "skill_effect": {
-        "attack_buff_percent": 50,
-        "attack_buff_duration": 1,
-        "attack_ignores_defense": true
+      "skill": {
+        "name": "Frenzy",
+        "description": "Increases own Attack by 50% this round and ignores the opponent's Defense.",
+        "cost": 4,
+        "key": "skill:frenzy",
+        "effect": {
+          "attack_buff_percent": 50,
+          "attack_buff_duration": 1,
+          "attack_ignores_defense": true
+        }
       }
     },
     {
@@ -43,15 +47,17 @@
       "agility": 10,
       "energy": 1,
       "vigor_cost": 2,
-      "skill_name": "Swift Pounce",
-      "skill_cost": 3,
-      "skill_description": "A quick strike: +30% Attack and ignores 40% of the opponent's Defense for one round.",
-      "skill_key": "skill:swift_pounce",
-      "skill_effect": {
-        "attack_buff_percent": 30,
-        "attack_buff_duration": 1,
-        "attack_ignores_defense": true,
-        "attack_ignores_defense_duration": 1
+      "skill": {
+        "name": "Swift Pounce",
+        "description": "A quick strike: +30% Attack and ignores 40% of the opponent's Defense for one round.",
+        "cost": 3,
+        "key": "skill:swift_pounce",
+        "effect": {
+          "attack_buff_percent": 30,
+          "attack_buff_duration": 1,
+          "attack_ignores_defense": true,
+          "attack_ignores_defense_duration": 1
+        }
       }
     },
     {
@@ -62,13 +68,15 @@
       "agility": 9,
       "energy": 1,
       "vigor_cost": 1,
-      "skill_name": "Strategic Flight",
-      "skill_cost": 2,
-      "skill_description": "Focus and strike: +20% Attack next round.",
-      "skill_key": "skill:flight",
-      "skill_effect": {
-        "attack_buff_percent": 20,
-        "attack_buff_duration": 1
+      "skill": {
+        "name": "Strategic Flight",
+        "description": "Focus and strike: +20% Attack next round.",
+        "cost": 2,
+        "key": "skill:flight",
+        "effect": {
+          "attack_buff_percent": 20,
+          "attack_buff_duration": 1
+        }
       }
     },
     {
@@ -79,13 +87,15 @@
       "agility": 1,
       "energy": 0,
       "vigor_cost": 3,
-      "skill_name": "Relentless Charge",
-      "skill_cost": 4,
-      "skill_description": "Overpower: +40% Attack for one round (high-risk play).",
-      "skill_key": "skill:charge",
-      "skill_effect": {
-        "attack_buff_percent": 40,
-        "attack_buff_duration": 1
+      "skill": {
+        "name": "Relentless Charge",
+        "description": "Overpower: +40% Attack for one round (high-risk play).",
+        "cost": 4,
+        "key": "skill:charge",
+        "effect": {
+          "attack_buff_percent": 40,
+          "attack_buff_duration": 1
+        }
       }
     },
     {
@@ -96,15 +106,17 @@
       "agility": 1,
       "energy": 0,
       "vigor_cost": 3,
-      "skill_name": "Iron Shell",
-      "skill_cost": 3,
-      "skill_description": "Triples your Defense for one round. You cannot attack this round.",
-      "skill_key": "skill:iron_shell",
-      "skill_effect": {
-        "defense_buff_multiplier": 3,
-        "defense_buff_duration": 1,
-        "cannot_attack": true,
-        "cannot_attack_duration": 1
+      "skill": {
+        "name": "Iron Shell",
+        "description": "Triples your Defense for one round. You cannot attack this round.",
+        "cost": 3,
+        "key": "skill:iron_shell",
+        "effect": {
+          "defense_buff_multiplier": 3,
+          "defense_buff_duration": 1,
+          "cannot_attack": true,
+          "cannot_attack_duration": 1
+        }
       }
     },
     {
@@ -115,13 +127,15 @@
       "agility": 2,
       "energy": 0,
       "vigor_cost": 3,
-      "skill_name": "Stunning Blow",
-      "skill_cost": 5,
-      "skill_description": "Powerful strike: +30% Attack this round.",
-      "skill_key": "skill:stun",
-      "skill_effect": {
-        "attack_buff_percent": 30,
-        "attack_buff_duration": 1
+      "skill": {
+        "name": "Stunning Blow",
+        "description": "Powerful strike: +30% Attack this round.",
+        "cost": 5,
+        "key": "skill:stun",
+        "effect": {
+          "attack_buff_percent": 30,
+          "attack_buff_duration": 1
+        }
       }
     },
     {
@@ -132,12 +146,14 @@
       "agility": 6,
       "energy": 1,
       "vigor_cost": 1,
-      "skill_name": "Pack Tactics",
-      "skill_cost": 2,
-      "skill_description": "Restore 4 Energy points.",
-      "skill_key": "skill:pack_tactics",
-      "skill_effect": {
-        "restore_energy": 4
+      "skill": {
+        "name": "Pack Tactics",
+        "description": "Restore 4 Energy points.",
+        "cost": 2,
+        "key": "skill:pack_tactics",
+        "effect": {
+          "restore_energy": 4
+        }
       }
     },
     {
@@ -148,13 +164,15 @@
       "agility": 4,
       "energy": 1,
       "vigor_cost": 2,
-      "skill_name": "Ink Curtain",
-      "skill_cost": 3,
-      "skill_description": "Reduces the opponent's Agility by 50% for two rounds.",
-      "skill_key": "skill:ink",
-      "skill_effect": {
-        "opponent_agility_debuff_percent": 50,
-        "opponent_agility_debuff_duration": 2
+      "skill": {
+        "name": "Ink Curtain",
+        "description": "Reduces the opponent's Agility by 50% for two rounds.",
+        "cost": 3,
+        "key": "skill:ink",
+        "effect": {
+          "opponent_agility_debuff_percent": 50,
+          "opponent_agility_debuff_duration": 2
+        }
       }
     },
     {
@@ -165,12 +183,14 @@
       "agility": 7,
       "energy": 1,
       "vigor_cost": 1,
-      "skill_name": "Cunning Analysis",
-      "skill_cost": 2,
-      "skill_description": "Quick observation: restore 2 Energy to your hybrid.",
-      "skill_key": "skill:reveal",
-      "skill_effect": {
-        "restore_energy": 2
+      "skill": {
+        "name": "Cunning Analysis",
+        "description": "Quick observation: restore 2 Energy to your hybrid.",
+        "cost": 2,
+        "key": "skill:reveal",
+        "effect": {
+          "restore_energy": 2
+        }
       }
     }
   ],

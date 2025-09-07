@@ -48,8 +48,8 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		return
 	}
 	prevE := self.CurrentEnergy
-	if self.CurrentEnergy >= ch.SkillCost {
-		self.CurrentEnergy -= ch.SkillCost
+	if self.CurrentEnergy >= ch.Skill.Cost {
+		self.CurrentEnergy -= ch.Skill.Cost
 	}
 	vigCost := ch.VigorCost
 	prevV := self.CurrentVIG
@@ -62,11 +62,11 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		self.CurrentVIG = 0
 		self.VulnerableThisRound = true
 	}
-	eff := ch.SkillEffect
+	eff := ch.Skill.Effect
 
 	// Record a stable last-action key when available (used for UI/logs).
-	if ch.SkillKey != "" {
-		self.LastAction = ch.SkillKey
+	if ch.Skill.Key != "" {
+		self.LastAction = ch.Skill.Key
 	} else {
 		self.LastAction = string(ActionAbility)
 	}
@@ -79,7 +79,7 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		}
 		opp.AttackDebuffPercent = eff.OpponentAttackDebuffPercent
 		opp.AttackDebuffUntilRound = rc.g.RoundCount + dur - 1
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": -" + strconv.Itoa(eff.OpponentAttackDebuffPercent) + "% opponent Attack for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": -" + strconv.Itoa(eff.OpponentAttackDebuffPercent) + "% opponent Attack for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
 	// Self attack buff + optionally ignore defense
@@ -98,12 +98,12 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 				self.SelfDefenseIgnoredUntilRound = rc.g.RoundCount
 			}
 		}
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": +" + strconv.Itoa(eff.AttackBuffPercent) + "% Attack" + func() string {
+		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": +" + strconv.Itoa(eff.AttackBuffPercent) + "% Attack" + func() string {
 			if eff.AttackIgnoresDefense {
 				return " and ignores Defense"
 			}
 			return ""
-		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
 
@@ -118,18 +118,18 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		if eff.CannotAttack {
 			self.CannotAttackUntilRound = rc.g.RoundCount + eff.CannotAttackDuration - 1
 		}
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": Defense x" + strconv.Itoa(eff.DefenseBuffMultiplier) + " for " + strconv.Itoa(dur) + " round(s)" + func() string {
+		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": Defense x" + strconv.Itoa(eff.DefenseBuffMultiplier) + " for " + strconv.Itoa(dur) + " round(s)" + func() string {
 			if eff.CannotAttack {
 				return " (cannot attack)"
 			}
 			return ""
-		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
 	// Restore energy
 	if eff.RestoreEnergy > 0 {
 		self.CurrentEnergy += eff.RestoreEnergy
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": +" + strconv.Itoa(eff.RestoreEnergy) + " Energy. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": +" + strconv.Itoa(eff.RestoreEnergy) + " Energy. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
 	// Opponent agility debuff
@@ -140,7 +140,7 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		}
 		opp.AgilityDebuffPercent = eff.OpponentAgilityDebuffPercent
 		opp.AgilityDebuffUntilRound = rc.g.RoundCount + dur - 1
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": -" + strconv.Itoa(eff.OpponentAgilityDebuffPercent) + "% opponent Agility for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
+		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": -" + strconv.Itoa(eff.OpponentAgilityDebuffPercent) + "% opponent Agility for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
     // Note: priority/reveal mechanics were removed; abilities should use

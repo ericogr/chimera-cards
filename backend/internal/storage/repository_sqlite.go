@@ -46,11 +46,7 @@ func (r *sqliteRepository) GetEntities() ([]game.Entity, error) {
 				entities[i].Agility = conf.Agility
 				entities[i].Energy = conf.Energy
 				entities[i].VigorCost = conf.VigorCost
-				entities[i].SkillName = conf.SkillName
-				entities[i].SkillCost = conf.SkillCost
-				entities[i].SkillDescription = conf.SkillDescription
-				entities[i].SkillKey = conf.SkillKey
-				entities[i].SkillEffect = conf.SkillEffect
+				entities[i].Skill = conf.Skill
 			}
 		}
 	}
@@ -82,11 +78,7 @@ func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 						a.Agility = conf.Agility
 						a.Energy = conf.Energy
 						a.VigorCost = conf.VigorCost
-						a.SkillName = conf.SkillName
-						a.SkillCost = conf.SkillCost
-						a.SkillDescription = conf.SkillDescription
-						a.SkillKey = conf.SkillKey
-						a.SkillEffect = conf.SkillEffect
+						a.Skill = conf.Skill
 					}
 				}
 			}
@@ -131,11 +123,7 @@ func (r *sqliteRepository) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
 				entities[i].Agility = conf.Agility
 				entities[i].Energy = conf.Energy
 				entities[i].VigorCost = conf.VigorCost
-				entities[i].SkillName = conf.SkillName
-				entities[i].SkillCost = conf.SkillCost
-				entities[i].SkillDescription = conf.SkillDescription
-				entities[i].SkillKey = conf.SkillKey
-				entities[i].SkillEffect = conf.SkillEffect
+				entities[i].Skill = conf.Skill
 			}
 		}
 	}
@@ -314,9 +302,7 @@ func (r *sqliteRepository) GetEntityByName(name string) (*game.Entity, error) {
 			a.Agility = conf.Agility
 			a.Energy = conf.Energy
 			a.VigorCost = conf.VigorCost
-			a.SkillName = conf.SkillName
-			a.SkillCost = conf.SkillCost
-			a.SkillDescription = conf.SkillDescription
+			a.Skill = conf.Skill
 		}
 	}
 	return &a, nil

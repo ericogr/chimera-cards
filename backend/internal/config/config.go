@@ -11,7 +11,7 @@ import (
 	"github.com/ericogr/chimera-cards/internal/game"
 )
 
-type entityEntry struct {
+	type entityEntry struct {
 	Name             string           `json:"name"`
 	HitPoints        int              `json:"hit_points"`
 	Attack           int              `json:"attack"`
@@ -19,11 +19,8 @@ type entityEntry struct {
 	Agility          int              `json:"agility"`
 	Energy           int              `json:"energy"`
 	VigorCost        int              `json:"vigor_cost"`
-	SkillName        string           `json:"skill_name"`
-	SkillCost        int              `json:"skill_cost"`
-	SkillDescription string           `json:"skill_description"`
-	SkillKey         string           `json:"skill_key"`
-	SkillEffect      game.SkillEffect `json:"skill_effect"`
+	// New nested skill object (name, description, cost, key, effect)
+	Skill            game.Skill       `json:"skill"`
 }
 
 type rawConfig struct {
@@ -92,11 +89,7 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 			Agility:          a.Agility,
 			Energy:           a.Energy,
 			VigorCost:        a.VigorCost,
-			SkillName:        a.SkillName,
-			SkillCost:        a.SkillCost,
-			SkillDescription: a.SkillDescription,
-			SkillKey:         a.SkillKey,
-			SkillEffect:      a.SkillEffect,
+			Skill:            a.Skill,
 		})
 	}
 
@@ -113,11 +106,11 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		}
 		nameSet[ln] = struct{}{}
         // Note: execution-specific flags were removed from SkillEffect.
-		if aa.SkillKey != "" {
-			if _, exists := skillSet[aa.SkillKey]; exists {
-				return nil, fmt.Errorf("config file %s: duplicate skill_key '%s'", path, aa.SkillKey)
+		if aa.Skill.Key != "" {
+			if _, exists := skillSet[aa.Skill.Key]; exists {
+				return nil, fmt.Errorf("config file %s: duplicate skill_key '%s'", path, aa.Skill.Key)
 			}
-			skillSet[aa.SkillKey] = struct{}{}
+			skillSet[aa.Skill.Key] = struct{}{}
 		}
 	}
 

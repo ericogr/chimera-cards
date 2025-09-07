@@ -43,14 +43,14 @@ To keep the game focused and streamlined, each entity is defined by a set of cor
 
 ## Skill Effects
 
-Each entity's Special Ability is described in two ways: a human-friendly `skill_name`
-and `skill_description`, and a machine-readable `skill_effect` object in the server
-configuration. The `skill_effect` object contains a small set of optional parameters
+Each entity's Special Ability is described in two ways: a human-friendly `skill.name`
+and `skill.description`, and a machine-readable `skill.effect` object in the server
+configuration. The `skill.effect` object contains a small set of optional parameters
 that the engine uses to apply buffs, debuffs and other mechanical behaviour when the
 ability is used. This makes it easy to add or tweak abilities without changing code.
 
 
-Common `skill_effect` parameters (simple explanations):
+Common `skill.effect` parameters (simple explanations):
 
 - `opponent_attack_debuff_percent` / `opponent_attack_debuff_duration`: reduce the
   opponent's Attack by a percentage for N rounds.
@@ -66,9 +66,12 @@ Common `skill_effect` parameters (simple explanations):
 Example 1 — Commanding Roar (Lion): reduce opponent ATK by 30% for one round
 
 ```json
-"skill_effect": {
-  "opponent_attack_debuff_percent": 30,
-  "opponent_attack_debuff_duration": 1
+"skill": {
+  "name": "Commanding Roar",
+  "effect": {
+    "opponent_attack_debuff_percent": 30,
+    "opponent_attack_debuff_duration": 1
+  }
 }
 ```
 
@@ -76,9 +79,12 @@ Example 2 — Overpower / Charge (Rhino): replace execution-specific charge opti
 with a simple attack buff representation
 
 ```json
-"skill_effect": {
-  "attack_buff_percent": 40,
-  "attack_buff_duration": 1
+"skill": {
+  "name": "Relentless Charge",
+  "effect": {
+    "attack_buff_percent": 40,
+    "attack_buff_duration": 1
+  }
 }
 ```
 
