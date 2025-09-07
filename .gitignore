@@ -3,6 +3,7 @@ backend/bin/
 GEMINI.md
 backend/chimera.db
 .gocache/
+deploy.sh
 
 # Local frontend envs (do not commit secrets)
 .env
