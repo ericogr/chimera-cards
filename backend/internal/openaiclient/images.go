@@ -32,7 +32,7 @@ func SetSingleImagePromptTemplate(t string) {
 // SetHybridImagePromptTemplate sets the prompt template used when
 // generating images for hybrids composed of multiple entities.
 func SetHybridImagePromptTemplate(t string) {
-    hybridImagePromptTemplate = strings.TrimSpace(t)
+	hybridImagePromptTemplate = strings.TrimSpace(t)
 }
 
 // GenerateEntityImage generates an image for a single entity using the
@@ -48,31 +48,31 @@ func GenerateEntityImage(ctx context.Context, entityName string) ([]byte, error)
 // entities using the configured hybrid prompt template (or a sensible
 // default if missing).
 func GenerateHybridImage(ctx context.Context, entityNames []string) ([]byte, error) {
-    if len(entityNames) == 0 || len(entityNames) > 3 {
-        return nil, fmt.Errorf("entityNames must contain 1..3 items")
-    }
-    return generateImageWithTemplate(ctx, hybridImagePromptTemplate, entityNames)
+	if len(entityNames) == 0 || len(entityNames) > 3 {
+		return nil, fmt.Errorf("entityNames must contain 1..3 items")
+	}
+	return generateImageWithTemplate(ctx, hybridImagePromptTemplate, entityNames)
 }
 
 // generateImageWithTemplate is an internal helper that forms the prompt
 // from the provided template (or a default) and calls the OpenAI API.
 func generateImageWithTemplate(ctx context.Context, template string, entityNames []string) ([]byte, error) {
-    if len(entityNames) == 0 || len(entityNames) > 3 {
-        return nil, fmt.Errorf("entityNames must contain 1..3 items")
-    }
+	if len(entityNames) == 0 || len(entityNames) > 3 {
+		return nil, fmt.Errorf("entityNames must contain 1..3 items")
+	}
 
 	apiKey := os.Getenv(constants.EnvOpenAIAPIKey)
 	if apiKey == "" {
 		return nil, fmt.Errorf("%s not set", constants.EnvOpenAIAPIKey)
 	}
 
-    entitiesPart := strings.Join(entityNames, ", ")
-    prompt := template
+	entitiesPart := strings.Join(entityNames, ", ")
+	prompt := template
 	if prompt == "" {
 		// default hybrid-style template used when no custom template provided
 		prompt = "Create a single PNG image of {{entities}} in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic heroic pose, no text or logos, transparent background. Combine distinctive features of each entity into a cohesive single creature."
 	}
-    prompt = strings.ReplaceAll(prompt, "{{entities}}", entitiesPart)
+	prompt = strings.ReplaceAll(prompt, "{{entities}}", entitiesPart)
 
 	payload := map[string]interface{}{
 		"prompt":  prompt,
@@ -84,7 +84,7 @@ func generateImageWithTemplate(ctx context.Context, template string, entityNames
 
 	// Log the prompt before sending the request so operators can see what
 	// was asked to the image API when a generation happens.
-    logging.Info("openai image prompt", logging.Fields{"entities": entitiesPart, "prompt": prompt})
+	logging.Info("openai image prompt", logging.Fields{"entities": entitiesPart, "prompt": prompt})
 
 	b, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))

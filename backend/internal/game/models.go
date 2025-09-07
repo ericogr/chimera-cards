@@ -19,21 +19,21 @@ type Entity struct {
 	Agility   int `json:"agi" gorm:"-"`
 	Energy    int `json:"ene" gorm:"-"`
 	VigorCost int `json:"vigor_cost" gorm:"-"`
-    // ImagePNG stores the 256x256 PNG bytes for this entity. It is
+	// ImagePNG stores the 256x256 PNG bytes for this entity. It is
 	// intentionally omitted from JSON responses (`json:"-"`) and stored
 	// as a BLOB in the database column `image_png`.
 	ImagePNG         []byte `json:"-" gorm:"column:image_png;type:blob"`
 	SkillName        string `json:"skill_name" gorm:"-"`
 	SkillCost        int    `json:"skill_cost" gorm:"-"`
 	SkillDescription string `json:"skill_description" gorm:"-"`
-    // SkillKey is an internal stable identifier for the entity's ability
-    // (e.g. "skill:roar"). It is loaded from the chimera config and used
-    // by the engine when recording `LastAction` and for mapping abilities.
+	// SkillKey is an internal stable identifier for the entity's ability
+	// (e.g. "skill:roar"). It is loaded from the chimera config and used
+	// by the engine when recording `LastAction` and for mapping abilities.
 	SkillKey string `json:"skill_key" gorm:"-"`
 
 	// SkillEffect contains machine-readable parameters that describe the
-    // mechanical behaviour of the entity's ability. Keeping this structured
-    // in the configuration allows adding new entities without changing code.
+	// mechanical behaviour of the entity's ability. Keeping this structured
+	// in the configuration allows adding new entities without changing code.
 	SkillEffect SkillEffect `json:"skill_effect" gorm:"-"`
 }
 
@@ -95,9 +95,9 @@ type SkillEffect struct {
 type Hybrid struct {
 	gorm.Model
 	PlayerID uint `json:"-"`
-    // Name is a derived, non-persistent display field built from the
-    // hybrid's base entities (e.g. "Lion + Raven"). It is intentionally
-    // ignored by GORM so the database does not store redundant data.
+	// Name is a derived, non-persistent display field built from the
+	// hybrid's base entities (e.g. "Lion + Raven"). It is intentionally
+	// ignored by GORM so the database does not store redundant data.
 	Name string `json:"name" gorm:"-"`
 	// GeneratedName is the AI-created final name for the hybrid. It is
 	// empty until the game is started (both players created hybrids and
@@ -246,8 +246,8 @@ func (HybridGeneratedName) TableName() string { return "hybrid_generated_cache" 
 // can be applied regardless of the order provided by the caller.
 func (h *HybridGeneratedName) BeforeSave(tx *gorm.DB) (err error) {
 	// Collect non-zero IDs so that 0 (meaning "none") is not considered in
-    // the sorting. This ensures two-entity combinations are stored as
-    // (min, max, 0) and three-entity combinations as (min, mid, max).
+	// the sorting. This ensures two-entity combinations are stored as
+	// (min, max, 0) and three-entity combinations as (min, mid, max).
 	ids := make([]uint, 0, 3)
 	if h.Entity1Key != 0 {
 		ids = append(ids, h.Entity1Key)

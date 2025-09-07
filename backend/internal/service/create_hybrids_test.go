@@ -43,7 +43,7 @@ func (m *mockRepo) UpdateStatsOnGameEnd(g *game.Game, resignedEmail string) erro
 }
 
 func TestCreateHybridsSuccess(t *testing.T) {
-// Prepare entities
+	// Prepare entities
 	entities := map[uint]game.Entity{
 		1: {Model: game.Entity{}.Model, Name: "Lion", HitPoints: 4, Attack: 8, Defense: 4, Agility: 5, Energy: 0},
 		2: {Model: game.Entity{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
@@ -102,9 +102,9 @@ func TestCreateHybrids_ReusedAnimal(t *testing.T) {
 	}
 
 	err := CreateHybrids(mr, 100, req)
-    if err == nil {
-        t.Fatalf("expected error for reused entity, got nil")
-    }
+	if err == nil {
+		t.Fatalf("expected error for reused entity, got nil")
+	}
 	if !reflect.DeepEqual(err, ErrEntityReused) {
 		t.Fatalf("expected ErrEntityReused, got %v", err)
 	}

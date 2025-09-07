@@ -45,15 +45,15 @@ func callOpenAI(entityNames []string) (string, error) {
 	// Build prompt from template. If a configured template is present use
 	// it; otherwise fall back to a sensible default. The template should
 	// contain the token {{entities}} where the names list will be inserted.
-    entitiesPart := strings.Join(entityNames, ", ")
-    prompt := namePromptTemplate
+	entitiesPart := strings.Join(entityNames, ", ")
+	prompt := namePromptTemplate
 	if prompt == "" {
 		prompt = "Given these entity names: {{entities}}. Create a short, fun, single-name hybrid that combines them (1-3 words). Return only the name."
 	}
-    prompt = strings.ReplaceAll(prompt, "{{entities}}", entitiesPart)
+	prompt = strings.ReplaceAll(prompt, "{{entities}}", entitiesPart)
 
-    // Log the prompt so operators can see exactly what was sent to OpenAI
-    logging.Info("hybrid-name openai prompt", logging.Fields{"entities": entitiesPart, "prompt": prompt})
+	// Log the prompt so operators can see exactly what was sent to OpenAI
+	logging.Info("hybrid-name openai prompt", logging.Fields{"entities": entitiesPart, "prompt": prompt})
 
 	payload := map[string]interface{}{
 		"model": constants.OpenAIChatModel,
@@ -113,25 +113,25 @@ func callOpenAI(entityNames []string) (string, error) {
 // stores it in the repository. It returns the name, the source ("db"|"openai"),
 // and an error if the OpenAI call failed.
 func GetOrCreateGeneratedName(repo storage.Repository, entityNames []string) (string, string, error) {
-    // Build canonical entity key from names: lowercase, underscores, sorted.
-    entityKey := keys.EntityKeyFromNames(entityNames)
+	// Build canonical entity key from names: lowercase, underscores, sorted.
+	entityKey := keys.EntityKeyFromNames(entityNames)
 
 	// Try cache by canonical name-key first.
-    if entityKey != "" {
-        if gn, err := repo.GetGeneratedNameByEntityKey(entityKey); err == nil && gn != nil && gn.GeneratedName != "" {
-            logging.Info("hybrid-name cache hit by entity_key", logging.Fields{constants.LogFieldKey: entityKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
-            return gn.GeneratedName, "db_key", nil
-        }
-    }
+	if entityKey != "" {
+		if gn, err := repo.GetGeneratedNameByEntityKey(entityKey); err == nil && gn != nil && gn.GeneratedName != "" {
+			logging.Info("hybrid-name cache hit by entity_key", logging.Fields{constants.LogFieldKey: entityKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
+			return gn.GeneratedName, "db_key", nil
+		}
+	}
 
 	// Not cached — deduplicate concurrent generation using singleflight
-    // keyed by the canonical entityKey (fallback to a stable string if
-    // entityKey is empty).
-    sfKey := entityKey
-    if sfKey == "" {
-        // As a last resort use the joined entity names string (unsorted)
-        sfKey = strings.Join(entityNames, " + ")
-    }
+	// keyed by the canonical entityKey (fallback to a stable string if
+	// entityKey is empty).
+	sfKey := entityKey
+	if sfKey == "" {
+		// As a last resort use the joined entity names string (unsorted)
+		sfKey = strings.Join(entityNames, " + ")
+	}
 
 	type genRes struct {
 		Name   string
@@ -139,14 +139,14 @@ func GetOrCreateGeneratedName(repo storage.Repository, entityNames []string) (st
 	}
 
 	ch := dedupe.NameGroup.DoChan(sfKey, func() (interface{}, error) {
-        // Re-check DB by entity key inside the singleflight function in
-        // case another goroutine saved the generated name before we got here.
-        if entityKey != "" {
-            if gn, err := repo.GetGeneratedNameByEntityKey(entityKey); err == nil && gn != nil && gn.GeneratedName != "" {
-                logging.Info("hybrid-name cache hit (singleflight)", logging.Fields{constants.LogFieldKey: entityKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
-                return genRes{Name: gn.GeneratedName, Source: "db_key"}, nil
-            }
-        }
+		// Re-check DB by entity key inside the singleflight function in
+		// case another goroutine saved the generated name before we got here.
+		if entityKey != "" {
+			if gn, err := repo.GetGeneratedNameByEntityKey(entityKey); err == nil && gn != nil && gn.GeneratedName != "" {
+				logging.Info("hybrid-name cache hit (singleflight)", logging.Fields{constants.LogFieldKey: entityKey, constants.LogFieldName: gn.GeneratedName, constants.LogFieldSource: "db_key"})
+				return genRes{Name: gn.GeneratedName, Source: "db_key"}, nil
+			}
+		}
 
 		// Ask OpenAI for a new name
 		name, err := callOpenAI(entityNames)
@@ -162,10 +162,10 @@ func GetOrCreateGeneratedName(repo storage.Repository, entityNames []string) (st
 		logging.Info("hybrid-name openai success", logging.Fields{constants.LogFieldKey: sfKey, constants.LogFieldName: name})
 
 		// Persist the generated name for future reuse.
-        // Attempt to resolve numeric IDs from names so we can save the
-        // canonical row with entity key and numeric foreign keys. If
-        // any name is missing in the entities table we skip saving by IDs
-        // (the name is still usable via the entity_key lookup).
+		// Attempt to resolve numeric IDs from names so we can save the
+		// canonical row with entity key and numeric foreign keys. If
+		// any name is missing in the entities table we skip saving by IDs
+		// (the name is still usable via the entity_key lookup).
 		ids := make([]uint, 0, len(entityNames))
 		for _, n := range entityNames {
 			if a, err := repo.GetEntityByName(n); err == nil && a != nil {
@@ -175,19 +175,19 @@ func GetOrCreateGeneratedName(repo storage.Repository, entityNames []string) (st
 				break
 			}
 		}
-        if ids != nil && (len(ids) == 2 || len(ids) == 3) {
-            if err := repo.SaveGeneratedNameForEntityIDs(ids, strings.Join(entityNames, " + "), name); err != nil {
-                logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: sfKey})
-            } else {
-                logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: sfKey})
-            }
-        } else {
-            // Best-effort: save using entity_key only via repository by
-            // attempting a direct create (if repository supported it).
-            // For now we skip numeric-key save so cached lookup will rely
-            // on the stored entity_key created when possible.
-            logging.Info("hybrid-name saved to cache skipped (missing numeric ids)", logging.Fields{constants.LogFieldKey: sfKey})
-        }
+		if ids != nil && (len(ids) == 2 || len(ids) == 3) {
+			if err := repo.SaveGeneratedNameForEntityIDs(ids, strings.Join(entityNames, " + "), name); err != nil {
+				logging.Error("hybrid-name failed to save generated name", err, logging.Fields{constants.LogFieldKey: sfKey})
+			} else {
+				logging.Info("hybrid-name saved generated name", logging.Fields{constants.LogFieldKey: sfKey})
+			}
+		} else {
+			// Best-effort: save using entity_key only via repository by
+			// attempting a direct create (if repository supported it).
+			// For now we skip numeric-key save so cached lookup will rely
+			// on the stored entity_key created when possible.
+			logging.Info("hybrid-name saved to cache skipped (missing numeric ids)", logging.Fields{constants.LogFieldKey: sfKey})
+		}
 
 		return genRes{Name: name, Source: "openai"}, nil
 	})

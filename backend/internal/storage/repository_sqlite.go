@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-    "github.com/ericogr/chimera-cards/internal/game"
-    "github.com/ericogr/chimera-cards/internal/keys"
+	"github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/keys"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

@@ -26,10 +26,10 @@ func OpenAndMigrate(dataSourceName string, entitiesFromConfig []game.Entity) (*g
 		return nil, err
 	}
 
-    // Ensure a unique constraint across the three entity key columns. We use
-    // an explicit UNIQUE index so combinations like (a,b,0) are enforced when
-    // the third key is 0 (meaning "none"). The index targets the renamed
-    // cache table for hybrid-generated assets.
+	// Ensure a unique constraint across the three entity key columns. We use
+	// an explicit UNIQUE index so combinations like (a,b,0) are enforced when
+	// the third key is 0 (meaning "none"). The index targets the renamed
+	// cache table for hybrid-generated assets.
 	if execErr := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_hybrid_generated_cache_entities ON hybrid_generated_cache(entity1_key, entity2_key, entity3_key);").Error; execErr != nil {
 		return nil, execErr
 	}
