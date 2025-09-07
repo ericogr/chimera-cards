@@ -132,7 +132,8 @@
 }
 
 @media (max-width: 600px) {
-  .welcome-logo { width: 96px; height: 96px; }
+  /* Keep the welcome logo larger on small screens as well */
+  .welcome-logo { width: 260px; height: 260px; }
   .game-list, .rank-list { min-width: 600px; }
   .game-board-container { font-size: 14px; }
   .google-login-button { padding: 10px 16px; font-size: 14px; }

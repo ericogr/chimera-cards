@@ -68,15 +68,17 @@
 }
 
 .welcome-logo {
-  width: 150px;
-  height: 150px;
+  /* Increased further for better presence on larger screens */
+  width: 420px;
+  height: 420px;
   margin-bottom: 20px;
 }
 
 @media (max-width: 600px) {
+  /* Mobile: slightly larger to remain prominent on phones */
   .welcome-logo {
-    width: 100px;
-    height: 100px;
+    width: 260px;
+    height: 260px;
   }
 }
 

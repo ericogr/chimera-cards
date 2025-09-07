@@ -82,7 +82,6 @@ const App: React.FC = () => {
             </div>
           )}
           <img src="/welcome_logo.png" alt="Welcome Logo" className="welcome-logo" />
-          <h1>Chimera Cards</h1>
           <div>
             <p>Please log in to continue</p>
             {error && <p className="error-message">{error}</p>}
