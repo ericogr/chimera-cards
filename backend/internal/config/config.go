@@ -112,11 +112,7 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 			return nil, fmt.Errorf("config file %s: duplicate entity name '%s'", path, aa.Name)
 		}
 		nameSet[ln] = struct{}{}
-		if aa.SkillEffect.ExecutesPlan {
-			if strings.TrimSpace(aa.SkillKey) == "" {
-				return nil, fmt.Errorf("config file %s: entity '%s' marked executes_plan but missing 'skill_key'", path, aa.Name)
-			}
-		}
+        // Note: execution-specific flags were removed from SkillEffect.
 		if aa.SkillKey != "" {
 			if _, exists := skillSet[aa.SkillKey]; exists {
 				return nil, fmt.Errorf("config file %s: duplicate skill_key '%s'", path, aa.SkillKey)

@@ -60,8 +60,6 @@ type SkillEffect struct {
 	AttackIgnoresDefense         bool `json:"attack_ignores_defense"`
 	AttackIgnoresDefenseDuration int  `json:"attack_ignores_defense_duration"`
 
-	// Some abilities grant priority to the user for the next round.
-	PriorityNextRound bool `json:"priority_next_round"`
 
 	// Defense multiplier applied to self for the given duration.
 	DefenseBuffMultiplier int `json:"defense_buff_multiplier"`
@@ -77,19 +75,10 @@ type SkillEffect struct {
 	SwiftAddAgilityDivisor    int `json:"swift_add_agility_divisor"`
 	SwiftIgnoreDefensePercent int `json:"swift_ignore_defense_percent"`
 
-	// Charge options
-	ChargeExtraAttack   int     `json:"charge_extra_attack"`
-	ChargeRecoilPercent float64 `json:"charge_recoil_percent"`
-
-	// Stun options
-	StunChancePercent int `json:"stun_chance_percent"`
-	StunDuration      int `json:"stun_duration"`
-
-	// Reveal / informational ability
-	Reveal bool `json:"reveal"`
-
-	// Misc for future expansion
-	ExecutesPlan bool `json:"executes_plan"`
+    // Note: previously this struct included a few execution-specific
+    // parameters (priority, reveal, charge/stun execution flags). Those
+    // options have been removed to simplify the ability system — remaining
+    // fields describe pure buffs/debuffs and instant effects only.
 }
 
 type Hybrid struct {
@@ -133,7 +122,6 @@ type Hybrid struct {
 	DefenseBuffMultiplier         int    `json:"defense_buff_multiplier"`
 	DefenseBuffUntilRound         int    `json:"defense_buff_until_round"`
 	DefendStanceActive            bool   `json:"defend_stance_active"`
-	PriorityNextRound             bool   `json:"priority_next_round"`
 	AgilityDebuffPercent          int    `json:"agility_debuff_percent"`
 	AgilityDebuffUntilRound       int    `json:"agility_debuff_until_round"`
 	CannotAttackUntilRound        int    `json:"cannot_attack_until_round"`

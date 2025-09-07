@@ -106,11 +106,6 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
-	// Priority
-	if eff.PriorityNextRound {
-		self.PriorityNextRound = true
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": gains priority next round. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-	}
 
 	// Defense buff / cannot attack
 	if eff.DefenseBuffMultiplier > 0 {
@@ -148,10 +143,8 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": -" + strconv.Itoa(eff.OpponentAgilityDebuffPercent) + "% opponent Agility for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
-	// Reveal informational ability
-	if eff.Reveal {
-		rc.add(player.PlayerName + " ABILITY — " + ch.SkillName + ": reveal opponent info. Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.SkillCost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
-	}
+    // Note: priority/reveal mechanics were removed; abilities should use
+    // the remaining structured parameters (buffs/debuffs, restore, etc.).
 }
 
 func (rc *roundContext) applyBasicAttackPreEffects(player *game.Player, self *game.Hybrid) {

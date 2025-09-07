@@ -290,13 +290,10 @@ func (h *GameHandler) EndGame(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req) // optional body; ignore errors
 	if req.PlayerUUID != "" && len(g.Players) == 2 {
 		var loser *game.Player
-		var winner *game.Player
 		if g.Players[0].PlayerUUID == req.PlayerUUID {
 			loser = &g.Players[0]
-			winner = &g.Players[1]
 		} else if g.Players[1].PlayerUUID == req.PlayerUUID {
 			loser = &g.Players[1]
-			winner = &g.Players[0]
 		}
         if loser != nil {
             // Mark a human-friendly message that someone resigned. Do not set

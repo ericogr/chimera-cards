@@ -30,16 +30,59 @@ To keep the game focused and streamlined, each entity is defined by a set of cor
 | ---------- | -- | --- | --- | --- | --- | ------------------------------------------------------------------------------------------ |
 | Lion       | 4  | 8   | 4   | 5   | 2   | Commanding Roar (3 ENE): Reduces opponent’s ATK by 30% for one round.                     |
 | Bear       | 6  | 7   | 5   | 2   | 3   | Frenzy (4 ENE): Increases own ATK by 50% this round, ignoring DEF.                        |
-| Cheetah    | 3  | 5   | 2   | 10  | 4   | Swift Pounce (3 ENE): Attack cannot be dodged and ignores 40% DEF.                         |
-| Eagle      | 2  | 6   | 2   | 9   | 5   | Strategic Flight (2 ENE): Guarantees first strike next round regardless of AGI.           |
-| Rhinoceros | 7  | 6   | 7   | 1   | 2   | Relentless Charge (4 ENE): Deals ATK+5 damage, but you take 20% recoil.                    |
-| Turtle     | 8  | 1   | 9   | 1   | 4   | Iron Shell (3 ENE): Triples DEF for one round but cannot attack.                           |
-| Gorilla    | 6  | 7   | 6   | 2   | 2   | Stunning Blow (5 ENE): Deals damage with a 50% chance to stun the opponent.                |
-| Wolf       | 4  | 5   | 4   | 6   | 5   | Pack Tactics (2 ENE): Restores 4 Energy points.                                            |
-| Octopus    | 5  | 2   | 5   | 4   | 8   | Ink Curtain (3 ENE): Reduces opponent’s AGI by 50% for 2 rounds.                           |
-| Raven      | 2  | 3   | 3   | 7   | 9   | Cunning Analysis (2 ENE): Reveals opponent’s current Energy and Abilities.                 |
+| Cheetah    | 3  | 5   | 2   | 10  | 4   | Swift Pounce (3 ENE): +30% Attack and ignores 40% of opponent's DEF for one round.        |
+| Eagle      | 2  | 6   | 2   | 9   | 5   | Strategic Flight (2 ENE): +20% Attack next round.                                          |
+| Rhinoceros | 7  | 6   | 7   | 1   | 2   | Relentless Charge (4 ENE): +40% Attack for one round.                                     |
+| Turtle     | 8  | 1   | 9   | 1   | 4   | Iron Shell (3 ENE): Triples DEF for one round but cannot attack.                          |
+| Gorilla    | 6  | 7   | 6   | 2   | 2   | Stunning Blow (5 ENE): +30% Attack this round.                                              |
+| Wolf       | 4  | 5   | 4   | 6   | 5   | Pack Tactics (2 ENE): Restores 4 Energy points.                                           |
+| Octopus    | 5  | 2   | 5   | 4   | 8   | Ink Curtain (3 ENE): Reduces opponent’s AGI by 50% for 2 rounds.                          |
+| Raven      | 2  | 3   | 3   | 7   | 9   | Cunning Analysis (2 ENE): Restores 2 Energy to your hybrid.                                |
 
 ## 3. Game Phases
+
+## Skill Effects
+
+Each entity's Special Ability is described in two ways: a human-friendly `skill_name`
+and `skill_description`, and a machine-readable `skill_effect` object in the server
+configuration. The `skill_effect` object contains a small set of optional parameters
+that the engine uses to apply buffs, debuffs and other mechanical behaviour when the
+ability is used. This makes it easy to add or tweak abilities without changing code.
+
+
+Common `skill_effect` parameters (simple explanations):
+
+- `opponent_attack_debuff_percent` / `opponent_attack_debuff_duration`: reduce the
+  opponent's Attack by a percentage for N rounds.
+- `opponent_agility_debuff_percent` / `opponent_agility_debuff_duration`: reduce the
+  opponent's Agility for N rounds.
+- `attack_buff_percent` / `attack_buff_duration`: increase the user's Attack for N rounds.
+- `attack_ignores_defense` / `attack_ignores_defense_duration`: ignore opponent's
+  Defense for the configured duration.
+- `defense_buff_multiplier` / `defense_buff_duration`: multiply user's Defense for N rounds.
+- `cannot_attack` / `cannot_attack_duration`: prevent the user from attacking for N rounds.
+- `restore_energy`: immediately restore ENE to the user.
+
+Example 1 — Commanding Roar (Lion): reduce opponent ATK by 30% for one round
+
+```json
+"skill_effect": {
+  "opponent_attack_debuff_percent": 30,
+  "opponent_attack_debuff_duration": 1
+}
+```
+
+Example 2 — Overpower / Charge (Rhino): replace execution-specific charge options
+with a simple attack buff representation
+
+```json
+"skill_effect": {
+  "attack_buff_percent": 40,
+  "attack_buff_duration": 1
+}
+```
+
+See `backend/chimera_config.json` for concrete examples used in the game.
 
 ### Phase 1: Creation
 
