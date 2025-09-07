@@ -38,16 +38,28 @@ variable "ssh_public_key" {
   default     = ""
 }
 
-variable "backend_port" {
-  description = "Port on the instance where the application listens (backend port)"
+variable "backend_https_port" {
+  description = "Port on the instance where the application listens (backend HTTPS port)"
+  type        = number
+  default     = 8443
+}
+
+variable "backend_http_port" {
+  description = "Port on the instance where the application listens (backend HTTP port)"
   type        = number
   default     = 8080
 }
 
-variable "lb_listen_port" {
+variable "lb_listen_https_port" {
   description = "Port the load balancer listens on (external)"
   type        = number
   default     = 443
+}
+
+variable "lb_listen_http_port" {
+  description = "Port the load balancer listens on (external)"
+  type        = number
+  default     = 80
 }
 
 variable "image_ocid" {
