@@ -69,7 +69,7 @@ func (rc *roundContext) execBasicAttack(plan *plannedAction, oppPlayer *game.Pla
 	if len(ctxParts) > 0 {
 		ctx = " (" + strings.Join(ctxParts, ", ") + ")"
 	}
-	rc.add(oppPlayer.PlayerName + "'s " + plan.target.Name + " takes " + strconv.Itoa(dmg) + " damage" + ctx)
+	rc.add(oppPlayer.PlayerName + "'s " + hybridDisplayName(plan.target) + " takes " + strconv.Itoa(dmg) + " damage" + ctx)
 }
 
 func (rc *roundContext) execSwiftPounce(plan *plannedAction, oppPlayer *game.Player) {
@@ -155,9 +155,9 @@ func (rc *roundContext) execSwiftPounce(plan *plannedAction, oppPlayer *game.Pla
 			ctxParts = append(ctxParts, "+25% vs Vulnerable")
 		}
 		if len(ctxParts) > 0 {
-			rc.add(oppPlayer.PlayerName + "'s " + plan.target.Name + " takes " + strconv.Itoa(dmg) + " damage (" + strings.Join(ctxParts, ", ") + ")")
+			rc.add(oppPlayer.PlayerName + "'s " + hybridDisplayName(plan.target) + " takes " + strconv.Itoa(dmg) + " damage (" + strings.Join(ctxParts, ", ") + ")")
 		} else {
-			rc.add(oppPlayer.PlayerName + "'s " + plan.target.Name + " takes " + strconv.Itoa(dmg) + " damage")
+			rc.add(oppPlayer.PlayerName + "'s " + hybridDisplayName(plan.target) + " takes " + strconv.Itoa(dmg) + " damage")
 		}
 		return
 	}
@@ -210,9 +210,9 @@ func (rc *roundContext) execSwiftPounce(plan *plannedAction, oppPlayer *game.Pla
 		ctxParts = append(ctxParts, "+25% vs Vulnerable")
 	}
 	if len(ctxParts) > 0 {
-		rc.add(oppPlayer.PlayerName + "'s " + plan.target.Name + " takes " + strconv.Itoa(dmg) + " damage (" + strings.Join(ctxParts, ", ") + ")")
+		rc.add(oppPlayer.PlayerName + "'s " + hybridDisplayName(plan.target) + " takes " + strconv.Itoa(dmg) + " damage (" + strings.Join(ctxParts, ", ") + ")")
 	} else {
-		rc.add(oppPlayer.PlayerName + "'s " + plan.target.Name + " takes " + strconv.Itoa(dmg) + " damage")
+		rc.add(oppPlayer.PlayerName + "'s " + hybridDisplayName(plan.target) + " takes " + strconv.Itoa(dmg) + " damage")
 	}
 }
 

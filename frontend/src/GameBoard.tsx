@@ -179,32 +179,7 @@ const GameBoard: React.FC = () => {
         <div style={{ marginTop: 6, fontSize: 13, color: '#ccc' }}>
           Your action: {submittedLabel(me)} | Opponent action: {submittedLabel(opponent)}
         </div>
-        <div style={{ marginTop: 8 }}>
-          <button
-            onClick={async () => {
-              try {
-                if (endRef.current || submitting) return;
-                endRef.current = true;
-                setSubmitting(true);
-                await apiFetch(`${constants.API_GAMES}/${gameId}/end`, {
-                  method: 'POST',
-                  headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-                  body: JSON.stringify({ player_uuid: playerUUID, player_email: playerEmail }),
-                });
-              } finally {
-                setSubmitting(false);
-                endRef.current = false;
-                try { localStorage.removeItem('game_id'); } catch {}
-                navigate('/');
-              }
-            }}
-            disabled={submitting}
-            className="icon-btn"
-          >
-            <img src={iconEnd} alt="End" className="btn-icon" />
-            End Match
-          </button>
-        </div>
+        {/* End Match moved to the bottom as a final action with consistent layout */}
         {game.status === 'finished' && (
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <div>Winner: {game.winner || me?.player_name || '-'}</div>
@@ -263,6 +238,36 @@ const GameBoard: React.FC = () => {
         {!myTurn && planning && (
           <div style={{ marginTop: 8 }}>{me?.has_submitted_action ? 'You already chose. Waiting for opponent...' : 'Waiting for both actions...'}</div>
         )}
+        
+
+        <div className="action-row" style={{ marginTop: 12 }}>
+          <button
+            onClick={async () => {
+              try {
+                if (endRef.current || submitting) return;
+                endRef.current = true;
+                setSubmitting(true);
+                await apiFetch(`${constants.API_GAMES}/${gameId}/end`, {
+                  method: 'POST',
+                  headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
+                  body: JSON.stringify({ player_uuid: playerUUID, player_email: playerEmail }),
+                });
+              } finally {
+                setSubmitting(false);
+                endRef.current = false;
+                try { localStorage.removeItem('game_id'); } catch {}
+                navigate('/');
+              }
+            }}
+            disabled={submitting}
+            className="icon-btn"
+          >
+            <img src={iconEnd} alt="End" className="btn-icon" />
+            End Match
+          </button>
+          <div className="action-desc">Forfeit the match — ends combat and counts as a forfeit by your player.</div>
+        </div>
+
         {planning && (
           <div style={{ marginTop: 8, fontSize: 13, color: '#ccc' }}>
             Your choice: {currentActionLabel() || '—'}
@@ -299,7 +304,6 @@ const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) =
         <div>AGI: {hybrid.current_agi}</div>
         <div>ENE: {hybrid.current_ene}</div>
         {'current_vig' in hybrid && <div>VIG: {hybrid.current_vig} {hybrid.base_vig ? `/ ${hybrid.base_vig}` : ''}</div>}
-        {isMe && hybrid.last_action && <div>Last action: {hybrid.last_action}</div>}
       </div>
     </div>
   );

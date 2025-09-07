@@ -24,3 +24,15 @@ func getChosen(h *game.Hybrid, pid *uint) *game.Entity {
 	}
 	return nil
 }
+
+// hybridDisplayName returns the generated name when available, otherwise
+// falls back to the derived combination name.
+func hybridDisplayName(h *game.Hybrid) string {
+	if h == nil {
+		return ""
+	}
+	if h.GeneratedName != "" {
+		return h.GeneratedName
+	}
+	return h.Name
+}

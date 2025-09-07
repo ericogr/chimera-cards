@@ -32,12 +32,12 @@ func (rc *roundContext) executePlans(plans []plannedAction) {
 		if plan.target.CurrentHitPoints <= 0 && !plan.target.IsDefeated {
 			plan.target.IsDefeated = true
 			plan.target.IsActive = false
-			rc.add(opponentOf(plan.player).PlayerName + "'s " + plan.target.Name + " is defeated!")
+			rc.add(opponentOf(plan.player).PlayerName + "'s " + hybridDisplayName(plan.target) + " is defeated!")
 		}
 		if plan.actor.CurrentHitPoints <= 0 && !plan.actor.IsDefeated {
 			plan.actor.IsDefeated = true
 			plan.actor.IsActive = false
-			rc.add(plan.player.PlayerName + "'s " + plan.actor.Name + " is defeated!")
+			rc.add(plan.player.PlayerName + "'s " + hybridDisplayName(plan.actor) + " is defeated!")
 		}
 	}
 }
