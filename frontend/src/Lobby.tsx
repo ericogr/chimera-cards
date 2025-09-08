@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './api';
-import { safeSetLocal, safeRemoveLocal } from './runtimeConfig';
+import { safeSetLocal } from './runtimeConfig';
 import './Lobby.css';
 import * as constants from './constants';
 interface Player {
