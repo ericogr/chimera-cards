@@ -11,23 +11,23 @@ import (
 	"github.com/ericogr/chimera-cards/internal/game"
 )
 
-	type entityEntry struct {
-	Name             string           `json:"name"`
-	HitPoints        int              `json:"hit_points"`
-	Attack           int              `json:"attack"`
-	Defense          int              `json:"defense"`
-	Agility          int              `json:"agility"`
-	Energy           int              `json:"energy"`
-	VigorCost        int              `json:"vigor_cost"`
+type entityEntry struct {
+	Name      string `json:"name"`
+	HitPoints int    `json:"hit_points"`
+	Attack    int    `json:"attack"`
+	Defense   int    `json:"defense"`
+	Agility   int    `json:"agility"`
+	Energy    int    `json:"energy"`
+	VigorCost int    `json:"vigor_cost"`
 	// New nested skill object (name, description, cost, key, effect)
-	Skill            game.Skill       `json:"skill"`
+	Skill game.Skill `json:"skill"`
 }
 
 type rawConfig struct {
 	EntityList []entityEntry `json:"entity_list"`
-    Server     *struct {
-        Address string `json:"address"`
-    } `json:"server"`
+	Server     *struct {
+		Address string `json:"address"`
+	} `json:"server"`
 	// Optional image prompt template used to generate entity/hybrid images.
 	// Use the string token {{entities}} where the comma-separated list of
 	// entity names will be substituted. If not provided, a sensible
@@ -35,14 +35,14 @@ type rawConfig struct {
 	// Optional single-entity image prompt template loaded from config
 	SingleImagePrompt string `json:"single_image_prompt"`
 	HybridImagePrompt string `json:"hybrid_image_prompt"`
-    // Optional name prompt template used to generate hybrid names.
-    // Use the token {{entities}} where the comma-separated list of entity
-    // names will be substituted. If omitted, a default prompt is used.
-    NamePrompt string `json:"name_prompt"`
-    // Optional TTL controlling how long newly created public games remain
-    // listed. Accepts a Go duration string (e.g. "5m", "30s") or an
-    // integer number of seconds as fallback.
-    PublicGamesTTL string `json:"public_games_ttl"`
+	// Optional name prompt template used to generate hybrid names.
+	// Use the token {{entities}} where the comma-separated list of entity
+	// names will be substituted. If omitted, a default prompt is used.
+	NamePrompt string `json:"name_prompt"`
+	// Optional TTL controlling how long newly created public games remain
+	// listed. Accepts a Go duration string (e.g. "5m", "30s") or an
+	// integer number of seconds as fallback.
+	PublicGamesTTL string `json:"public_games_ttl"`
 }
 
 // LoadedConfig contains entities to seed and the server address to bind to.
@@ -82,14 +82,14 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 			return nil, fmt.Errorf("config file %s: entity entry missing 'name'", path)
 		}
 		out = append(out, game.Entity{
-			Name:             a.Name,
-			HitPoints:        a.HitPoints,
-			Attack:           a.Attack,
-			Defense:          a.Defense,
-			Agility:          a.Agility,
-			Energy:           a.Energy,
-			VigorCost:        a.VigorCost,
-			Skill:            a.Skill,
+			Name:      a.Name,
+			HitPoints: a.HitPoints,
+			Attack:    a.Attack,
+			Defense:   a.Defense,
+			Agility:   a.Agility,
+			Energy:    a.Energy,
+			VigorCost: a.VigorCost,
+			Skill:     a.Skill,
 		})
 	}
 
@@ -105,7 +105,7 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 			return nil, fmt.Errorf("config file %s: duplicate entity name '%s'", path, aa.Name)
 		}
 		nameSet[ln] = struct{}{}
-        // Note: execution-specific flags were removed from SkillEffect.
+		// Note: execution-specific flags were removed from SkillEffect.
 		if aa.Skill.Key != "" {
 			if _, exists := skillSet[aa.Skill.Key]; exists {
 				return nil, fmt.Errorf("config file %s: duplicate skill_key '%s'", path, aa.Skill.Key)
@@ -119,22 +119,22 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		addr = rc.Server.Address
 	}
 
-    // Parse public games TTL: default to 5 minutes if omitted or invalid.
-    defaultTTL := 5 * time.Minute
-    ttl := defaultTTL
-    if strings.TrimSpace(rc.PublicGamesTTL) != "" {
-        txt := strings.TrimSpace(rc.PublicGamesTTL)
-        if d, err := time.ParseDuration(txt); err == nil {
-            ttl = d
-        } else {
-            // Allow numeric seconds as a fallback (e.g. 300)
-            if s, serr := strconv.Atoi(txt); serr == nil {
-                ttl = time.Duration(s) * time.Second
-            } else {
-                return nil, fmt.Errorf("config file %s: invalid public_games_ttl: %w", path, err)
-            }
-        }
-    }
+	// Parse public games TTL: default to 5 minutes if omitted or invalid.
+	defaultTTL := 5 * time.Minute
+	ttl := defaultTTL
+	if strings.TrimSpace(rc.PublicGamesTTL) != "" {
+		txt := strings.TrimSpace(rc.PublicGamesTTL)
+		if d, err := time.ParseDuration(txt); err == nil {
+			ttl = d
+		} else {
+			// Allow numeric seconds as a fallback (e.g. 300)
+			if s, serr := strconv.Atoi(txt); serr == nil {
+				ttl = time.Duration(s) * time.Second
+			} else {
+				return nil, fmt.Errorf("config file %s: invalid public_games_ttl: %w", path, err)
+			}
+		}
+	}
 
 	return &LoadedConfig{
 		Entities:                  out,

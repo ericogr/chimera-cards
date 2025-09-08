@@ -22,7 +22,7 @@ type Entity struct {
 	// ImagePNG stores the 256x256 PNG bytes for this entity. It is
 	// intentionally omitted from JSON responses (`json:"-"`) and stored
 	// as a BLOB in the database column `image_png`.
-	ImagePNG         []byte `json:"-" gorm:"column:image_png;type:blob"`
+	ImagePNG []byte `json:"-" gorm:"column:image_png;type:blob"`
 	// Skill contains the nested skill configuration (human-friendly and
 	// machine-readable parts). It is not persisted in the DB (gorm:"-")
 	// but will be exposed in API responses as a nested object.
@@ -52,7 +52,6 @@ type SkillEffect struct {
 	AttackIgnoresDefense         bool `json:"attack_ignores_defense"`
 	AttackIgnoresDefenseDuration int  `json:"attack_ignores_defense_duration"`
 
-
 	// Defense multiplier applied to self for the given duration.
 	DefenseBuffMultiplier int `json:"defense_buff_multiplier"`
 	DefenseBuffDuration   int `json:"defense_buff_duration"`
@@ -67,21 +66,21 @@ type SkillEffect struct {
 	SwiftAddAgilityDivisor    int `json:"swift_add_agility_divisor"`
 	SwiftIgnoreDefensePercent int `json:"swift_ignore_defense_percent"`
 
-    // Note: previously this struct included a few execution-specific
-    // parameters (priority, reveal, charge/stun execution flags). Those
-    // options have been removed to simplify the ability system — remaining
-    // fields describe pure buffs/debuffs and instant effects only.
+	// Note: previously this struct included a few execution-specific
+	// parameters (priority, reveal, charge/stun execution flags). Those
+	// options have been removed to simplify the ability system — remaining
+	// fields describe pure buffs/debuffs and instant effects only.
 }
 
 // Skill is a compact wrapper combining the human-readable metadata for an
 // ability (name, description, cost, key) with the structured machine
 // parameters contained in SkillEffect. Keep it non-persistent.
 type Skill struct {
-    Name        string      `json:"name" gorm:"-"`
-    Description string      `json:"description" gorm:"-"`
-    Cost        int         `json:"cost" gorm:"-"`
-    Key         string      `json:"key" gorm:"-"`
-    Effect      SkillEffect `json:"effect" gorm:"-"`
+	Name        string      `json:"name" gorm:"-"`
+	Description string      `json:"description" gorm:"-"`
+	Cost        int         `json:"cost" gorm:"-"`
+	Key         string      `json:"key" gorm:"-"`
+	Effect      SkillEffect `json:"effect" gorm:"-"`
 }
 
 type Hybrid struct {

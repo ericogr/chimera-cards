@@ -43,14 +43,14 @@ func (rc *roundContext) buildPlans(p1, p2 *game.Player, h1, h2 *game.Hybrid) []p
 	plans := make([]plannedAction, 0, 4)
 
 	mapPlan := func(player *game.Player, self, opp *game.Hybrid) {
-    switch player.PendingActionType {
-    case game.PendingActionBasicAttack:
-        plans = append(plans, plannedAction{player: player, actor: self, target: opp, action: ActionBasicAttack})
-    // Abilities are applied during pre-effect resolution (applyAbilityPreEffects)
-    // and do not create separate execution plans anymore.
-    case game.PendingActionAbility:
-        // no execution plan; pre-effects already applied
-    }
+		switch player.PendingActionType {
+		case game.PendingActionBasicAttack:
+			plans = append(plans, plannedAction{player: player, actor: self, target: opp, action: ActionBasicAttack})
+		// Abilities are applied during pre-effect resolution (applyAbilityPreEffects)
+		// and do not create separate execution plans anymore.
+		case game.PendingActionAbility:
+			// no execution plan; pre-effects already applied
+		}
 	}
 
 	mapPlan(p1, h1, h2)

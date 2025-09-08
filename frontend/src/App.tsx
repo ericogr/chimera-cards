@@ -5,6 +5,7 @@ import { apiFetch } from './api';
 import Lobby from './Lobby';
 import GameRoom from './GameRoom';
 import GameBoard from './GameBoard';
+import ProfilePage from './ProfilePage';
 import './App.css';
 import * as constants from './constants';
 
@@ -104,6 +105,7 @@ const App: React.FC = () => {
       )}
       <Routes>
         <Route path="/" element={<Lobby user={user} onLogout={handleLogout} />} />
+        <Route path="/profile" element={<ProfilePage user={user} onLogout={handleLogout} />} />
         <Route path="/game/:gameId" element={<GameRoom />} />
         <Route path="/game/:gameId/board" element={<GameBoard />} />
       </Routes>

@@ -18,13 +18,13 @@ func (rc *roundContext) executePlans(plans []plannedAction) {
 		if plan.actor.CannotAttackUntilRound >= rc.g.RoundCount {
 			continue
 		}
-        switch plan.action {
-        case ActionBasicAttack:
-            rc.execBasicAttack(&plan, opponentOf(plan.player))
-        default:
-            // All ability effects are applied as pre-effects; no separate
-            // execution action is required.
-        }
+		switch plan.action {
+		case ActionBasicAttack:
+			rc.execBasicAttack(&plan, opponentOf(plan.player))
+		default:
+			// All ability effects are applied as pre-effects; no separate
+			// execution action is required.
+		}
 
 		if plan.target.CurrentHitPoints <= 0 && !plan.target.IsDefeated {
 			plan.target.IsDefeated = true

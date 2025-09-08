@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import HybridCreation from './HybridCreation';
-import SettingsMenu from './SettingsMenu';
 import { Game, Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
@@ -158,7 +157,6 @@ const GameRoom: React.FC = () => {
         <h3>Game Room #{game.ID} (Code: {game.join_code})</h3>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={leaveGameAndReturn}>Back to Lobby</button>
-          <SettingsMenu />
         </div>
       </header>
 

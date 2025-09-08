@@ -85,6 +85,8 @@ func main() {
 		protected.POST(constants.RouteGameLeave, handler.LeaveGame)
 		protected.POST(constants.RouteCreateHybrids, handler.CreateHybrids)
 		protected.POST(constants.RouteGameAction, handler.SubmitAction)
+		// Player profile: GET returns stats, POST updates display name
+		protected.POST(constants.RoutePlayerStats, handler.UpdatePlayerProfile)
 	}
 
 	router.POST(constants.RouteAuthGoogleCallBack, authHandler.GoogleOAuthCallback)

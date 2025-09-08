@@ -1,5 +1,4 @@
 import React from 'react';
-import SettingsMenu from './SettingsMenu';
 
 interface UserProfileProps {
   user: {
@@ -18,7 +17,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
       <p><strong>Name:</strong> {user.name}</p>
       <p><strong>Email:</strong> {user.email}</p>
       <div style={{ marginTop: 12 }}>
-        <SettingsMenu onLogout={onLogout} />
+        <button onClick={onLogout}>Logout</button>
       </div>
     </div>
   );

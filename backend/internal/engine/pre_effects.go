@@ -106,7 +106,6 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		}() + ". Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
-
 	// Defense buff / cannot attack
 	if eff.DefenseBuffMultiplier > 0 {
 		dur := eff.DefenseBuffDuration
@@ -143,8 +142,8 @@ func (rc *roundContext) applyAbilityPreEffects(player *game.Player, self, opp *g
 		rc.add(player.PlayerName + " ABILITY — " + ch.Skill.Name + ": -" + strconv.Itoa(eff.OpponentAgilityDebuffPercent) + "% opponent Agility for " + strconv.Itoa(dur) + " round(s). Costs: Energy " + strconv.Itoa(rc.minInt(prevE, ch.Skill.Cost)) + ", Vigor " + strconv.Itoa(spentV) + rc.vulnerableTag(self))
 	}
 
-    // Note: priority/reveal mechanics were removed; abilities should use
-    // the remaining structured parameters (buffs/debuffs, restore, etc.).
+	// Note: priority/reveal mechanics were removed; abilities should use
+	// the remaining structured parameters (buffs/debuffs, restore, etc.).
 }
 
 func (rc *roundContext) applyBasicAttackPreEffects(player *game.Player, self *game.Hybrid) {

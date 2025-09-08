@@ -2,11 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import './SettingsMenu.css';
 
 interface SettingsMenuProps {
-  onLogout?: () => void;
+  onLogout: () => void;
+  onProfile?: () => void;
   className?: string;
 }
 
-const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, className }) => {
+const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, onProfile, className }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -43,20 +44,21 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, className }) => {
       </button>
       {open && (
         <div className="settings-dropdown" role="menu">
+          {onProfile && (
+            <button
+              className="settings-item"
+              role="menuitem"
+              onClick={() => { setOpen(false); onProfile(); }}
+            >
+              User Profile
+            </button>
+          )}
           <button
             className="settings-item"
             role="menuitem"
             onClick={() => {
               setOpen(false);
-              if (onLogout) {
-                onLogout();
-                return;
-              }
-              // Default logout fallback: clear session and redirect to root
-              try { localStorage.removeItem('user'); } catch {}
-              try { localStorage.removeItem('session_ok'); } catch {}
-              try { localStorage.removeItem('game_id'); } catch {}
-              window.location.href = '/';
+              onLogout();
             }}
           >
             Logout

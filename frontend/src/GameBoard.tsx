@@ -10,7 +10,6 @@ import { Game, Player, Hybrid, Entity, EntityName } from './types';
 import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
-import SettingsMenu from './SettingsMenu';
 
 const GameBoard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -137,7 +136,6 @@ const GameBoard: React.FC = () => {
             <p>Game ID: {game.ID}</p>
             <p>Created: {new Date(game.created_at).toLocaleString()}</p>
           </div>
-          <SettingsMenu />
         </div>
       </header>
 

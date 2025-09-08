@@ -217,10 +217,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {user.picture && <img src={user.picture} alt="Profile" style={{ borderRadius: '50%', height: '40px', marginRight: '12px' }} />}
-          {/* Settings menu replaces the previous Logout button. Logout is available inside the menu. */}
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore: imported component */}
-          <SettingsMenu onLogout={onLogout} />
+          {/* Settings menu replaces the previous Logout button. Logout and User Profile are available in the Lobby. */}
+          <SettingsMenu onLogout={onLogout} onProfile={() => navigate('/profile')} />
         </div>
       </header>
 

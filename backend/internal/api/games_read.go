@@ -91,3 +91,36 @@ func (h *GameHandler) GetPlayerStats(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, ps)
 }
+
+// UpdatePlayerProfile updates the authenticated player's display name.
+func (h *GameHandler) UpdatePlayerProfile(c *gin.Context) {
+	var body struct {
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidRequest})
+		return
+	}
+    // Require authenticated email from context (no fallbacks).
+    email := ""
+    if v, ok := c.Get("userEmail"); ok {
+        email, _ = v.(string)
+    }
+    if email == "" {
+        c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrEmailRequired})
+        return
+    }
+	// Load or create user stats record
+	ps, err := h.repo.GetStatsByEmail(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchStats})
+		return
+	}
+	ps.PlayerName = body.Name
+	// Persist
+	if err := h.repo.SaveUser(ps); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedUpdateGame})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
