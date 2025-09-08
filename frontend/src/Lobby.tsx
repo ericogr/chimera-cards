@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './api';
+import SettingsMenu from './SettingsMenu';
 import './Lobby.css';
 import * as constants from './constants';
 interface Player {
@@ -215,8 +216,11 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {user.picture && <img src={user.picture} alt="Profile" style={{ borderRadius: '50%', height: '40px', marginRight: '15px' }} />}
-          <button onClick={onLogout}>Logout</button>
+          {user.picture && <img src={user.picture} alt="Profile" style={{ borderRadius: '50%', height: '40px', marginRight: '12px' }} />}
+          {/* Settings menu replaces the previous Logout button. Logout is available inside the menu. */}
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore: imported component */}
+          <SettingsMenu onLogout={onLogout} />
         </div>
       </header>
 

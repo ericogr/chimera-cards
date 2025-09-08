@@ -10,6 +10,7 @@ import { Game, Player, Hybrid, Entity, EntityName } from './types';
 import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
+import SettingsMenu from './SettingsMenu';
 
 const GameBoard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -126,14 +127,17 @@ const GameBoard: React.FC = () => {
 
   return (
     <div className="game-board-container">
-      <header className="game-board-header">
+      <header className="game-board-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div className="game-info">
           <h1>{game.name}</h1>
           <p>{game.description}</p>
         </div>
-        <div className="game-meta">
-          <p>Game ID: {game.ID}</p>
-          <p>Created: {new Date(game.created_at).toLocaleString()}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="game-meta" style={{ textAlign: 'right' }}>
+            <p>Game ID: {game.ID}</p>
+            <p>Created: {new Date(game.created_at).toLocaleString()}</p>
+          </div>
+          <SettingsMenu />
         </div>
       </header>
 
