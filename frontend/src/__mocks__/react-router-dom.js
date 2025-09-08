@@ -18,3 +18,8 @@ module.exports = {
   BrowserRouter,
 };
 
+// Minimal hook implementations for tests
+module.exports.useLocation = () => ({ pathname: '/' });
+module.exports.useNavigate = () => () => {};
+module.exports.useParams = () => ({});
+module.exports.Link = ({ to, children }) => React.createElement('a', { href: to }, children);
