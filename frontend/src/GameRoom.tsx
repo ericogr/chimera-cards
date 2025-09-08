@@ -4,6 +4,7 @@ import HybridCreation from './HybridCreation';
 import { Game, Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
+import { safeRemoveLocal } from './runtimeConfig';
 
 const GameRoom: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -146,7 +147,7 @@ const GameRoom: React.FC = () => {
     } catch (e) {
       console.warn('Leave failed (continuing to lobby):', e);
     } finally {
-      try { localStorage.removeItem('game_id'); } catch {}
+      safeRemoveLocal('game_id');
       navigate('/');
     }
   };
@@ -216,7 +217,7 @@ const GameRoom: React.FC = () => {
                 console.warn('Cancel failed, continuing to lobby:', e);
               } finally {
                 setSubmitting(false);
-                try { localStorage.removeItem('game_id'); } catch {}
+                safeRemoveLocal('game_id');
                 navigate('/');
               }
             }}

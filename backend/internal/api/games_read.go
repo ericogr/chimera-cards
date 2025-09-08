@@ -101,15 +101,15 @@ func (h *GameHandler) UpdatePlayerProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidRequest})
 		return
 	}
-    // Require authenticated email from context (no fallbacks).
-    email := ""
-    if v, ok := c.Get("userEmail"); ok {
-        email, _ = v.(string)
-    }
-    if email == "" {
-        c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrEmailRequired})
-        return
-    }
+	// Require authenticated email from context (no fallbacks).
+	email := ""
+	if v, ok := c.Get("userEmail"); ok {
+		email, _ = v.(string)
+	}
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrEmailRequired})
+		return
+	}
 	// Load or create user stats record
 	ps, err := h.repo.GetStatsByEmail(email)
 	if err != nil {

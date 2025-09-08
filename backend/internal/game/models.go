@@ -33,6 +33,20 @@ type Entity struct {
 // persisted table is `entity_templates` instead of the default `entities`.
 func (Entity) TableName() string { return "entity_templates" }
 
+// ApplyConfig copies non-persistent, configuration-driven fields from the
+// provided entity definition into the current entity instance. This keeps
+// the logic of applying config values centralized and avoids repetition in
+// repository code.
+func (e *Entity) ApplyConfig(conf Entity) {
+	e.HitPoints = conf.HitPoints
+	e.Attack = conf.Attack
+	e.Defense = conf.Defense
+	e.Agility = conf.Agility
+	e.Energy = conf.Energy
+	e.VigorCost = conf.VigorCost
+	e.Skill = conf.Skill
+}
+
 // SkillEffect is a flexible description of what an entity's special ability
 // does in-game. All fields are optional and will be applied when present.
 type SkillEffect struct {

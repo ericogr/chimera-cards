@@ -10,6 +10,7 @@ import { Game, Player, Hybrid, Entity, EntityName } from './types';
 import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
+import { safeRemoveLocal } from './runtimeConfig';
 
 const GameBoard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -187,7 +188,7 @@ const GameBoard: React.FC = () => {
             <div>Winner: {game.winner || me?.player_name || '-'}</div>
             <button
               onClick={() => {
-                try { localStorage.removeItem('game_id'); } catch {}
+                safeRemoveLocal('game_id');
                 navigate('/');
               }}
             >

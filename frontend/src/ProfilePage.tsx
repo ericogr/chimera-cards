@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as constants from './constants';
 import { apiFetch } from './api';
+import { safeSetLocal } from './runtimeConfig';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
@@ -52,7 +53,7 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
         try {
           const parsed = JSON.parse(stored);
           parsed.name = name;
-          localStorage.setItem('user', JSON.stringify(parsed));
+          safeSetLocal('user', JSON.stringify(parsed));
         } catch {}
       }
       setMessage('Saved');

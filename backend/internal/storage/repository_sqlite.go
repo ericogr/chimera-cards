@@ -40,13 +40,7 @@ func (r *sqliteRepository) GetEntities() ([]game.Entity, error) {
 	for i := range entities {
 		if r.configByName != nil {
 			if conf, ok := r.configByName[strings.ToLower(entities[i].Name)]; ok {
-				entities[i].HitPoints = conf.HitPoints
-				entities[i].Attack = conf.Attack
-				entities[i].Defense = conf.Defense
-				entities[i].Agility = conf.Agility
-				entities[i].Energy = conf.Energy
-				entities[i].VigorCost = conf.VigorCost
-				entities[i].Skill = conf.Skill
+				entities[i].ApplyConfig(conf)
 			}
 		}
 	}
@@ -72,13 +66,7 @@ func (r *sqliteRepository) GetGameByID(id uint) (*game.Game, error) {
 				for ai := range g.Players[pi].Hybrids[hi].BaseEntities {
 					a := &g.Players[pi].Hybrids[hi].BaseEntities[ai]
 					if conf, ok := r.configByName[strings.ToLower(a.Name)]; ok {
-						a.HitPoints = conf.HitPoints
-						a.Attack = conf.Attack
-						a.Defense = conf.Defense
-						a.Agility = conf.Agility
-						a.Energy = conf.Energy
-						a.VigorCost = conf.VigorCost
-						a.Skill = conf.Skill
+						a.ApplyConfig(conf)
 					}
 				}
 			}
@@ -117,13 +105,7 @@ func (r *sqliteRepository) GetEntitiesByIDs(ids []uint) ([]game.Entity, error) {
 	for i := range entities {
 		if r.configByName != nil {
 			if conf, ok := r.configByName[strings.ToLower(entities[i].Name)]; ok {
-				entities[i].HitPoints = conf.HitPoints
-				entities[i].Attack = conf.Attack
-				entities[i].Defense = conf.Defense
-				entities[i].Agility = conf.Agility
-				entities[i].Energy = conf.Energy
-				entities[i].VigorCost = conf.VigorCost
-				entities[i].Skill = conf.Skill
+				entities[i].ApplyConfig(conf)
 			}
 		}
 	}
@@ -296,13 +278,7 @@ func (r *sqliteRepository) GetEntityByName(name string) (*game.Entity, error) {
 	}
 	if r.configByName != nil {
 		if conf, ok := r.configByName[strings.ToLower(a.Name)]; ok {
-			a.HitPoints = conf.HitPoints
-			a.Attack = conf.Attack
-			a.Defense = conf.Defense
-			a.Agility = conf.Agility
-			a.Energy = conf.Energy
-			a.VigorCost = conf.VigorCost
-			a.Skill = conf.Skill
+			a.ApplyConfig(conf)
 		}
 	}
 	return &a, nil

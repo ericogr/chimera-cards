@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './api';
+import { safeSetLocal, safeRemoveLocal } from './runtimeConfig';
 import './Lobby.css';
 import * as constants from './constants';
 interface Player {
@@ -90,7 +91,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       let uuid = localStorage.getItem('player_uuid');
       if (!uuid) {
         uuid = window.crypto?.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem('player_uuid', uuid);
+        safeSetLocal('player_uuid', uuid);
       }
     } catch {}
     loadAvailableGames();
@@ -139,8 +140,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
         throw new Error('Failed to create game');
       }
       const newGameInfo = await response.json();
-      try { if (user?.email) localStorage.setItem('player_email', user.email); } catch {}
-      localStorage.setItem('game_id', newGameInfo.game_id);
+      try { if (user?.email) safeSetLocal('player_email', user.email); } catch {}
+      safeSetLocal('game_id', newGameInfo.game_id);
       navigate(`/game/${newGameInfo.game_id}`);
     } catch (err) {
       alert('Error creating game. Please try again.');
@@ -174,8 +175,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       if (response.status === 401) { window.location.href = '/'; return; }
       if (response.ok) {
         const joinedGameInfo = await response.json();
-        try { if (user?.email) localStorage.setItem('player_email', user.email); } catch {}
-        localStorage.setItem('game_id', joinedGameInfo.game_id);
+        try { if (user?.email) safeSetLocal('player_email', user.email); } catch {}
+        safeSetLocal('game_id', joinedGameInfo.game_id);
         navigate(`/game/${joinedGameInfo.game_id}`);
       } else {
         const errorData = await response.json();
