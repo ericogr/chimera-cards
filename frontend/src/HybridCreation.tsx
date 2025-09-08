@@ -3,6 +3,7 @@ import { Entity } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
 import { entityAssetUrl } from './utils/keys';
+import './HybridCreation.css';
 
 interface Props {
   gameId: string;
@@ -115,16 +116,18 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
     const src = target === 'h1' ? h1 : h2;
     const disabled = usedIds.has(a.ID) && !src.entityIds.includes(a.ID);
     const selected = src.entityIds.includes(a.ID);
+    const canSelect = !disabled && (selected || src.entityIds.length < 3);
+    const needsAbilitySelection = src.entityIds.length > 0 && src.selectedEntityId === undefined && src.entityIds.includes(a.ID);
     return (
       <div
         key={`${target}-${a.ID}`}
         onClick={() => toggleAnimalSelection(target, a.ID)}
+        className={`hybrid-entity-card ${disabled ? 'disabled' : ''} ${selected ? 'selected' : ''} ${canSelect ? 'blink-border' : ''}`}
         style={{
           border: '1px solid #444',
           padding: '8px',
           borderRadius: 6,
           opacity: disabled ? 0.4 : 1,
-          background: selected ? '#1f3b' : 'transparent',
           cursor: disabled ? 'not-allowed' : 'pointer',
           display: 'flex',
           flexDirection: 'column',
@@ -171,7 +174,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
                         }}
                         disabled={!selected}
                       />
-                      <span>Use this entity's special ability</span>
+                      <span className={needsAbilitySelection ? 'blink-text' : ''}>Use this entity's special ability</span>
                     </label>
                   )}
                 </div>
