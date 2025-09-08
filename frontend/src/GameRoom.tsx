@@ -153,14 +153,13 @@ const GameRoom: React.FC = () => {
 
   return (
     <div>
-      <header className="page-header">
-        <h3>Game Room #{game.ID} (Code: {game.join_code})</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={leaveGameAndReturn}>Back to Lobby</button>
-        </div>
-      </header>
-
       <main style={{ padding: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h3 style={{ margin: 0 }}>Game Room #{game.ID} (Code: {game.join_code})</h3>
+          <div>
+            <button onClick={leaveGameAndReturn}>Back to Lobby</button>
+          </div>
+        </div>
         <h4>Status: {game.status}</h4>
 
         <h4>Players ({game.players?.length || 0} / 2)</h4>

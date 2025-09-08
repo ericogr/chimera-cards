@@ -126,20 +126,19 @@ const GameBoard: React.FC = () => {
 
   return (
     <div className="game-board-container">
-      <header className="game-board-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <div className="game-info">
-          <h1>{game.name}</h1>
-          <p>{game.description}</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div className="game-meta" style={{ textAlign: 'right' }}>
-            <p>Game ID: {game.ID}</p>
-            <p>Created: {new Date(game.created_at).toLocaleString()}</p>
+      <main style={{ padding: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div>
+            <h1 style={{ margin: 0 }}>{game.name}</h1>
+            <p style={{ margin: 0 }}>{game.description}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ margin: 0 }}>Game ID: {game.ID}</p>
+            <p style={{ margin: 0 }}>Created: {new Date(game.created_at).toLocaleString()}</p>
           </div>
         </div>
-      </header>
 
-      <main className="game-board-main">
+        <div className="game-board-main">
         <div className="player-area player-one">
           <h2>{player1?.player_name || 'Waiting for Player 1'}</h2>
           {player1 && (
@@ -173,6 +172,7 @@ const GameBoard: React.FC = () => {
               <Stats hybrid={player2.hybrids?.find(h => h.is_active)} isMe={player2.player_uuid===playerUUID} />
             </div>
           )}
+        </div>
         </div>
       </main>
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import * as constants from './constants';
 import { apiFetch } from './api';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   user: { name?: string; email?: string; picture?: string } | null;
@@ -65,22 +65,22 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
 
   return (
     <div style={{ padding: 20 }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2>User Profile</h2>
-        <div>
-          <button onClick={() => navigate(-1)} style={{ marginRight: 8 }}>Back</button>
-          <button onClick={onLogout}>Logout</button>
-        </div>
-      </header>
-
       <section style={{ maxWidth: 560 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h2 style={{ margin: 0 }}>User Profile</h2>
+        </div>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', marginBottom: 6 }}>Display Name</label>
           <input value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: 8, fontSize: 16 }} />
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <button onClick={saveName} disabled={loading} style={{ padding: '8px 12px' }}>{loading ? 'Saving…' : 'Save'}</button>
-          {message && <span style={{ marginLeft: 12 }}>{message}</span>}
+        <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button onClick={saveName} disabled={loading} style={{ padding: '8px 12px' }}>{loading ? 'Saving…' : 'Save'}</button>
+            {message && <span style={{ marginLeft: 12 }}>{message}</span>}
+          </div>
+          <div>
+            <button onClick={() => navigate('/')} style={{ padding: '8px 12px' }}>Back</button>
+          </div>
         </div>
 
         <h3>Statistics</h3>
@@ -106,4 +106,3 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
 };
 
 export default ProfilePage;
-

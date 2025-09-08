@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './api';
-import SettingsMenu from './SettingsMenu';
 import './Lobby.css';
 import * as constants from './constants';
 interface Player {
@@ -33,7 +32,7 @@ interface LobbyProps {
 
 const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
   const [games, setGames] = useState<Game[]>([]);
-  const [stats, setStats] = useState<{ games_played: number; wins: number; resignations: number } | null>(null);
+  
   const [error, setError] = useState<string | null>(null);
   const [leaderboard, setLeaderboard] = useState<Array<{ ID: number; PlayerName: string; Email: string; GamesPlayed: number; Wins: number; Resignations: number }>>([]);
   const [creatorStats, setCreatorStats] = useState<Record<string, { wins: number; resignations: number }>>({});
@@ -95,20 +94,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       }
     } catch {}
     loadAvailableGames();
-    const fetchStats = async () => {
-      try {
-        // Only fetch stats if we have an authenticated session
-        if (localStorage.getItem('session_ok') !== '1') return;
-        const email = user?.email || '';
-        if (!email) return;
-        const res = await apiFetch(`${constants.API_PLAYER_STATS}?email=${encodeURIComponent(email)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setStats({ games_played: data.GamesPlayed ?? data.games_played ?? 0, wins: data.Wins ?? data.wins ?? 0, resignations: data.Resignations ?? data.resignations ?? 0 });
-        }
-      } catch {}
-    };
-    fetchStats();
+    // stats are shown in the shared header; Lobby does not fetch them locally
     const loadLeaderboard = async () => {
       try {
         const res = await apiFetch(constants.API_LEADERBOARD);
@@ -121,9 +107,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
 
     loadLeaderboard();
     const intervalA = setInterval(loadAvailableGames, 5000);
-    const intervalB = setInterval(fetchStats, 5000);
     const intervalC = setInterval(loadLeaderboard, 10000);
-    return () => { clearInterval(intervalA); clearInterval(intervalB); clearInterval(intervalC); };
+    return () => { clearInterval(intervalA); clearInterval(intervalC); };
   }, [user?.email, creatorStats]);
 
   const createGame = async () => {
@@ -202,26 +187,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
     } finally { setSubmitting(false); actingRef.current = false; }
   };
 
-  const defeats = Math.max(0, (stats?.games_played ?? 0) - (stats?.wins ?? 0) - (stats?.resignations ?? 0));
-
   return (
     <div>
-      <header className="page-header">
-        <div>
-          <h3 style={{ margin: 0 }}>Welcome, {user.name}!</h3>
-          {stats && (
-            <div style={{ fontSize: 12, color: '#bbb', marginTop: 4 }}>
-              Wins: {stats.wins} · Defeats: {defeats} · Resignations: {stats.resignations}
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {user.picture && <img src={user.picture} alt="Profile" style={{ borderRadius: '50%', height: '40px', marginRight: '12px' }} />}
-          {/* Settings menu replaces the previous Logout button. Logout and User Profile are available in the Lobby. */}
-          <SettingsMenu onLogout={onLogout} onProfile={() => navigate('/profile')} />
-        </div>
-      </header>
-
       <main style={{ padding: '20px' }}>
         <h2>Game Lobby</h2>
         <div className="lobby-top">

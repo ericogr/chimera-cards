@@ -6,8 +6,10 @@ import Lobby from './Lobby';
 import GameRoom from './GameRoom';
 import GameBoard from './GameBoard';
 import ProfilePage from './ProfilePage';
+import Header from './Header';
 import './App.css';
 import * as constants from './constants';
+import { useLocation } from 'react-router-dom';
 
 interface User {
   name?: string;
@@ -18,6 +20,7 @@ interface User {
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
 
   // Runtime configuration provided at container start (generated from REACT_APP_* environment variables)
   const runtimeConfig = (window as any)._env_ || {};
@@ -103,6 +106,7 @@ const App: React.FC = () => {
           `REACT_APP_` environment variables for the frontend container (for example, in `docker-compose.yml`).
         </div>
       )}
+      <Header user={user} onLogout={handleLogout} showProfileOption={location.pathname === '/'} />
       <Routes>
         <Route path="/" element={<Lobby user={user} onLogout={handleLogout} />} />
         <Route path="/profile" element={<ProfilePage user={user} onLogout={handleLogout} />} />
