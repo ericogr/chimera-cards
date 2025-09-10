@@ -84,4 +84,6 @@ export interface Game {
   message?: string;
   last_round_summary?: string;
   created_at: string;
+  // ISO timestamp indicating when the current planning phase expires
+  action_deadline?: string;
 }

@@ -45,7 +45,7 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 	// Delegate to service layer
 	// Convert raw action_type string to the typed PendingActionType
 	actionType := game.PendingActionType(req.ActionType)
-	g2, resolved, err := service.SubmitAction(h.repo, uint(gameID), req.PlayerUUID, actionType, req.EntityID)
+	g2, resolved, err := service.SubmitAction(h.repo, uint(gameID), req.PlayerUUID, actionType, req.EntityID, h.actionTimeout)
 	if err != nil {
 		switch err {
 		case service.ErrGameNotFound:

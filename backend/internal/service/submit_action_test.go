@@ -3,6 +3,7 @@ package service
 import (
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/ericogr/chimera-cards/internal/game"
 )
@@ -46,7 +47,7 @@ func TestSubmitAction_ResolvesRound(t *testing.T) {
 	mr := &mockRepoSA{games: map[uint]*game.Game{7: g}}
 
 	// First player submits
-	_, resolved, err := SubmitAction(mr, 7, "p1", game.PendingActionBasicAttack, 0)
+	_, resolved, err := SubmitAction(mr, 7, "p1", game.PendingActionBasicAttack, 0, 1*time.Minute)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -55,7 +56,7 @@ func TestSubmitAction_ResolvesRound(t *testing.T) {
 	}
 
 	// Second player submits -> should resolve
-	g2, resolved, err := SubmitAction(mr, 7, "p2", game.PendingActionBasicAttack, 0)
+	g2, resolved, err := SubmitAction(mr, 7, "p2", game.PendingActionBasicAttack, 0, 1*time.Minute)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

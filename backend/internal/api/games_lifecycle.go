@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"time"
 	"unicode/utf8"
 
 	"github.com/ericogr/chimera-cards/internal/constants"
@@ -197,6 +198,9 @@ func (h *GameHandler) StartGame(c *gin.Context) {
 			_ = h.repo.UpdateGame(gg)
 			return
 		}
+		// Set initial action deadline for the first planning phase.
+		gg.ActionDeadline = time.Now().Add(h.actionTimeout)
+		_ = h.repo.UpdateGame(gg)
 	}(g.ID)
 
 	c.JSON(http.StatusAccepted, gin.H{"message": "Game starting"})

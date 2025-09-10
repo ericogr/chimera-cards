@@ -1,6 +1,10 @@
 package storage
 
-import "github.com/ericogr/chimera-cards/internal/game"
+import (
+    "time"
+
+    "github.com/ericogr/chimera-cards/internal/game"
+)
 
 type Repository interface {
 	GetEntities() ([]game.Entity, error)
@@ -29,4 +33,9 @@ type Repository interface {
 	SaveUser(u *game.User) error
 	// Leaderboard
 	GetTopPlayers(limit int) ([]game.User, error)
+	// FindTimedOutGames returns games that are currently in-progress,
+	// in the planning phase and whose action deadline is at or before
+	// the provided time. The caller may then decide how to resolve them
+	// (for example, marking them finished due to inactivity).
+	FindTimedOutGames(now time.Time) ([]game.Game, error)
 }

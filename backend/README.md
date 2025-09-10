@@ -74,3 +74,11 @@ Example: the single-entity prompt is used when seeding/creating entity
 portraits at startup; the hybrid prompt is used when generating final hybrid
 images. Keep the prompts in `chimera_config.json` to make image styling
 adjustable without code changes.
+
+Additional optional keys
+------------------------
+
+- `action_timeout`: optional per-round timeout (Go duration string, e.g. "1m").
+  When provided, players have this amount of time to submit their actions
+  during the planning phase. If the timeout expires and both players haven't
+  submitted, the match is finished with no winner and no stats are awarded.

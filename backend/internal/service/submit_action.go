@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"github.com/ericogr/chimera-cards/internal/engine"
 	"github.com/ericogr/chimera-cards/internal/game"
@@ -18,7 +19,7 @@ var (
 
 // SubmitAction stores a player's chosen action and resolves the round if both players submitted.
 // Returns the updated game and a boolean indicating whether the round was resolved.
-func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game.PendingActionType, entityID uint) (*game.Game, bool, error) {
+func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game.PendingActionType, entityID uint, actionTimeout time.Duration) (*game.Game, bool, error) {
 	g, err := repo.GetGameByID(gameID)
 	if err != nil || g == nil {
 		return nil, false, ErrGameNotFound
@@ -71,9 +72,17 @@ func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game
 	resolved := false
 	if g.Players[0].HasSubmittedAction && g.Players[1].HasSubmittedAction {
 		engine.ResolveRound(g)
-		if g.Status == "finished" && !g.StatsCounted {
-			_ = repo.UpdateStatsOnGameEnd(g, "")
-			g.StatsCounted = true
+		// If the match continues, reset the action deadline for the next round;
+		// otherwise mark stats as counted so no further updates occur.
+		if g.Status == "finished" {
+			if !g.StatsCounted {
+				// keep existing behavior for normal finishes
+				_ = repo.UpdateStatsOnGameEnd(g, "")
+				g.StatsCounted = true
+			}
+		} else {
+			// New planning phase started; reset deadline
+			g.ActionDeadline = time.Now().Add(actionTimeout)
 		}
 		resolved = true
 	}

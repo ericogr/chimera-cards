@@ -43,6 +43,11 @@ type rawConfig struct {
 	// listed. Accepts a Go duration string (e.g. "5m", "30s") or an
 	// integer number of seconds as fallback.
 	PublicGamesTTL string `json:"public_games_ttl"`
+	// Optional per-round action timeout. When provided, players have this
+	// amount of time to submit their actions during the planning phase.
+	// Accepts a Go duration string (e.g. "1m", "30s") or an integer
+	// number of seconds as fallback. Defaults to "1m" when omitted.
+	ActionTimeout string `json:"action_timeout"`
 }
 
 // LoadedConfig contains entities to seed and the server address to bind to.
@@ -58,6 +63,8 @@ type LoadedConfig struct {
 	NamePromptTemplate string
 	// How long to keep public games listed (duration)
 	PublicGamesTTL time.Duration
+	// How long players have to submit an action each round
+	ActionTimeout time.Duration
 }
 
 // LoadConfig reads the configuration file at path and returns entities and
@@ -136,6 +143,22 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		}
 	}
 
+	// Parse action timeout: default to 1 minute if omitted or invalid.
+	defaultActionTimeout := 1 * time.Minute
+	actionTimeout := defaultActionTimeout
+	if strings.TrimSpace(rc.ActionTimeout) != "" {
+		txt := strings.TrimSpace(rc.ActionTimeout)
+		if d, err := time.ParseDuration(txt); err == nil {
+			actionTimeout = d
+		} else {
+			if s, serr := strconv.Atoi(txt); serr == nil {
+				actionTimeout = time.Duration(s) * time.Second
+			} else {
+				return nil, fmt.Errorf("config file %s: invalid action_timeout: %w", path, err)
+			}
+		}
+	}
+
 	return &LoadedConfig{
 		Entities:                  out,
 		ServerAddress:             addr,
@@ -143,6 +166,7 @@ func LoadConfig(path string) (*LoadedConfig, error) {
 		HybridImagePromptTemplate: strings.TrimSpace(rc.HybridImagePrompt),
 		NamePromptTemplate:        strings.TrimSpace(rc.NamePrompt),
 		PublicGamesTTL:            ttl,
+		ActionTimeout:             actionTimeout,
 	}, nil
 }
 

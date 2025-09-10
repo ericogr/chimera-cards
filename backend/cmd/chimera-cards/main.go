@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/ericogr/chimera-cards/internal/api"
 	"github.com/ericogr/chimera-cards/internal/config"
@@ -56,7 +57,41 @@ func main() {
 	}
 
 	repo := storage.NewSQLiteRepository(db, cfg.Entities, cfg.PublicGamesTTL)
-	handler := api.NewGameHandler(repo)
+	handler := api.NewGameHandler(repo, cfg.ActionTimeout)
+
+	// Background scanner: periodically expire games whose action deadline
+	// has passed. Expired games are finished with no winner and do not
+	// affect player stats (StatsCounted=true prevents stat updates).
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			now := time.Now()
+			games, err := repo.FindTimedOutGames(now)
+			if err != nil {
+				logging.Error("timeout scanner failed", err, nil)
+				continue
+			}
+			for _, g := range games {
+				gg, err := repo.GetGameByID(g.ID)
+				if err != nil {
+					continue
+				}
+				if gg.Status != "in_progress" || gg.Phase != "planning" {
+					continue
+				}
+				gg.Status = "finished"
+				gg.Phase = "resolved"
+				gg.Winner = ""
+				gg.Message = "Match ended due to inactivity"
+				gg.StatsCounted = true
+				gg.ActionDeadline = time.Time{}
+				if err := repo.UpdateGame(gg); err != nil {
+					logging.Error("failed to expire game", err, logging.Fields{constants.LogFieldGameID: gg.ID})
+				}
+			}
+		}
+	}()
 	authHandler := api.NewAuthHandler()
 
 	router := gin.Default()

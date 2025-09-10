@@ -198,5 +198,6 @@
   "single_image_prompt": "Create a single PNG with transparent background of the entity '{{entities}}' in a comic-book superhero cartoon style. Vibrant colors, bold clean lines, dynamic pose, no text or logos, transparent background. The image should depict a single entity character suitable for an icon/portrait.",
   "hybrid_image_prompt": "Create a single PNG with transparent background of a hybrid creature that combines the distinctive features of {{entities}} into one cohesive creature. It must be a single creature, not multiple entities. The subject is the hybrid creature only, not a human or humanoid. Bold comic-book style with exaggerated heroic proportions, dramatic shading, vibrant colors, clean thick outlines, and an action pose. No text or logos.",
   "name_prompt": "Combine these entity names into one fun, single-word hybrid: {{entities}}. The result must be a new invented word. Do not include profanity, offensive terms, or anything that resembles a curse word. Return only the invented name.",
+  "action_timeout": "1m",
   "public_games_ttl": "5m"
 }

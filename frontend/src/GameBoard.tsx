@@ -16,6 +16,7 @@ const GameBoard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [game, setGame] = useState<Game | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lockedRound, setLockedRound] = useState<number | null>(null);
@@ -47,6 +48,24 @@ const GameBoard: React.FC = () => {
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [gameId]);
+
+  // Local countdown updater (1s) based on server-provided action_deadline.
+  useEffect(() => {
+    if (!game) return;
+    let tick: number | null = null;
+    const update = () => {
+      if (!game || !game.action_deadline || game.status !== 'in_progress' || game.phase !== 'planning') {
+        setTimeLeft(null);
+        return;
+      }
+      const deadline = new Date(game.action_deadline).getTime();
+      const diff = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      setTimeLeft(diff);
+    };
+    update();
+    tick = window.setInterval(update, 1000);
+    return () => { if (tick) window.clearInterval(tick); };
+  }, [game]);
 
   useEffect(() => {
     if (!game) return;
@@ -136,6 +155,9 @@ const GameBoard: React.FC = () => {
           <div style={{ textAlign: 'right' }}>
             <p style={{ margin: 0 }}>Game ID: {game.ID}</p>
             <p style={{ margin: 0 }}>Created: {new Date(game.created_at).toLocaleString()}</p>
+            {timeLeft != null && (
+              <p style={{ margin: 0 }}>Time left: {Math.floor((timeLeft || 0) / 60).toString().padStart(2, '0')}:{((timeLeft || 0) % 60).toString().padStart(2, '0')}</p>
+            )}
           </div>
         </div>
 

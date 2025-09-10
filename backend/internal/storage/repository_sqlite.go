@@ -128,6 +128,16 @@ func (r *sqliteRepository) GetPublicGames() ([]game.Game, error) {
 	return filtered, nil
 }
 
+func (r *sqliteRepository) FindTimedOutGames(now time.Time) ([]game.Game, error) {
+	var games []game.Game
+	// Find games that are in progress, in planning phase and whose
+	// action_deadline has passed.
+	if err := r.db.Preload("Players.Hybrids.BaseEntities").Where("status = ? AND phase = ? AND action_deadline IS NOT NULL AND action_deadline <= ?", "in_progress", "planning", now).Find(&games).Error; err != nil {
+		return nil, err
+	}
+	return games, nil
+}
+
 // Note: GetAllGames removed as unused to keep the repository lean.
 
 func (r *sqliteRepository) FindGameByJoinCode(code string) (*game.Game, error) {

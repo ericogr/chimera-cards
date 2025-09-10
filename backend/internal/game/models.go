@@ -2,6 +2,7 @@ package game
 
 import (
 	"sort"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -180,6 +181,10 @@ type Game struct {
 	Message          string   `json:"message"`
 	LastRoundSummary string   `json:"last_round_summary"`
 	StatsCounted     bool     `json:"-"`
+	// ActionDeadline marks the time by which both players must submit their
+	// actions for the current planning phase. When empty/zero no deadline is
+	// enforced. Stored in the DB so it survives server restarts.
+	ActionDeadline time.Time `json:"action_deadline"`
 }
 
 // User stores unique player identity and aggregate stats.
