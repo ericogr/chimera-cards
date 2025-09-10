@@ -1,9 +1,9 @@
 package storage
 
 import (
-    "time"
+	"time"
 
-    "github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/game"
 )
 
 type Repository interface {

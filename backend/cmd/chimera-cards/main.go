@@ -84,6 +84,26 @@ func main() {
 				gg.Phase = "resolved"
 				gg.Winner = ""
 				gg.Message = "Match ended due to inactivity"
+				// Build an English last-round summary describing which players
+				// (if any) failed to submit actions before the deadline.
+				summary := "Round timed out: "
+				if len(gg.Players) == 2 {
+					p1Submitted := gg.Players[0].HasSubmittedAction
+					p2Submitted := gg.Players[1].HasSubmittedAction
+					switch {
+					case !p1Submitted && !p2Submitted:
+						summary += "both players failed to submit actions within the allotted time."
+					case p1Submitted && !p2Submitted:
+						summary += gg.Players[1].PlayerName + " did not submit an action in time."
+					case !p1Submitted && p2Submitted:
+						summary += gg.Players[0].PlayerName + " did not submit an action in time."
+					default:
+						summary += "no resolution was reached."
+					}
+				} else {
+					summary += "no resolution was reached due to inactivity."
+				}
+				gg.LastRoundSummary = summary
 				gg.StatsCounted = true
 				gg.ActionDeadline = time.Time{}
 				if err := repo.UpdateGame(gg); err != nil {

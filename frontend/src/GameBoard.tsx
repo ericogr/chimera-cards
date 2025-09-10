@@ -207,7 +207,7 @@ const GameBoard: React.FC = () => {
         {/* End Match moved to the bottom as a final action with consistent layout */}
         {game.status === 'finished' && (
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <div>Winner: {game.winner || me?.player_name || '-'}</div>
+            <div>Winner: {game.winner === '' || game.winner == null ? 'None' : game.winner}</div>
             <button
               onClick={() => {
                 safeRemoveLocal('game_id');
