@@ -167,25 +167,48 @@ func (Player) TableName() string { return "game_players" }
 
 type Game struct {
 	gorm.Model
-	Name             string   `json:"name" gorm:"size:32"`
-	Description      string   `json:"description" gorm:"size:256"`
-	Private          bool     `json:"private"`
-	JoinCode         string   `json:"join_code" gorm:"unique"`
-	Players          []Player `json:"players"`
-	CurrentTurn      string   `json:"current_turn"`
-	RoundCount       int      `json:"round_count"`
-	TurnNumber       int      `json:"turn_number"`
-	Phase            string   `json:"phase"` // planning | resolving
-	Status           string   `json:"status"`
-	Winner           string   `json:"winner"`
-	Message          string   `json:"message"`
-	LastRoundSummary string   `json:"last_round_summary"`
-	StatsCounted     bool     `json:"-"`
+	Name             string     `json:"name" gorm:"size:32"`
+	Description      string     `json:"description" gorm:"size:256"`
+	Private          bool       `json:"private"`
+	JoinCode         string     `json:"join_code" gorm:"unique"`
+	Players          []Player   `json:"players"`
+	CurrentTurn      string     `json:"current_turn"`
+	RoundCount       int        `json:"round_count"`
+	TurnNumber       int        `json:"turn_number"`
+	Phase            GamePhase  `json:"phase"` // planning | resolving
+	Status           GameStatus `json:"status"`
+	Winner           string     `json:"winner"`
+	Message          string     `json:"message"`
+	LastRoundSummary string     `json:"last_round_summary"`
+	StatsCounted     bool       `json:"-"`
 	// ActionDeadline marks the time by which both players must submit their
 	// actions for the current planning phase. When empty/zero no deadline is
 	// enforced. Stored in the DB so it survives server restarts.
 	ActionDeadline time.Time `json:"action_deadline"`
 }
+
+// GameStatus and GamePhase provide typed aliases for the game state and
+// phase fields. Using typed constants reduces mistakes caused by raw
+// string literals throughout the codebase while keeping JSON
+// serialization compatible (they are string aliases).
+type GameStatus string
+
+const (
+	StatusWaitingForPlayers GameStatus = "waiting_for_players"
+	StatusStarting          GameStatus = "starting"
+	StatusInProgress        GameStatus = "in_progress"
+	StatusFinished          GameStatus = "finished"
+	StatusError             GameStatus = "error"
+)
+
+type GamePhase string
+
+const (
+	PhasePlanning  GamePhase = "planning"
+	PhaseResolving GamePhase = "resolving"
+	PhaseResolved  GamePhase = "resolved"
+	PhaseNone      GamePhase = ""
+)
 
 // User stores unique player identity and aggregate stats.
 type User struct {

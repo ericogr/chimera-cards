@@ -18,6 +18,13 @@ Always follow these principles when generating code:
 - Since the project has not been released yet, ignore incremental database migrations.  
 - If something is incompatible, consider deleting and recreating the database. 
 
+# Migration and Compatibility directive for the agent
+- Do NOT create incremental migration code, migration scripts, or compatibility
+  shims when modifying the schema or persistent models. If a change requires a
+  schema update that is incompatible with the existing database, prefer deleting
+  and recreating the development database. Do not attempt to implement
+  backward-compatibility code unless the user explicitly asks for it.
+
 # Repository Guidelines
 
 ## Project Structure & Modules

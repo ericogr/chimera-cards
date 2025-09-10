@@ -29,11 +29,11 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
 	}
-	if g.Status != "in_progress" {
+	if g.Status != game.StatusInProgress {
 		c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrGameNotInProgress})
 		return
 	}
-	if g.Phase != "planning" {
+	if g.Phase != game.PhasePlanning {
 		c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrActionsLockedResolvingRound})
 		return
 	}

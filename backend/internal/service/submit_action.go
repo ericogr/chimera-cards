@@ -24,10 +24,10 @@ func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game
 	if err != nil || g == nil {
 		return nil, false, ErrGameNotFound
 	}
-	if g.Status != "in_progress" {
+	if g.Status != game.StatusInProgress {
 		return nil, false, ErrGameNotInProgress
 	}
-	if g.Phase != "planning" {
+	if g.Phase != game.PhasePlanning {
 		return nil, false, ErrActionsLocked
 	}
 	if len(g.Players) != 2 {
@@ -74,7 +74,7 @@ func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game
 		engine.ResolveRound(g)
 		// If the match continues, reset the action deadline for the next round;
 		// otherwise mark stats as counted so no further updates occur.
-		if g.Status == "finished" {
+		if g.Status == game.StatusFinished {
 			if !g.StatsCounted {
 				// keep existing behavior for normal finishes
 				_ = repo.UpdateStatsOnGameEnd(g, "")

@@ -42,19 +42,20 @@ func (rc *roundContext) finalizeRound() {
 		}
 		return d
 	}
+
 	if cntDefeated(p1) == 2 {
-		rc.g.Status = "finished"
+		rc.g.Status = game.StatusFinished
 		rc.g.Winner = p2.PlayerName
 		rc.g.Message = "Victory for player " + p2.PlayerName
 	} else if cntDefeated(p2) == 2 {
-		rc.g.Status = "finished"
+		rc.g.Status = game.StatusFinished
 		rc.g.Winner = p1.PlayerName
 		rc.g.Message = "Victory for player " + p1.PlayerName
 	}
 
 	// next round or resolved
 	rc.g.LastRoundSummary = rc.joinSummary()
-	if rc.g.Status == "in_progress" {
+	if rc.g.Status == game.StatusInProgress {
 		rc.g.RoundCount++
 		rc.g.TurnNumber = 1
 		for i := range rc.g.Players {
@@ -91,10 +92,10 @@ func (rc *roundContext) finalizeRound() {
 				}
 			}
 		}
-		rc.g.Phase = "planning"
+		rc.g.Phase = game.PhasePlanning
 		rc.g.Message = "New round. Choose your actions."
 	} else {
-		rc.g.Phase = "resolved"
+		rc.g.Phase = game.PhaseResolved
 	}
 }
 
@@ -105,7 +106,7 @@ func ResolveRound(g *game.Game) {
 		return
 	}
 	// begin
-	g.Phase = "resolving"
+	g.Phase = game.PhaseResolving
 	rc := newRoundContext(g)
 
 	p1 := &g.Players[0]

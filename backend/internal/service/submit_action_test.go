@@ -42,8 +42,8 @@ func TestSubmitAction_ResolvesRound(t *testing.T) {
 		{PlayerUUID: "p2", PlayerName: "P2", Hybrids: []game.Hybrid{{Name: "H2", BaseHitPoints: 10, CurrentHitPoints: 10, BaseAttack: 1, CurrentAttack: 1, BaseDefense: 1, CurrentDefense: 1, BaseAgility: 1, CurrentAgility: 1, IsActive: true}}},
 	}}
 	g.RoundCount = 1
-	g.Status = "in_progress"
-	g.Phase = "planning"
+	g.Status = game.StatusInProgress
+	g.Phase = game.PhasePlanning
 	mr := &mockRepoSA{games: map[uint]*game.Game{7: g}}
 
 	// First player submits

@@ -54,10 +54,10 @@ func StartGame(repo storage.Repository, g *game.Game) error {
 	}
 
 	// Prepare game state
-	g.Status = "in_progress"
+	g.Status = game.StatusInProgress
 	g.RoundCount = 1
 	g.TurnNumber = 1
-	g.Phase = "planning"
+	g.Phase = game.PhasePlanning
 	g.Message = "The game has started. Choose your actions."
 
 	// Round start adjustments

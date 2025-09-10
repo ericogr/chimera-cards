@@ -132,7 +132,7 @@ func (r *sqliteRepository) FindTimedOutGames(now time.Time) ([]game.Game, error)
 	var games []game.Game
 	// Find games that are in progress, in planning phase and whose
 	// action_deadline has passed.
-	if err := r.db.Preload("Players.Hybrids.BaseEntities").Where("status = ? AND phase = ? AND action_deadline IS NOT NULL AND action_deadline <= ?", "in_progress", "planning", now).Find(&games).Error; err != nil {
+	if err := r.db.Preload("Players.Hybrids.BaseEntities").Where("status = ? AND phase = ? AND action_deadline IS NOT NULL AND action_deadline <= ?", game.StatusInProgress, game.PhasePlanning, now).Find(&games).Error; err != nil {
 		return nil, err
 	}
 	return games, nil

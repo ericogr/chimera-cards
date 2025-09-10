@@ -59,7 +59,7 @@ func (h *GameHandler) CreateGame(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		Private:     req.Private,
-		Status:      "waiting_for_players",
+		Status:      game.StatusWaitingForPlayers,
 		JoinCode:    joinCode,
 		Players: []game.Player{
 			{PlayerUUID: player1UUID, PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail},
@@ -121,7 +121,7 @@ func (h *GameHandler) JoinGame(c *gin.Context) {
 	newPlayer := game.Player{PlayerUUID: newPlayerUUID, PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail}
 
 	g.Players = append(g.Players, newPlayer)
-	g.Status = "waiting_for_players"
+	g.Status = game.StatusWaitingForPlayers
 	g.Message = "Second player joined. Waiting for the game to start."
 
 	// Upsert user profile (name/email)
@@ -165,14 +165,14 @@ func (h *GameHandler) StartGame(c *gin.Context) {
 	}
 
 	// Prevent starting if already in another transitional state
-	if g.Status != "waiting_for_players" {
+	if g.Status != game.StatusWaitingForPlayers {
 		c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrGameAlreadyStartingOrStarted})
 		return
 	}
 
 	// Persist the "starting" state so other clients polling the game see
 	// that hybrid creation is in progress.
-	g.Status = "starting"
+	g.Status = game.StatusStarting
 	g.Message = "Your hybrid is being created. This may take a few moments."
 	if err := h.repo.UpdateGame(g); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedUpdateGameStatus})
@@ -193,7 +193,7 @@ func (h *GameHandler) StartGame(c *gin.Context) {
 			logging.Error("async-start failed to start game", err, logging.Fields{constants.LogFieldGameID: gameID})
 			// Update game to a visible error state so players aren't left
 			// waiting forever.
-			gg.Status = "error"
+			gg.Status = game.StatusError
 			gg.Message = "Failed to create hybrid names or images. Please try again."
 			_ = h.repo.UpdateGame(gg)
 			return
@@ -232,7 +232,7 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
 	}
-	if g.Status != "waiting_for_players" {
+	if g.Status != game.StatusWaitingForPlayers {
 		c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrCannotLeaveAfterGameStarted})
 		return
 	}
@@ -283,8 +283,8 @@ func (h *GameHandler) EndGame(c *gin.Context) {
 		return
 	}
 	// Default resolution on end
-	g.Status = "finished"
-	g.Phase = "resolved"
+	g.Status = game.StatusFinished
+	g.Phase = game.PhaseResolved
 	g.Winner = ""
 
 	// If a player is specified, count it as a resignation for that player.

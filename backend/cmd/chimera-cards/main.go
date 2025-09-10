@@ -7,6 +7,7 @@ import (
 	"github.com/ericogr/chimera-cards/internal/api"
 	"github.com/ericogr/chimera-cards/internal/config"
 	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/game"
 	"github.com/ericogr/chimera-cards/internal/hybridname"
 	"github.com/ericogr/chimera-cards/internal/logging"
 	"github.com/ericogr/chimera-cards/internal/openaiclient"
@@ -77,11 +78,11 @@ func main() {
 				if err != nil {
 					continue
 				}
-				if gg.Status != "in_progress" || gg.Phase != "planning" {
+				if gg.Status != game.StatusInProgress || gg.Phase != game.PhasePlanning {
 					continue
 				}
-				gg.Status = "finished"
-				gg.Phase = "resolved"
+				gg.Status = game.StatusFinished
+				gg.Phase = game.PhaseResolved
 				gg.Winner = ""
 				gg.Message = "Match ended due to inactivity"
 				// Build an English last-round summary describing which players
