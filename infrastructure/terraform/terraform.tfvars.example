@@ -19,3 +19,10 @@ instance_display_name = "chimera-instance"
 vcn_cidr = "10.0.0.0/16"
 subnet_cidr = "10.0.1.0/24"
 dns_label = "chimera"
+
+cloudflare_api_token = "asdfasdfasdfasdf"
+cloudflare_zone_name = "zone.com.br"
+cloudflare_dns_record_name = "chimera.zone.com.br"
+cloudflare_dns_ttl = 120
+cloudflare_dns_type = "A"
+cloudflare_dns_proxied = false

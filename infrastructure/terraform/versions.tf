@@ -5,6 +5,10 @@ terraform {
       source  = "oracle/oci"
       version = "~> 7.16.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.9"
+    }
   }
 }
 
@@ -16,3 +20,6 @@ provider "oci" {
   private_key_path = var.private_key_path
 }
 
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}

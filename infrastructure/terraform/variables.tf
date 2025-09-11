@@ -128,3 +128,40 @@ variable "private_key_path" {
   description = "User OCID (ocid1.user.oc1..)"
   type        = string
 }
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token. If not set, provider reads from the environment variable CLOUDFLARE_API_TOKEN."
+  type        = string
+  default     = ""
+}
+
+variable "cloudflare_zone_name" {
+  description = "DNS zone name (domain) in Cloudflare (e.g., example.com)"
+  type        = string
+  default     = ""
+}
+
+variable "cloudflare_dns_record_name" {
+  description = "DNS record name to create/update in Cloudflare (e.g., 'www' or 'app.example.com'). If empty, uses var.dns_label"
+  type        = string
+  default     = ""
+}
+
+variable "cloudflare_dns_ttl" {
+  description = "TTL for the Cloudflare DNS record (seconds). Use 1 for automatic TTL."
+  type        = number
+  default     = 1
+}
+
+variable "cloudflare_dns_type" {
+  description = "DNS record type to create (e.g., A, CNAME)"
+  type        = string
+  default     = "A"
+}
+
+variable "cloudflare_dns_proxied" {
+  description = "Whether the Cloudflare record should be proxied (Cloudflare CDN)."
+  type        = bool
+  default     = false
+}
+
