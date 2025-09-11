@@ -43,4 +43,8 @@ type Repository interface {
 	// avoids heavy preloads when the scheduler only needs to know which
 	// games to process.
 	FindTimedOutGameIDs(now time.Time) ([]uint, error)
+	// ClaimTimedOutGameIDs atomically marks up to `limit` timed-out games
+	// as being processed by `workerID`. reclaimAfter is a duration used to
+	// allow reclaiming stale claims (processing_at older than now-reclaimAfter).
+	ClaimTimedOutGameIDs(now time.Time, limit int, reclaimAfter time.Duration, workerID string) ([]uint, error)
 }

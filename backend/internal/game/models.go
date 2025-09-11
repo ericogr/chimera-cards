@@ -185,6 +185,10 @@ type Game struct {
 	// actions for the current planning phase. When empty/zero no deadline is
 	// enforced. Stored in the DB so it survives server restarts.
 	ActionDeadline time.Time `json:"action_deadline"`
+	// ProcessingBy and ProcessingAt are used by the scheduler to claim a
+	// game for background processing. They are non-JSON fields.
+	ProcessingBy string    `json:"-" gorm:"index"`
+	ProcessingAt time.Time `json:"-" gorm:"index"`
 }
 
 // GameStatus and GamePhase provide typed aliases for the game state and

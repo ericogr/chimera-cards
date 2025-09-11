@@ -148,6 +148,35 @@ func (r *sqliteRepository) FindTimedOutGameIDs(now time.Time) ([]uint, error) {
 	return ids, nil
 }
 
+func (r *sqliteRepository) ClaimTimedOutGameIDs(now time.Time, limit int, reclaimAfter time.Duration, workerID string) ([]uint, error) {
+	// processingAt marks when this worker claimed the rows
+	processingAt := now
+	reclaimThreshold := now.Add(-reclaimAfter)
+
+	// Atomic-ish claim: update rows matching timeout conditions (and not
+	// currently being processed, or whose processing_at is stale) and set
+	// processing_by/processing_at to our worker id/time. Use a subselect
+	// with ORDER BY action_deadline to claim the oldest first.
+	sql := `UPDATE games SET processing_by = ?, processing_at = ? WHERE id IN (
+        SELECT id FROM games
+        WHERE status = ? AND phase = ? AND action_deadline IS NOT NULL AND action_deadline <= ?
+          AND (processing_by IS NULL OR processing_at <= ?)
+        ORDER BY action_deadline ASC
+        LIMIT ?
+    );`
+
+	if err := r.db.Exec(sql, workerID, processingAt, game.StatusInProgress, game.PhasePlanning, now, reclaimThreshold, limit).Error; err != nil {
+		return nil, err
+	}
+
+	// Now select the ids we claimed
+	var ids []uint
+	if err := r.db.Model(&game.Game{}).Where("processing_by = ? AND processing_at = ?", workerID, processingAt).Pluck("id", &ids).Error; err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
 // Note: GetAllGames removed as unused to keep the repository lean.
 
 func (r *sqliteRepository) FindGameByJoinCode(code string) (*game.Game, error) {

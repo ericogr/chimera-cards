@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -60,6 +61,9 @@ func main() {
 	repo := storage.NewSQLiteRepository(db, cfg.Entities, cfg.PublicGamesTTL)
 	handler := api.NewGameHandler(repo, cfg.ActionTimeout, cfg.PublicGamesTTL)
 
+	// Worker identity for claim operations (unique per process start)
+	workerID := fmt.Sprintf("%d-%d", os.Getpid(), time.Now().UnixNano())
+
 	// Background scanner: periodically expire games whose action deadline
 	// has passed. Expired games are finished with no winner and do not
 	// affect player stats (StatsCounted=true prevents stat updates).
@@ -71,7 +75,8 @@ func main() {
 		defer ticker.Stop()
 		for range ticker.C {
 			now := time.Now()
-			ids, err := repo.FindTimedOutGameIDs(now)
+			// Claim up to N timed-out games atomically for this worker
+			ids, err := repo.ClaimTimedOutGameIDs(now, 20, 2*time.Minute, workerID)
 			if err != nil {
 				logging.Error("timeout scanner failed to list ids", err, nil)
 				continue
