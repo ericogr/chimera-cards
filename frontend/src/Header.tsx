@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SettingsMenu from './SettingsMenu';
 import { usePlayerStats } from './hooks/usePlayerStats';
-import './Header.css';
+// header styles moved to `index.css`
 import { Avatar } from './ui';
 
 interface User {

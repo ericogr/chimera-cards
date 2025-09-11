@@ -1,17 +1,17 @@
 .hybrid-entity-card {
   transition: box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-  background-color: #1f2933; /* slightly different from page bg */
-  color: #e6eef6; /* light text for contrast */
-  border: 1px solid #3a3f45;
+  background-color: var(--panel-bg); /* slightly different from page bg */
+  color: var(--text-light); /* light text for contrast */
+  border: 1px solid rgba(58,63,69,1);
   padding: 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   gap: 8px;
   cursor: pointer;
 }
 .hybrid-entity-card.disabled { opacity: 0.5; cursor: not-allowed; color: #7b8791; }
-.hybrid-entity-card.selected { background: rgba(97,218,251,0.06); border-color: #61dafb !important; color: #ffffff; }
+.hybrid-entity-card.selected { background: rgba(97,218,251,0.06); border-color: var(--accent-color) !important; color: #ffffff; }
 .hybrid-entity-card.blink-border { animation: blinkBorder 1.2s linear infinite; }
 
 @keyframes blinkBorder {
@@ -24,7 +24,5 @@
 
 /* Page-specific headings and helper text inside the hybrid creation area */
 .hybrid-creation-grid, .hybrid-creation-grid h4, .hybrid-creation-grid h3, .hybrid-creation-grid p {
-  color: #e6eef6;
+  color: var(--text-light);
 }
-
-.entity-image { object-fit: cover; border-radius: 6px; }

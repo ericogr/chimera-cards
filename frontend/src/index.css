@@ -2,7 +2,7 @@ html, body, #root {
   /* Ensure the app fills the viewport and the page background is dark
      so no white areas from the default page background appear on mobile. */
   height: 100%;
-  background-color: #282c34;
+  background-color: var(--app-bg, #282c34);
 }
 
 body {
@@ -28,6 +28,16 @@ code {
   --btn-bg-end: #2563eb;   /* blue-600 */
   --btn-text: #ffffff;
   --btn-shadow: 0 6px 18px rgba(2,6,23,0.45);
+  /* Global color vars */
+  --app-bg: #282c34;
+  --panel-bg: #1f1f1f;
+  --panel-bg-alt: #111;
+  --border-color: #333;
+  --muted-color: #ccc;
+  --accent-color: #61dafb;
+  --text-light: #e6eef6;
+  --radius-sm: 6px;
+  --radius-md: 8px;
 }
 
 button {
@@ -120,7 +130,7 @@ button:disabled {
 .no-margin { margin: 0 !important; }
 
 /* Card container for panels */
-.card { border: 1px solid #333; padding: 16px; border-radius: 8px; background: transparent; box-sizing: border-box; }
+.card { border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); background: transparent; box-sizing: border-box; }
 
 /* Simple form controls */
 .form-input { padding: 10px; font-size: 16px; width: 100%; box-sizing: border-box; }
@@ -136,6 +146,9 @@ button:disabled {
 
 /* Avatar helpers */
 .avatar-circle { border-radius: 50%; }
+
+/* Generic entity image used in hybrids / stats */
+.entity-image { object-fit: cover; border-radius: var(--radius-sm); }
 
 /* Small text */
 .small { font-size: 14px; }
@@ -155,7 +168,7 @@ button:disabled {
 .mb-12 { margin-bottom: 12px; }
 
 /* Panels */
-.panel-dark { margin-top: 12px; white-space: pre-wrap; padding: 12px; background: #111; border: 1px solid #333; border-radius: 6px; }
+.panel-dark { margin-top: 12px; white-space: pre-wrap; padding: 12px; background: var(--panel-bg-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
 
 /* Row helpers */
 .row-start { display: flex; gap: 12px; align-items: flex-start; }
@@ -177,7 +190,21 @@ button:disabled {
 
 /* Modal */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: #fff; color: #000; border-radius: 8px; padding: 18px 20px; max-width: 680px; width: 100%; box-sizing: border-box; text-align: center; font-size: 16px; line-height: 1.4; }
+.modal-content { background: #fff; color: #000; border-radius: var(--radius-md); padding: 18px 20px; max-width: 680px; width: 100%; box-sizing: border-box; text-align: center; font-size: 16px; line-height: 1.4; }
+
+/* Settings menu (moved from SettingsMenu.css) */
+.settings-menu { position: relative; display: inline-block; }
+.settings-toggle { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: transparent; border: none; color: #ffffff; cursor: pointer; padding: 6px; border-radius: var(--radius-sm); }
+.settings-toggle:hover { background: rgba(255,255,255,0.04); }
+.settings-dropdown { position: absolute; right: 0; top: calc(100% + 8px); background: var(--panel-bg); border: 1px solid var(--border-color); padding: 6px; border-radius: var(--radius-sm); min-width: 160px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); z-index: 1200; }
+.settings-item { display: block; width: 100%; background: transparent; color: #fff; border: none; text-align: left; padding: 8px 10px; cursor: pointer; border-radius: 4px; }
+.settings-item:hover { background: rgba(255,255,255,0.03); }
+
+/* Shared header (moved from Header.css) */
+.shared-header { background-color: var(--app-bg); color: white; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid var(--border-color); box-sizing: border-box; }
+.shared-header h3 { font-size: 1.25rem; margin: 0; }
+.shared-header img { display: block; }
+.header-avatar { border-radius: 50%; height: 40px; display: block; }
 
 /* Lightweight table styles */
 .table-light { width: 100%; border-collapse: collapse; }
@@ -192,7 +219,7 @@ button:disabled {
 
 /* Muted text variants */
 .muted { color: #666; }
-.muted-sm { color: #ccc; font-size: 12px; }
+.muted-sm { color: var(--muted-color); font-size: 12px; }
 
 /* Helpers */
 .full-width { width: 100%; }

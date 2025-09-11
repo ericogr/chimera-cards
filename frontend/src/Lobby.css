@@ -9,7 +9,7 @@
 
 .game-list-header {
   font-weight: bold;
-  border-bottom: 2px solid #61dafb;
+  border-bottom: 2px solid var(--accent-color);
   padding-bottom: 10px;
 }
 
@@ -20,7 +20,7 @@
 
 .game-description {
   font-size: 0.9em;
-  color: #ccc;
+  color: var(--muted-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -46,7 +46,7 @@
 
 .rank-list-header {
   font-weight: bold;
-  border-bottom: 2px solid #61dafb;
+  border-bottom: 2px solid var(--accent-color);
   padding-bottom: 10px;
 }
 

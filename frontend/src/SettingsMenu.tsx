@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './SettingsMenu.css';
+// styles moved to `index.css`
 import { Button } from './ui';
 
 interface SettingsMenuProps {
