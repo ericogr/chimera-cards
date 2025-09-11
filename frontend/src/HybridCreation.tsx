@@ -8,6 +8,8 @@ import './HybridCreation.css';
 interface Props {
   gameId: string;
   onCreated?: () => void;
+  // When true, the server-side public-games TTL expired and creation must be disabled
+  ttlExpired?: boolean;
 }
 
 interface HybridSpecState {
@@ -15,7 +17,7 @@ interface HybridSpecState {
   selectedEntityId?: number;
 }
 
-const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
+const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false }) => {
   const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
 
   const usedIds = useMemo(() => new Set([...h1.entityIds, ...h2.entityIds]), [h1, h2]);
   const toggleAnimalSelection = (target: 'h1' | 'h2', id: number) => {
-    if (submitting) return;
+    if (submitting || ttlExpired) return;
     const src = target === 'h1' ? h1 : h2;
     const setter = target === 'h1' ? setH1 : setH2;
     const isUsedElsewhere = usedIds.has(id) && !src.entityIds.includes(id);
@@ -79,6 +81,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
   const h2Name = computeName(h2.entityIds);
 
   const handleSubmit = async () => {
+    if (ttlExpired) return;
     if (!isValidSelection || actingRef.current || submitting) return;
     actingRef.current = true;
     setSubmitting(true);
@@ -226,9 +229,12 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated }) => {
           <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
           <div style={{ fontSize: 12, marginTop: 4, color: '#ccc' }}>Name (auto): {h2Name || '-'}</div>
         </section>
-        <button onClick={handleSubmit} disabled={!isValidSelection || submitting} style={{ padding: '10px 16px' }}>
+        <button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired} style={{ padding: '10px 16px' }}>
           {submitting ? 'Creating…' : 'Create Hybrids'}
         </button>
+        {ttlExpired && (
+          <div style={{ marginTop: 8, color: '#c00', fontSize: 13 }}>Hybrid creation is closed — the game can no longer be started.</div>
+        )}
         <div style={{ fontSize: 12, color: '#aaa' }}>* Names are generated automatically by the game.</div>
       </div>
       {showHelp && (

@@ -17,3 +17,5 @@ export const API_AUTH_GOOGLE_CALLBACK = `/auth/google/oauth2callback`;
 // Headers and content types
 export const HEADER_CONTENT_TYPE = 'Content-Type';
 export const CONTENT_TYPE_JSON = 'application/json';
+
+export const API_CONFIG = `${API_PREFIX}/config`;

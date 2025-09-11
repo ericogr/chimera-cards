@@ -58,7 +58,7 @@ func main() {
 	}
 
 	repo := storage.NewSQLiteRepository(db, cfg.Entities, cfg.PublicGamesTTL)
-	handler := api.NewGameHandler(repo, cfg.ActionTimeout)
+	handler := api.NewGameHandler(repo, cfg.ActionTimeout, cfg.PublicGamesTTL)
 
 	// Background scanner: periodically expire games whose action deadline
 	// has passed. Expired games are finished with no winner and do not
@@ -123,6 +123,7 @@ func main() {
 		apiRoutes.GET(constants.RouteEntities, handler.ListEntities)
 		apiRoutes.GET(constants.RoutePublicGames, handler.ListPublicGames)
 		apiRoutes.GET(constants.RouteLeaderboard, handler.ListLeaderboard)
+		apiRoutes.GET(constants.RouteConfig, handler.GetConfig)
 
 		// Authenticated endpoints
 		protected := apiRoutes.Group("")

@@ -10,6 +10,8 @@ const GameRoom: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const [game, setGame] = useState<Game | null>(null);
+  const [timeLeftMs, setTimeLeftMs] = useState<number | null>(null);
+  const [publicGamesTTLSeconds, setPublicGamesTTLSeconds] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
@@ -55,6 +57,53 @@ const GameRoom: React.FC = () => {
     const interval = setInterval(loadGame, 3000);
     return () => clearInterval(interval);
   }, [gameId, navigate]);
+
+  // Fetch backend config (public games TTL) and compute countdown.
+  useEffect(() => {
+    let mounted = true;
+    const loadConfig = async () => {
+      try {
+        const res = await apiFetch(constants.API_CONFIG);
+        if (!res.ok) return;
+        const body = await res.json();
+        if (!mounted) return;
+        if (body && typeof body.public_games_ttl_seconds === 'number') {
+          setPublicGamesTTLSeconds(body.public_games_ttl_seconds);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    loadConfig();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!game) {
+      setTimeLeftMs(null);
+      return;
+    }
+    if (game.private) {
+      setTimeLeftMs(null);
+      return;
+    }
+
+    const ttlSec = publicGamesTTLSeconds ?? 300; // default 5m
+    const ttlMs = ttlSec * 1000;
+    const createdAt = game.created_at ? new Date(game.created_at).getTime() : NaN;
+    if (isNaN(createdAt)) {
+      setTimeLeftMs(null);
+      return;
+    }
+    const expiry = createdAt + ttlMs;
+
+    const update = () => setTimeLeftMs(Math.max(0, expiry - Date.now()));
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [game, publicGamesTTLSeconds]);
 
   const canAutoLeaveRef = useRef(false);
   useEffect(() => {
@@ -134,6 +183,13 @@ const GameRoom: React.FC = () => {
   const currentPlayer: Player | undefined = game.players.find(p => p.player_uuid === currentPlayerUUID);
   const allReady = game.players.length === 2 && game.players.every(p => p.has_created);
 
+  const formatMs = (ms: number) => {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  };
+
   const leaveGameAndReturn = async () => {
     try {
       if (game?.status === 'waiting_for_players' && currentPlayerUUID && game.players?.some(p => p.player_uuid === currentPlayerUUID)) {
@@ -161,6 +217,14 @@ const GameRoom: React.FC = () => {
             <button onClick={leaveGameAndReturn}>Back to Lobby</button>
           </div>
         </div>
+
+        {/* Countdown until public game TTL expires (only for public games in waiting state) */}
+        {game && !game.private && timeLeftMs !== null && game.status === 'waiting_for_players' && (
+          <div style={{ marginTop: 6, fontSize: 14, color: '#666' }}>
+            {timeLeftMs > 0 ? `Time left to start: ${formatMs(timeLeftMs)}` : 'This public game can no longer be started.'}
+          </div>
+        )}
+
         <h4>Status: {game.status}</h4>
 
         <h4>Players ({game.players?.length || 0} / 2)</h4>
@@ -174,11 +238,11 @@ const GameRoom: React.FC = () => {
         </ul>
 
         {game.status === 'waiting_for_players' && currentPlayer && !currentPlayer.has_created && (
-          <HybridCreation gameId={gameId!} onCreated={() => {}} />
+          <HybridCreation gameId={gameId!} onCreated={() => {}} ttlExpired={timeLeftMs !== null && timeLeftMs <= 0} />
         )}
 
         {isCreator && game.players.length === 2 && game.status === 'waiting_for_players' && (
-          <button onClick={handleStartGame} disabled={!allReady || submitting} style={{ padding: '10px 20px', fontSize: '16px' }}>
+          <button onClick={handleStartGame} disabled={!allReady || submitting || (timeLeftMs !== null && timeLeftMs <= 0)} style={{ padding: '10px 20px', fontSize: '16px' }}>
             {allReady ? 'Start Game' : 'Waiting hybrids...'}
           </button>
         )}

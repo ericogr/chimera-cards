@@ -58,6 +58,7 @@ const (
 	RouteAssetsEntities     = "/assets/entities"
 	RouteAssetsHybrids      = "/assets/hybrids"
 	RoutePublicGames        = "/public-games"
+	RouteConfig             = "/config"
 	RouteLeaderboard        = "/leaderboard"
 	RouteAuthGoogleCallBack = "/auth/google/oauth2callback"
 	RoutePlayerStats        = "/player-stats"
