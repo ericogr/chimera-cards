@@ -124,10 +124,24 @@
   .game-list, .rank-list { min-width: 700px; }
   .lobby-top { gap: 16px; }
   .lobby-top > div { min-width: 100%; }
-  .game-board-main { flex-direction: column; }
-  .player-area { width: 100%; }
-  .player-one { border-right: none; border-bottom: 1px solid #444; }
-  .stats-grid { grid-template-columns: 1fr; }
+
+  /* Keep players side-by-side when possible by allowing wrapping
+     and reduce internal element sizes so two player panels can fit
+     on narrow screens. */
+  .game-board-main { flex-wrap: wrap; }
+
+  /* Each player takes roughly half the width but can shrink. */
+  .player-area { flex: 1 1 50%; min-width: 220px; padding: 12px; box-sizing: border-box; }
+
+  /* Keep a right border for the left panel when side-by-side. */
+  .player-one { border-right: 1px solid #444; border-bottom: none; }
+
+  /* Make stats more compact so they fit horizontally next to the entity image. */
+  .stats-grid { grid-template-columns: repeat(2, minmax(100px, 1fr)); gap: 6px; font-size: 13px; }
+
+  /* Reduce entity artwork size on narrower screens. */
+  .entity-image { width: 64px; height: 64px; }
+
   .entities-grid { grid-template-columns: 1fr; }
 }
 
@@ -138,4 +152,9 @@
   .game-board-container { font-size: 14px; }
   .google-login-button { padding: 10px 16px; font-size: 14px; }
   .action-row { grid-template-columns: 1fr !important; }
+
+  /* Further reduce artwork and stats for very small screens */
+  .entity-image { width: 56px; height: 56px; }
+  .stats-grid { grid-template-columns: 1fr; font-size: 12px; gap: 4px; }
+  .player-area { min-width: 160px; padding: 8px; }
 }

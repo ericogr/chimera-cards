@@ -101,3 +101,40 @@
     gap: 6px;
   }
 }
+
+/* Component-level responsive tweaks to ensure the two player panels
+   remain side-by-side on small screens by reducing artwork and text
+   sizes and allowing panels to shrink. These rules intentionally come
+   after the global responsive file so they take precedence when the
+   GameBoard component is rendered. */
+@media (max-width: 900px) {
+  .game-board-main {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0;
+    overflow-x: auto; /* allow horizontal fit when absolutely needed */
+  }
+
+  .player-area {
+    flex: 1 1 50%;
+    min-width: 120px; /* allow tighter shrink on phones */
+    padding: 10px;
+    box-sizing: border-box;
+    align-items: flex-start;
+  }
+
+  .player-one { border-right: 1px solid #444; border-bottom: none; }
+
+  /* Make the entity image and stats more compact so they fit side-by-side */
+  .row-start { align-items: center; gap: 8px; }
+  .entity-image { width: 56px; height: 56px; }
+  .stats-grid { grid-template-columns: 1fr; font-size: 13px; gap: 6px; }
+  .player-area h2 { font-size: 1rem; }
+}
+
+@media (max-width: 420px) {
+  .entity-image { width: 44px; height: 44px; }
+  .stats-grid { font-size: 12px; gap: 4px; }
+  .player-area { padding: 8px; }
+}
