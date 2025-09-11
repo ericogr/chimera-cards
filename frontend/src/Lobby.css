@@ -32,20 +32,7 @@
   font-size: 0.9em;
 }
 
-.link-button {
-  background: none;
-  border: none;
-  color: #61dafb;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font-size: inherit;
-  font-family: inherit;
-}
 
-.link-button:hover {
-  color: #fff;
-}
 
 /* Leaderboard styles */
 .rank-list {

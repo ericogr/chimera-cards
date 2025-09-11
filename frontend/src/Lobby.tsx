@@ -5,24 +5,8 @@ import { apiFetch } from './api';
 import { safeSetLocal } from './runtimeConfig';
 import './Lobby.css';
 import * as constants from './constants';
-interface Player {
-  ID: number;
-  player_uuid: string;
-  player_name: string;
-  player_email?: string;
-}
-
-interface Game {
-  ID: number;
-  name: string;
-  description: string;
-  private: boolean;
-  players: Player[];
-  status: string;
-  join_code: string;
-  created_at: string; // Assuming date comes as a string
-}
-
+import { usePublicGames } from './hooks/usePublicGames';
+import { useLeaderboard } from './hooks/useLeaderboard';
 interface LobbyProps {
   user: {
     name?: string;
@@ -33,10 +17,9 @@ interface LobbyProps {
 }
 
 const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
-  const [games, setGames] = useState<Game[]>([]);
-  
   const [error, setError] = useState<string | null>(null);
-  const [leaderboard, setLeaderboard] = useState<Array<{ ID: number; PlayerName: string; Email: string; GamesPlayed: number; Wins: number; Resignations: number }>>([]);
+  const { games, error: gamesError } = usePublicGames(5000);
+  const leaderboard = useLeaderboard(10000);
   const [creatorStats, setCreatorStats] = useState<Record<string, { wins: number; resignations: number }>>({});
   const [joinCode, setJoinCode] = useState('');
   const [gameName, setGameName] = useState('');
@@ -47,46 +30,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const actingRef = useRef(false);
 
-    useEffect(() => {
-    const loadAvailableGames = async () => {
-      try {
-        const response = await apiFetch(constants.API_PUBLIC_GAMES);
-        if (response.status === 401) { window.location.href = '/'; return; }
-        if (!response.ok) {
-          throw new Error('Failed to fetch games');
-        }
-        const data = await response.json();
-        const available = (data || []).filter((g: Game) => g.status === 'waiting_for_players');
-        setGames(available);
-        // Trigger fetching creator stats for new creators
-        const emails = new Set<string>();
-        for (const g of available) {
-          const creator = g.players?.[0]?.player_email;
-          if (creator) emails.add(creator);
-        }
-        const missing = Array.from(emails).filter(e => !(e in creatorStats));
-        if (missing.length) {
-          const entries: [string, { wins: number; resignations: number }][] = [];
-          await Promise.all(missing.map(async (e) => {
-            try {
-              const res = await apiFetch(`${constants.API_PLAYER_STATS}?email=${encodeURIComponent(e)}`);
-              if (res.status === 401) { window.location.href = '/'; return; }
-              if (res.ok) {
-                const s = await res.json();
-                entries.push([e, { wins: s.Wins ?? s.wins ?? 0, resignations: s.Resignations ?? s.resignations ?? 0 }]);
-              }
-            } catch {}
-          }));
-          if (entries.length) {
-            setCreatorStats(prev => ({ ...prev, ...Object.fromEntries(entries) }));
-          }
-        }
-      } catch (err) {
-        setError('Could not load games. Please try again later.');
-        console.error(err);
-      }
-    };
-
+  useEffect(() => {
     // Ensure persistent player_uuid across sessions for stats aggregation
     try {
       let uuid = localStorage.getItem('player_uuid');
@@ -95,23 +39,43 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
         safeSetLocal('player_uuid', uuid);
       }
     } catch {}
-    loadAvailableGames();
-    // stats are shown in the shared header; Lobby does not fetch them locally
-    const loadLeaderboard = async () => {
+    // surface errors from the games hook
+    if (gamesError) setError('Could not load games. Please try again later.');
+  }, [gamesError]);
+
+  useEffect(() => {
+    // When public games update, fetch any missing creator stats
+    const fetchMissingCreatorStats = async () => {
       try {
-        const res = await apiFetch(constants.API_LEADERBOARD);
-        if (res.ok) {
-          const data = await res.json();
-          setLeaderboard(Array.isArray(data) ? data : []);
+        const emails = new Set<string>();
+        for (const g of games || []) {
+          const creator = g.players?.[0]?.player_email;
+          if (creator) emails.add(creator);
         }
-      } catch {}
+        const missing = Array.from(emails).filter(e => !(e in creatorStats));
+        if (!missing.length) return;
+        const entries: [string, { wins: number; resignations: number }][] = [];
+        await Promise.all(missing.map(async (e) => {
+          try {
+            const res = await apiFetch(`${constants.API_PLAYER_STATS}?email=${encodeURIComponent(e)}`);
+            if (res.status === 401) { window.location.href = '/'; return; }
+            if (res.ok) {
+              const s = await res.json();
+              entries.push([e, { wins: s.Wins ?? s.wins ?? 0, resignations: s.Resignations ?? s.resignations ?? 0 }]);
+            }
+          } catch {}
+        }));
+        if (entries.length) {
+          setCreatorStats(prev => ({ ...prev, ...Object.fromEntries(entries) }));
+        }
+      } catch (err) {
+        setError('Could not load games. Please try again later.');
+        console.error(err);
+      }
     };
 
-    loadLeaderboard();
-    const intervalA = setInterval(loadAvailableGames, 5000);
-    const intervalC = setInterval(loadLeaderboard, 10000);
-    return () => { clearInterval(intervalA); clearInterval(intervalC); };
-  }, [user?.email, creatorStats]);
+    fetchMissingCreatorStats();
+  }, [games, creatorStats]);
 
   const createGame = async () => {
     if (!gameName.trim()) {

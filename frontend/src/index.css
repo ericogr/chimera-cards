@@ -76,6 +76,37 @@ button:disabled {
   color: #fff;
 }
 
+/* Link-style button used across the app (centralized) */
+.link-button {
+  background: none;
+  border: none;
+  color: #61dafb;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.link-button:hover { color: #fff; }
+
+/* Icon button used for action controls (global) */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
 /* Blinking helpers used for urgent UI elements (e.g., timers) */
 .blink-text { animation: blinkText 1s ease-in-out infinite; color: #ffffff; }
 @keyframes blinkText { 0% { opacity: 1; } 50% { opacity: 0.25; } 100% { opacity: 1; } }

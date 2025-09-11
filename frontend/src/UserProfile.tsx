@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './ui';
+import { Button, Avatar } from './ui';
 
 interface UserProfileProps {
   user: {
@@ -14,7 +14,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
   return (
     <div>
       <h2>Authentication Successful!</h2>
-      {user.picture && <img src={user.picture} alt="Profile" className="avatar-circle" />}
+      {user.picture && <Avatar src={user.picture} alt={user.name || 'Profile'} size={80} />}
       <p><strong>Name:</strong> {user.name}</p>
       <p><strong>Email:</strong> {user.email}</p>
       <div className="mt-12">

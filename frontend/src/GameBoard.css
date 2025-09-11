@@ -93,22 +93,7 @@
   color: #c9c9c9;
 }
 
-/* Icon buttons */
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  min-height: 44px;
-  justify-content: center;
-}
-
-.btn-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-}
+/* Icon button styles moved to global `index.css` */
 
 @media (max-width: 600px) {
   .action-row {

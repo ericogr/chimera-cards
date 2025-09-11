@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SettingsMenu from './SettingsMenu';
 import { usePlayerStats } from './hooks/usePlayerStats';
 import './Header.css';
+import { Avatar } from './ui';
 
 interface User {
   name?: string;
@@ -33,7 +34,7 @@ const Header: React.FC<Props> = ({ user, onLogout, showProfileOption }) => {
         </div>
       </div>
       <div className="header-right">
-        {user?.picture && <img src={user.picture} alt="Profile" className="header-avatar" />}
+        {user?.picture && <Avatar src={user.picture} size={40} alt={user.name || 'Profile'} className="header-avatar" />}
         <SettingsMenu onLogout={onLogout} onProfile={showProfileOption ? () => navigate('/profile') : undefined} />
       </div>
     </header>
