@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-    "github.com/ericogr/chimera-cards/internal/storage"
-    "github.com/gin-gonic/gin"
+	"github.com/ericogr/chimera-cards/internal/storage"
+	"github.com/gin-gonic/gin"
 )
 
 // GameHandler groups all game-related HTTP handlers.

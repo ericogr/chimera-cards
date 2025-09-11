@@ -63,18 +63,24 @@ func main() {
 	// Background scanner: periodically expire games whose action deadline
 	// has passed. Expired games are finished with no winner and do not
 	// affect player stats (StatsCounted=true prevents stat updates).
+	// Optimized: run less frequently (5s), first fetch only IDs, then load
+	// full game rows for those IDs to compute summaries. This reduces the
+	// hot DB work when there are no expirations.
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(5 * time.Second)
 		defer ticker.Stop()
 		for range ticker.C {
 			now := time.Now()
-			games, err := repo.FindTimedOutGames(now)
+			ids, err := repo.FindTimedOutGameIDs(now)
 			if err != nil {
-				logging.Error("timeout scanner failed", err, nil)
+				logging.Error("timeout scanner failed to list ids", err, nil)
 				continue
 			}
-			for _, g := range games {
-				gg, err := repo.GetGameByID(g.ID)
+			if len(ids) == 0 {
+				continue
+			}
+			for _, id := range ids {
+				gg, err := repo.GetGameByID(id)
 				if err != nil {
 					continue
 				}

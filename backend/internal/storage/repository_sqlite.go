@@ -138,6 +138,16 @@ func (r *sqliteRepository) FindTimedOutGames(now time.Time) ([]game.Game, error)
 	return games, nil
 }
 
+func (r *sqliteRepository) FindTimedOutGameIDs(now time.Time) ([]uint, error) {
+	var ids []uint
+	if err := r.db.Model(&game.Game{}).
+		Where("status = ? AND phase = ? AND action_deadline IS NOT NULL AND action_deadline <= ?", game.StatusInProgress, game.PhasePlanning, now).
+		Pluck("id", &ids).Error; err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
 // Note: GetAllGames removed as unused to keep the repository lean.
 
 func (r *sqliteRepository) FindGameByJoinCode(code string) (*game.Game, error) {

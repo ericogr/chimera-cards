@@ -38,4 +38,9 @@ type Repository interface {
 	// the provided time. The caller may then decide how to resolve them
 	// (for example, marking them finished due to inactivity).
 	FindTimedOutGames(now time.Time) ([]game.Game, error)
+	// FindTimedOutGameIDs returns only IDs of games that have timed out
+	// (status=in_progress, phase=planning, action_deadline <= now). This
+	// avoids heavy preloads when the scheduler only needs to know which
+	// games to process.
+	FindTimedOutGameIDs(now time.Time) ([]uint, error)
 }

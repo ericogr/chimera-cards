@@ -33,6 +33,11 @@ func OpenAndMigrate(dataSourceName string, entitiesFromConfig []game.Entity) (*g
 	if execErr := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_hybrid_generated_cache_entities ON hybrid_generated_cache(entity1_key, entity2_key, entity3_key);").Error; execErr != nil {
 		return nil, execErr
 	}
+
+	// Index to speed up timeout scanner queries that filter by status, phase and action_deadline.
+	if execErr := db.Exec("CREATE INDEX IF NOT EXISTS idx_games_status_phase_deadline ON games(status, phase, action_deadline);").Error; execErr != nil {
+		return nil, execErr
+	}
 	seedDefaultEntities(db, entitiesFromConfig)
 	// Ensure entity images are present in the DB. If missing, generate via
 	// OpenAI and resize to 256x256 before storing.
