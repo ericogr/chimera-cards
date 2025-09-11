@@ -168,6 +168,8 @@ const GameRoom: React.FC = () => {
 
   const leaveGameAndReturn = async () => {
     try {
+      // Prevent the unload/visibility handler from firing an extra leave
+      hasLeftRef.current = true;
       if (game?.status === 'waiting_for_players' && currentPlayerUUID && game.players?.some(p => p.player_uuid === currentPlayerUUID)) {
                 await apiFetch(`${constants.API_GAMES}/${gameId}/leave`, {
           method: 'POST',
@@ -175,7 +177,7 @@ const GameRoom: React.FC = () => {
           body: JSON.stringify({ player_uuid: currentPlayerUUID }),
         });
         
-      }
+        }
     } catch (e) {
       console.warn('Leave failed (continuing to lobby):', e);
     } finally {
@@ -245,19 +247,21 @@ const GameRoom: React.FC = () => {
           <Button
             onClick={async () => {
               if (submitting) return;
+              // Prevent the unload/visibility handler from firing an extra leave
+              hasLeftRef.current = true;
               setSubmitting(true);
               try {
                 // Before the game starts, just leave to free up the slot
                 if (game?.status === 'waiting_for_players') {
-                                    await apiFetch(`${constants.API_GAMES}/${gameId}/leave`, {
+                  await apiFetch(`${constants.API_GAMES}/${gameId}/leave`, {
                     method: 'POST',
                     headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
                     body: JSON.stringify({ player_uuid: currentPlayerUUID }),
                   });
-                  
+
                 } else {
                   // Fallback: end the match if somehow already started from this view
-                                    await apiFetch(`${constants.API_GAMES}/${gameId}/end`, { method: 'POST' });
+                  await apiFetch(`${constants.API_GAMES}/${gameId}/end`, { method: 'POST' });
                 }
               } catch (e) {
                 console.warn('Cancel failed, continuing to lobby:', e);
