@@ -190,27 +190,27 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
 
   return (
     <div>
-      <main style={{ padding: '20px' }}>
+      <main className="page-main">
         <h2>Game Lobby</h2>
         <div className="lobby-top">
               {/* Create Game Section */}
               <div>
                 <h4>Create New Game</h4>
-                <input 
-                  type="text" 
-              placeholder="Game Name" 
-              value={gameName}
-              onChange={(e) => setGameName(e.target.value)}
-              maxLength={32}
-              style={{ padding: '10px', fontSize: '16px', width: '100%', boxSizing: 'border-box', marginBottom: '10px' }}
-            />
-            <textarea 
-              placeholder="Description" 
-              value={gameDescription}
-              onChange={(e) => setGameDescription(e.target.value)}
-              maxLength={256}
-              style={{ padding: '10px', fontSize: '16px', width: '100%', boxSizing: 'border-box', marginBottom: '10px', minHeight: '80px', fontFamily: 'inherit' }}
-            />
+                <input
+                  type="text"
+                  placeholder="Game Name"
+                  value={gameName}
+                  onChange={(e) => setGameName(e.target.value)}
+                  maxLength={32}
+                  className="form-input"
+                />
+                <textarea
+                  placeholder="Description"
+                  value={gameDescription}
+                  onChange={(e) => setGameDescription(e.target.value)}
+                  maxLength={256}
+                  className="form-textarea"
+                />
             <div style={{ marginBottom: '20px' }}>
               <input 
                 type="checkbox" 
@@ -220,7 +220,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
               />
               <label htmlFor="privateGame" style={{ marginLeft: '10px' }}>Private Game</label>
             </div>
-            <button onClick={createGame} disabled={submitting || gameName.trim().length < 5} style={{ padding: '10px 20px', fontSize: '16px', width: '100%' }}>
+            <button onClick={createGame} disabled={submitting || gameName.trim().length < 5} className="full-width">
               Create Game
             </button>
           </div>
@@ -229,22 +229,23 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           <div>
             <h4>Join Existing Game</h4>
             <div className="join-row">
-              <input 
-                type="text" 
-                placeholder="Enter game code" 
+              <input
+                type="text"
+                placeholder="Enter game code"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 maxLength={JOIN_CODE_LENGTH}
-                style={{ padding: '10px', fontSize: '16px', flexGrow: 1 }}
+                className="form-input"
+                style={{ flexGrow: 1 }}
               />
-              <button onClick={() => joinGame()} disabled={submitting || joinCode.trim().length !== JOIN_CODE_LENGTH} style={{ padding: '10px 20px', fontSize: '16px' }}>
+              <button onClick={() => joinGame()} disabled={submitting || joinCode.trim().length !== JOIN_CODE_LENGTH}>
                 Join Game
               </button>
             </div>
           </div>
         </div>
 
-        <h4 style={{ marginTop: '40px' }}>Available Public Games</h4>
+        <h4 className="mt-20">Available Public Games</h4>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <div className="table-wrap">
           <div className="game-list game-list-header">
@@ -275,8 +276,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           )}
         </div>
       </main>
-      <section style={{ padding: '0 20px 40px' }}>
-        <h4 style={{ marginTop: '20px' }}>Top 10 Players</h4>
+      <section className="section-padding">
+        <h4 className="mt-20">Top 10 Players</h4>
         <div className="table-wrap">
           <div className="rank-list rank-list-header">
             <div>#</div>

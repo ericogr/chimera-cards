@@ -126,25 +126,16 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
         key={`${target}-${a.ID}`}
         onClick={() => toggleAnimalSelection(target, a.ID)}
         className={`hybrid-entity-card ${disabled ? 'disabled' : ''} ${selected ? 'selected' : ''} ${canSelect ? 'blink-border' : ''}`}
-        style={{
-          border: '1px solid #444',
-          padding: '8px',
-          borderRadius: 6,
-          opacity: disabled ? 0.4 : 1,
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
       >
         {/* Top content: image + info */}
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div className="row-center-sm">
           <img
             src={imageSrcFor(a.name)}
             alt={a.name}
             width={96}
             height={96}
-            style={{ objectFit: 'cover', borderRadius: 6, border: selected ? '2px solid #61dafb' : '2px solid transparent' }}
+            className="entity-image"
+            style={{ border: selected ? '2px solid #61dafb' : '2px solid transparent' }}
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
           />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -197,33 +188,33 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
   );
 
   return (
-    <div style={{ border: '1px solid #333', padding: 16, borderRadius: 8, position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="card">
+      <div className="row-center">
         <button type="button" onClick={() => setShowHelp(true)} className="btn-ghost">
           Help
         </button>
-        <h3 style={{ margin: 0 }}>Create Your Hybrids</h3>
+        <h3 className="no-margin">Create Your Hybrids</h3>
       </div>
       <div className="hybrid-creation-grid">
         <section>
           <h4>Hybrid 1</h4>
           {grid('h1')}
-          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 entities and choose 1 special ability among them</div>
-          <div style={{ fontSize: 12, marginTop: 4, color: '#ccc' }}>Name (auto): {h1Name || '-'}</div>
+          <div className="muted-sm" style={{ marginTop: 4 }}>Pick 2 to 3 entities and choose 1 special ability among them</div>
+          <div className="muted-sm" style={{ marginTop: 4 }}>Name (auto): {h1Name || '-'}</div>
         </section>
         <section>
           <h4>Hybrid 2</h4>
           {grid('h2')}
-          <div style={{ fontSize: 12, marginTop: 4 }}>Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
-          <div style={{ fontSize: 12, marginTop: 4, color: '#ccc' }}>Name (auto): {h2Name || '-'}</div>
+          <div className="muted-sm" style={{ marginTop: 4 }}>Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
+          <div className="muted-sm" style={{ marginTop: 4 }}>Name (auto): {h2Name || '-'}</div>
         </section>
-        <button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired} style={{ padding: '10px 16px' }}>
+        <button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired}>
           {submitting ? 'Creating…' : 'Create Hybrids'}
         </button>
         {ttlExpired && (
           <div style={{ marginTop: 8, color: '#c00', fontSize: 13 }}>Hybrid creation is closed — the game can no longer be started.</div>
         )}
-        <div style={{ fontSize: 12, color: '#aaa' }}>* Names are generated automatically by the game.</div>
+        <div className="muted-sm">* Names are generated automatically by the game.</div>
       </div>
       {showHelp && (
         <div

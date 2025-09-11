@@ -184,12 +184,7 @@ const GameRoom: React.FC = () => {
   const currentPlayer: Player | undefined = game.players.find(p => p.player_uuid === currentPlayerUUID);
   const allReady = game.players.length === 2 && game.players.every(p => p.has_created);
 
-  const formatMs = (ms: number) => {
-    const total = Math.max(0, Math.floor(ms / 1000));
-    const minutes = Math.floor(total / 60);
-    const seconds = total % 60;
-    return `${minutes}:${String(seconds).padStart(2, '0')}`;
-  };
+  
 
   const leaveGameAndReturn = async () => {
     try {
@@ -211,9 +206,9 @@ const GameRoom: React.FC = () => {
 
   return (
     <div>
-      <main style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ margin: 0 }}>Game Room #{game.ID} (Code: {game.join_code})</h3>
+      <main className="page-main">
+        <div className="row-between">
+          <h3 className="no-margin">Game Room #{game.ID} (Code: {game.join_code})</h3>
           <div>
             <button onClick={leaveGameAndReturn}>Back to Lobby</button>
           </div>
@@ -221,7 +216,7 @@ const GameRoom: React.FC = () => {
 
         {/* Countdown until public game TTL expires (only for public games in waiting state) */}
         {game && !game.private && timeLeftMs !== null && game.status === 'waiting_for_players' && (
-          <div style={{ marginTop: 6, fontSize: 14, color: '#666' }}>
+          <div className="muted small" style={{ marginTop: 6 }}>
             {timeLeftMs > 0 ? (
               <>
                 Time left to start: <Timer seconds={Math.floor((timeLeftMs || 0) / 1000)} />
@@ -235,11 +230,11 @@ const GameRoom: React.FC = () => {
         <h4>Status: {game.status}</h4>
 
         <h4>Players ({game.players?.length || 0} / 2)</h4>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="list-reset">
           {game.players.map(player => (
-            <li key={player.ID} style={{ border: '1px solid #444', padding: '10px', marginBottom: '10px', borderRadius: '5px' }}>
+            <li key={player.ID} className="player-card">
               {player.player_name || `Player ${player.ID}`} ({player.player_uuid}) {player.player_uuid === currentPlayerUUID ? '(You)' : ''}
-              <div style={{ fontSize: 12, color: '#ccc' }}>Hybrids created: {player.has_created ? 'Yes' : 'No'}</div>
+              <div className="muted-sm">Hybrids created: {player.has_created ? 'Yes' : 'No'}</div>
             </li>
           ))}
         </ul>
@@ -249,7 +244,7 @@ const GameRoom: React.FC = () => {
         )}
 
         {isCreator && game.players.length === 2 && game.status === 'waiting_for_players' && (
-          <button onClick={handleStartGame} disabled={!allReady || submitting || (timeLeftMs !== null && timeLeftMs <= 0)} style={{ padding: '10px 20px', fontSize: '16px' }}>
+          <button onClick={handleStartGame} disabled={!allReady || submitting || (timeLeftMs !== null && timeLeftMs <= 0)}>
             {allReady ? 'Start Game' : 'Waiting hybrids...'}
           </button>
         )}

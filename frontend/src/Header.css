@@ -12,5 +12,8 @@
 
 .shared-header h3 { font-size: 1.25rem; }
 
+.shared-header h3 { margin: 0; }
+
 .shared-header img { display: block; }
 
+.header-avatar { border-radius: 50%; height: 40px; display: block; }

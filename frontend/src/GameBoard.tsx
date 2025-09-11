@@ -147,17 +147,17 @@ const GameBoard: React.FC = () => {
 
   return (
     <div className="game-board-container">
-      <main style={{ padding: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <main className="page-main page-main--compact">
+        <div className="row-between">
           <div>
-            <h1 style={{ margin: 0 }}>{game.name}</h1>
-            <p style={{ margin: 0 }}>{game.description}</p>
+            <h1 className="no-margin">{game.name}</h1>
+            <p className="no-margin">{game.description}</p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ margin: 0 }}>Game ID: {game.ID}</p>
-            <p style={{ margin: 0 }}>Created: {new Date(game.created_at).toLocaleString()}</p>
+          <div className="game-meta">
+            <p className="no-margin">Game ID: {game.ID}</p>
+            <p className="no-margin">Created: {new Date(game.created_at).toLocaleString()}</p>
             {timeLeft != null && (
-              <p style={{ margin: 0 }}>Time left: <Timer seconds={timeLeft} /></p>
+              <p className="no-margin">Time left: <Timer seconds={timeLeft} /></p>
             )}
           </div>
         </div>
@@ -172,7 +172,7 @@ const GameBoard: React.FC = () => {
                 return (
                   <div>
                     <p>Active: {active?.generated_name || active?.name || '-'}</p>
-                    <p style={{ fontSize: 12, color: '#bbb' }}>Combination: {active?.name || '-'}</p>
+                    <p className="muted-sm">Combination: {active?.name || '-'}</p>
                   </div>
                 );
               })()}
@@ -189,7 +189,7 @@ const GameBoard: React.FC = () => {
                 return (
                   <div>
                     <p>Active: {active?.generated_name || active?.name || '-'}</p>
-                    <p style={{ fontSize: 12, color: '#bbb' }}>Combination: {active?.name || '-'}</p>
+                    <p className="muted-sm">Combination: {active?.name || '-'}</p>
                   </div>
                 );
               })()}
@@ -240,7 +240,7 @@ const GameBoard: React.FC = () => {
               const ability = myActive.base_entities?.find(a => a.ID === selId) as Entity | undefined;
               if (!ability) return null;
               const notEnoughEnergy = (myActive?.current_ene || 0) < (ability.skill?.cost || 0);
-              return (
+            return (
                 <div className="action-row">
                   <button className="icon-btn" onClick={() => submitAction('ability', ability)} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null || notEnoughEnergy}>
                     <img src={iconAbility} alt="Ability" className="btn-icon" />

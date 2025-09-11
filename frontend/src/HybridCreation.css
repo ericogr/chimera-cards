@@ -3,6 +3,12 @@
   background-color: #1f2933; /* slightly different from page bg */
   color: #e6eef6; /* light text for contrast */
   border: 1px solid #3a3f45;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
 }
 .hybrid-entity-card.disabled { opacity: 0.5; cursor: not-allowed; color: #7b8791; }
 .hybrid-entity-card.selected { background: rgba(97,218,251,0.06); border-color: #61dafb !important; color: #ffffff; }
@@ -20,3 +26,5 @@
 .hybrid-creation-grid, .hybrid-creation-grid h4, .hybrid-creation-grid h3, .hybrid-creation-grid p {
   color: #e6eef6;
 }
+
+.entity-image { object-fit: cover; border-radius: 6px; }

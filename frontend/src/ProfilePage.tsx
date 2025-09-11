@@ -65,39 +65,39 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <section style={{ maxWidth: 560 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h2 style={{ margin: 0 }}>User Profile</h2>
+    <div className="page-main">
+      <section className="content-section--narrow">
+        <div className="row-between">
+          <h2 className="no-margin">User Profile</h2>
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={{ display: 'block', marginBottom: 6 }}>Display Name</label>
-          <input value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: 8, fontSize: 16 }} />
+          <input value={name} onChange={e => setName(e.target.value)} className="form-input" />
         </div>
         <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={saveName} disabled={loading} style={{ padding: '8px 12px' }}>{loading ? 'Saving…' : 'Save'}</button>
-            {message && <span style={{ marginLeft: 12 }}>{message}</span>}
+            <button onClick={saveName} disabled={loading}>{loading ? 'Saving…' : 'Save'}</button>
+            {message && <span className="ml-12">{message}</span>}
           </div>
           <div>
-            <button onClick={() => navigate('/')} style={{ padding: '8px 12px' }}>Back</button>
+            <button onClick={() => navigate('/')}>Back</button>
           </div>
         </div>
 
         <h3>Statistics</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="table-light">
           <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #444' }}>
-              <th style={{ padding: '8px 6px' }}>Wins</th>
-              <th style={{ padding: '8px 6px' }}>Defeats</th>
-              <th style={{ padding: '8px 6px' }}>Resignations</th>
+            <tr>
+              <th>Wins</th>
+              <th>Defeats</th>
+              <th>Resignations</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style={{ padding: '8px 6px' }}>{stats ? stats.Wins : '-'}</td>
-              <td style={{ padding: '8px 6px' }}>{stats ? Math.max(0, (stats.GamesPlayed ?? 0) - (stats.Wins ?? 0) - (stats.Resignations ?? 0)) : '-'}</td>
-              <td style={{ padding: '8px 6px' }}>{stats ? stats.Resignations : '-'}</td>
+              <td>{stats ? stats.Wins : '-'}</td>
+              <td>{stats ? Math.max(0, (stats.GamesPlayed ?? 0) - (stats.Wins ?? 0) - (stats.Resignations ?? 0)) : '-'}</td>
+              <td>{stats ? stats.Resignations : '-'}</td>
             </tr>
           </tbody>
         </table>

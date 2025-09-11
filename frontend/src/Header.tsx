@@ -45,13 +45,13 @@ const Header: React.FC<Props> = ({ user, onLogout, showProfileOption }) => {
   return (
     <header className="page-header shared-header">
       <div>
-        <h3 style={{ margin: 0 }}>{user?.name || 'Player'}</h3>
-        <div style={{ fontSize: 12, color: '#bbb', marginTop: 4 }}>
+        <h3>{user?.name || 'Player'}</h3>
+        <div className="header-stats">
           Wins: {wins} · Defeats: {defeats} · Resignations: {resigns}
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {user?.picture && <img src={user.picture} alt="Profile" style={{ borderRadius: '50%', height: '40px' }} />}
+      <div className="header-right">
+        {user?.picture && <img src={user.picture} alt="Profile" className="header-avatar" />}
         <SettingsMenu onLogout={onLogout} onProfile={showProfileOption ? () => navigate('/profile') : undefined} />
       </div>
     </header>
@@ -59,4 +59,3 @@ const Header: React.FC<Props> = ({ user, onLogout, showProfileOption }) => {
 };
 
 export default Header;
-
