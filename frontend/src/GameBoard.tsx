@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './GameBoard.css';
+import Timer from './Timer';
 import iconAttack from './images/basic_attack.svg';
 import iconDefend from './images/defend.svg';
 import iconRest from './images/rest.svg';
@@ -156,7 +157,7 @@ const GameBoard: React.FC = () => {
             <p style={{ margin: 0 }}>Game ID: {game.ID}</p>
             <p style={{ margin: 0 }}>Created: {new Date(game.created_at).toLocaleString()}</p>
             {timeLeft != null && (
-              <p style={{ margin: 0 }}>Time left: {Math.floor((timeLeft || 0) / 60).toString().padStart(2, '0')}:{((timeLeft || 0) % 60).toString().padStart(2, '0')}</p>
+              <p style={{ margin: 0 }}>Time left: <Timer seconds={timeLeft} /></p>
             )}
           </div>
         </div>

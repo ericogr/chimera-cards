@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import HybridCreation from './HybridCreation';
+import Timer from './Timer';
 import { Game, Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
@@ -221,7 +222,13 @@ const GameRoom: React.FC = () => {
         {/* Countdown until public game TTL expires (only for public games in waiting state) */}
         {game && !game.private && timeLeftMs !== null && game.status === 'waiting_for_players' && (
           <div style={{ marginTop: 6, fontSize: 14, color: '#666' }}>
-            {timeLeftMs > 0 ? `Time left to start: ${formatMs(timeLeftMs)}` : 'This public game can no longer be started.'}
+            {timeLeftMs > 0 ? (
+              <>
+                Time left to start: <Timer seconds={Math.floor((timeLeftMs || 0) / 1000)} />
+              </>
+            ) : (
+              'This public game can no longer be started.'
+            )}
           </div>
         )}
 

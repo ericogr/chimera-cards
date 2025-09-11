@@ -18,3 +18,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Blinking helpers used for urgent UI elements (e.g., timers) */
+.blink-text { animation: blinkText 1s ease-in-out infinite; color: #ffffff; }
+@keyframes blinkText { 0% { opacity: 1; } 50% { opacity: 0.25; } 100% { opacity: 1; } }
