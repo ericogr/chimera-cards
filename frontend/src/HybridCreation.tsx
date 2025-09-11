@@ -199,19 +199,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
   return (
     <div style={{ border: '1px solid #333', padding: 16, borderRadius: 8, position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button
-          type="button"
-          onClick={() => setShowHelp(true)}
-          style={{
-            background: 'transparent',
-            color: '#61dafb',
-            border: '1px solid #61dafb',
-            padding: '6px 10px',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontSize: 14,
-          }}
-        >
+        <button type="button" onClick={() => setShowHelp(true)} className="btn-ghost">
           Help
         </button>
         <h3 style={{ margin: 0 }}>Create Your Hybrids</h3>

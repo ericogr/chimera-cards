@@ -19,6 +19,58 @@ code {
     monospace;
 }
 
+/* Modern button styles applied app-wide. Use classes like `.link-button` to opt-out. */
+:root {
+  --btn-radius: 10px;
+  --btn-padding-y: 8px;
+  --btn-padding-x: 14px;
+  --btn-bg-start: #3b82f6; /* blue-500 */
+  --btn-bg-end: #2563eb;   /* blue-600 */
+  --btn-text: #ffffff;
+  --btn-shadow: 0 6px 18px rgba(2,6,23,0.45);
+}
+
+button {
+  background: linear-gradient(180deg, var(--btn-bg-start), var(--btn-bg-end));
+  color: var(--btn-text);
+  border: none;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  box-shadow: 0 3px 8px rgba(2,6,23,0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--btn-shadow);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(2,6,23,0.35);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.1);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Ghost / secondary style */
+.btn-ghost {
+  background: transparent !important;
+  color: var(--btn-bg-start) !important;
+  border: 1px solid rgba(97,218,251,0.16) !important;
+  box-shadow: none !important;
+}
+
 /* Blinking helpers used for urgent UI elements (e.g., timers) */
 .blink-text { animation: blinkText 1s ease-in-out infinite; color: #ffffff; }
 @keyframes blinkText { 0% { opacity: 1; } 50% { opacity: 0.25; } 100% { opacity: 1; } }
