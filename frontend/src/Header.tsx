@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SettingsMenu from './SettingsMenu';
-import { apiFetch } from './api';
-import * as constants from './constants';
+import { usePlayerStats } from './hooks/usePlayerStats';
 import './Header.css';
 
 interface User {
@@ -18,25 +17,8 @@ interface Props {
 }
 
 const Header: React.FC<Props> = ({ user, onLogout, showProfileOption }) => {
-  const [stats, setStats] = useState<{ GamesPlayed: number; Wins: number; Resignations: number } | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const email = user?.email;
-        if (!email) return;
-        const res = await apiFetch(`${constants.API_PLAYER_STATS}?email=${encodeURIComponent(email)}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        setStats({ GamesPlayed: data.GamesPlayed ?? data.games_played ?? 0, Wins: data.Wins ?? data.wins ?? 0, Resignations: data.Resignations ?? data.resignations ?? 0 });
-      } catch (e) {
-        // ignore
-      }
-    };
-    fetchStats();
-  }, [user?.email]);
-
+  const stats = usePlayerStats(user?.email || null);
   const wins = stats?.Wins ?? 0;
   const gamesPlayed = stats?.GamesPlayed ?? 0;
   const resigns = stats?.Resignations ?? 0;

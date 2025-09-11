@@ -7,18 +7,19 @@ import iconDefend from './images/defend.svg';
 import iconRest from './images/rest.svg';
 import iconAbility from './images/ability.svg';
 import iconEnd from './images/end_match.svg';
-import { Game, Player, Hybrid, Entity, EntityName } from './types';
+import { Player, Hybrid, Entity, EntityName } from './types';
 import { hybridAssetUrlFromNames } from './utils/keys';
 import { apiFetch } from './api';
 import * as constants from './constants';
 import { safeRemoveLocal } from './runtimeConfig';
+import { useGame } from './hooks/useGame';
+import { Button, IconButton } from './ui';
 
 const GameBoard: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const [game, setGame] = useState<Game | null>(null);
+  const { game, error: gameError } = useGame(gameId, 3000);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lockedRound, setLockedRound] = useState<number | null>(null);
   const actingRef = useRef(false);
@@ -28,27 +29,7 @@ const GameBoard: React.FC = () => {
     try { return localStorage.getItem('player_email') || ''; } catch { return ''; }
   })();
 
-  useEffect(() => {
-    const fetchGame = async () => {
-      try {
-        const response = await apiFetch(`${constants.API_GAMES}/${gameId}`);
-        if (!response.ok) {
-          throw new Error('Game not found or an error occurred');
-        }
-        const data = await response.json();
-        setGame(data);
-      } catch (err) {
-        setError('Could not load game data.');
-        console.error(err);
-      }
-    };
-
-    fetchGame(); // Initial fetch
-
-    const interval = setInterval(fetchGame, 3000); // Poll every 3 seconds
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [gameId]);
+  // game is provided by useGame hook (polls every 3s)
 
   // Local countdown updater (1s) based on server-provided action_deadline.
   useEffect(() => {
@@ -77,8 +58,9 @@ const GameBoard: React.FC = () => {
     }
   }, [game, lockedRound]);
 
-  if (error) {
-    return <div className="game-board-error">Error: {error}</div>;
+  const effectiveError = gameError;
+  if (effectiveError) {
+    return <div className="game-board-error">Error: {effectiveError}</div>;
   }
 
   if (!game) {
@@ -202,37 +184,36 @@ const GameBoard: React.FC = () => {
 
       <footer className="game-board-footer">
         <div>Round: {game.round_count} | Phase: {game.phase || '-'} | {myTurn ? 'Choose your action' : planning ? 'Waiting opponent/you' : 'Resolving...'}</div>
-        <div style={{ marginTop: 6, fontSize: 13, color: '#ccc' }}>
+        <div className="muted small mt-6">
           Your action: {submittedLabel(me)} | Opponent action: {submittedLabel(opponent)}
         </div>
         {/* End Match moved to the bottom as a final action with consistent layout */}
         {game.status === 'finished' && (
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div className="row-center">
             <div>Winner: {game.winner === '' || game.winner == null ? 'None' : game.winner}</div>
-            <button
+            <Button
+              variant="ghost"
               onClick={() => {
                 safeRemoveLocal('game_id');
                 navigate('/');
               }}
             >
               Back to Lobby
-            </button>
+            </Button>
           </div>
         )}
         {myTurn && myActive && (
-          <div className="action-panel" style={{ marginTop: 12 }}>
+          <div className="action-panel mt-12">
             <div className="action-row">
-              <button className="icon-btn" onClick={() => submitAction('basic_attack')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
-                <img src={iconAttack} alt="Basic Attack" className="btn-icon" />
+              <IconButton icon={iconAttack} onClick={() => submitAction('basic_attack')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
                 Basic Attack
-              </button>
+              </IconButton>
               <div className="action-desc">Perform a basic attack with your active hybrid.</div>
             </div>
             <div className="action-row">
-              <button className="icon-btn" onClick={() => submitAction('defend')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
-                <img src={iconDefend} alt="Defend" className="btn-icon" />
+              <IconButton icon={iconDefend} onClick={() => submitAction('defend')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
                 Defend
-              </button>
+              </IconButton>
               <div className="action-desc">Increase defense this round. Spends VIG if available.</div>
             </div>
             {(() => {
@@ -242,10 +223,9 @@ const GameBoard: React.FC = () => {
               const notEnoughEnergy = (myActive?.current_ene || 0) < (ability.skill?.cost || 0);
             return (
                 <div className="action-row">
-                  <button className="icon-btn" onClick={() => submitAction('ability', ability)} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null || notEnoughEnergy}>
-                    <img src={iconAbility} alt="Ability" className="btn-icon" />
+                  <IconButton icon={iconAbility} onClick={() => submitAction('ability', ability)} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null || notEnoughEnergy}>
                     {ability.skill?.name}
-                  </button>
+                  </IconButton>
                   <div className="action-desc">
                     {ability.skill?.description} — ENE {ability.skill?.cost}, VIG {vigCostFor(ability.name)}
                   </div>
@@ -253,21 +233,20 @@ const GameBoard: React.FC = () => {
               );
             })()}
             <div className="action-row">
-              <button className="icon-btn" onClick={() => submitAction('rest')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
-                <img src={iconRest} alt="Rest" className="btn-icon" />
+              <IconButton icon={iconRest} onClick={() => submitAction('rest')} disabled={submitting || !!me?.has_submitted_action || lockedRound !== null}>
                 Rest
-              </button>
+              </IconButton>
               <div className="action-desc">Recover +2 VIG and +2 ENE.</div>
             </div>
           </div>
         )}
         {!myTurn && planning && (
-          <div style={{ marginTop: 8 }}>{me?.has_submitted_action ? 'You already chose. Waiting for opponent...' : 'Waiting for both actions...'}</div>
+          <div className="mt-8">{me?.has_submitted_action ? 'You already chose. Waiting for opponent...' : 'Waiting for both actions...'}</div>
         )}
         
 
-        <div className="action-row" style={{ marginTop: 12 }}>
-          <button
+        <div className="action-row mt-12">
+          <IconButton
             onClick={async () => {
               try {
                 if (endRef.current || submitting) return;
@@ -286,22 +265,22 @@ const GameBoard: React.FC = () => {
               }
             }}
             disabled={submitting}
-            className="icon-btn"
+            variant="danger"
+            icon={iconEnd}
           >
-            <img src={iconEnd} alt="End" className="btn-icon" />
             End Match
-          </button>
+          </IconButton>
           <div className="action-desc">Forfeit the match — ends combat and records a resignation for your player (no victory awarded to the opponent).</div>
         </div>
 
         {planning && (
-          <div style={{ marginTop: 8, fontSize: 13, color: '#ccc' }}>
+          <div className="muted small mt-8">
             Your choice: {currentActionLabel() || '—'}
           </div>
         )}
 
         {game.last_round_summary && (
-          <div style={{ marginTop: 12, whiteSpace: 'pre-wrap', padding: 12, background: '#111', border: '1px solid #333', borderRadius: 6 }}>
+          <div className="panel-dark">
             <strong>Last Round:</strong>
             <div>{game.last_round_summary}</div>
           </div>
@@ -319,9 +298,9 @@ const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) =
   const imgSrc = hybridAssetUrlFromNames((hybrid?.base_entities || []).map(a => a.name));
 
   return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+    <div className="row-start">
       {imgSrc && (
-        <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} style={{ objectFit: 'cover', borderRadius: 6 }} onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+        <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} className="entity-image" onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
       )}
       <div className="stats-grid">
         <div>HP: {hybrid.current_pv} / {hybrid.base_pv}</div>

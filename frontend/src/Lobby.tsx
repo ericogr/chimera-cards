@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FormInput, Textarea, Button } from './ui';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from './api';
 import { safeSetLocal } from './runtimeConfig';
@@ -196,57 +197,54 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
               {/* Create Game Section */}
               <div>
                 <h4>Create New Game</h4>
-                <input
+                <FormInput
                   type="text"
                   placeholder="Game Name"
                   value={gameName}
                   onChange={(e) => setGameName(e.target.value)}
                   maxLength={32}
-                  className="form-input"
                 />
-                <textarea
+                <Textarea
                   placeholder="Description"
                   value={gameDescription}
                   onChange={(e) => setGameDescription(e.target.value)}
                   maxLength={256}
-                  className="form-textarea"
                 />
-            <div style={{ marginBottom: '20px' }}>
+            <div className="mb-20">
               <input 
                 type="checkbox" 
                 id="privateGame" 
                 checked={isPrivate}
                 onChange={(e) => setIsPrivate(e.target.checked)}
               />
-              <label htmlFor="privateGame" style={{ marginLeft: '10px' }}>Private Game</label>
+              <label htmlFor="privateGame" className="ml-10">Private Game</label>
             </div>
-            <button onClick={createGame} disabled={submitting || gameName.trim().length < 5} className="full-width">
+            <Button onClick={createGame} disabled={submitting || gameName.trim().length < 5} className="full-width">
               Create Game
-            </button>
+            </Button>
           </div>
 
           {/* Join Game Section */}
           <div>
             <h4>Join Existing Game</h4>
             <div className="join-row">
-              <input
+              <FormInput
                 type="text"
                 placeholder="Enter game code"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 maxLength={JOIN_CODE_LENGTH}
-                className="form-input"
-                style={{ flexGrow: 1 }}
+                className="flex-grow-1"
               />
-              <button onClick={() => joinGame()} disabled={submitting || joinCode.trim().length !== JOIN_CODE_LENGTH}>
+              <Button onClick={() => joinGame()} disabled={submitting || joinCode.trim().length !== JOIN_CODE_LENGTH}>
                 Join Game
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
         <h4 className="mt-20">Available Public Games</h4>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
         <div className="table-wrap">
           <div className="game-list game-list-header">
             <div>Game</div>
@@ -260,9 +258,9 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
             games.map(game => (
               <div key={game.ID} className="game-list">
                 <div className="game-name">
-                  <button onClick={() => joinGame(game.join_code)} className="link-button" disabled={submitting}>
+                  <Button variant="link" onClick={() => joinGame(game.join_code)} className="link-button" disabled={submitting}>
                     {game.name}
-                  </button>
+                  </Button>
                 </div>
                 <div className="game-description">{game.description}</div>
                 <div className="game-players">{game.players?.length || 0}/2</div>

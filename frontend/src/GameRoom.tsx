@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import HybridCreation from './HybridCreation';
 import Timer from './Timer';
-import { Game, Player } from './types';
+import { useGame } from './hooks/useGame';
+import { Button } from './ui';
+import { Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
 import { safeRemoveLocal } from './runtimeConfig';
@@ -10,10 +12,9 @@ import { safeRemoveLocal } from './runtimeConfig';
 const GameRoom: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const [game, setGame] = useState<Game | null>(null);
+  const { game, error: gameError } = useGame(gameId, 3000);
   const [timeLeftMs, setTimeLeftMs] = useState<number | null>(null);
   const [publicGamesTTLSeconds, setPublicGamesTTLSeconds] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
   const hasLeftRef = useRef(false);
@@ -21,43 +22,21 @@ const GameRoom: React.FC = () => {
 
   const currentPlayerUUID = localStorage.getItem('player_uuid');
 
+  // react to game updates from the polling hook
   useEffect(() => {
-    const loadGame = async () => {
-      try {
-        const response = await apiFetch(`${constants.API_GAMES}/${gameId}`);
-        if (!response.ok) {
-          throw new Error('Game not found or an error occurred');
-        }
-        const data = await response.json();
-        setGame(data);
-        // Keep the Start button disabled while the game is transitioning
-        // to the in-progress state. Also redirect immediately when the
-        // game becomes active.
-        if (data.status === 'starting') {
-          setSubmitting(true);
-        } else if (data.status === 'in_progress') {
-            setSubmitting(false);
-            toBoardRef.current = true;
-            navigate(`/game/${gameId}/board`);
-        } else if (data.status === 'error') {
-            // Stop the disabled state so players can retry/cancel.
-            setSubmitting(false);
-        } else {
-            // Any other state (e.g. waiting_for_players) should enable
-            // the Start button when appropriate.
-            setSubmitting(false);
-        }
-
-      } catch (err) {
-        setError('Could not load game data.');
-        console.error(err);
-      }
-    };
-
-    loadGame();
-    const interval = setInterval(loadGame, 3000);
-    return () => clearInterval(interval);
-  }, [gameId, navigate]);
+    if (!game) return;
+    if (game.status === 'starting') {
+      setSubmitting(true);
+    } else if (game.status === 'in_progress') {
+      setSubmitting(false);
+      toBoardRef.current = true;
+      navigate(`/game/${gameId}/board`);
+    } else if (game.status === 'error') {
+      setSubmitting(false);
+    } else {
+      setSubmitting(false);
+    }
+  }, [game, gameId, navigate]);
 
   // Fetch backend config (public games TTL) and compute countdown.
   useEffect(() => {
@@ -172,8 +151,9 @@ const GameRoom: React.FC = () => {
     }
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  const effectiveError = gameError;
+  if (effectiveError) {
+    return <div>Error: {effectiveError}</div>;
   }
 
   if (!game) {
@@ -210,13 +190,13 @@ const GameRoom: React.FC = () => {
         <div className="row-between">
           <h3 className="no-margin">Game Room #{game.ID} (Code: {game.join_code})</h3>
           <div>
-            <button onClick={leaveGameAndReturn}>Back to Lobby</button>
+            <Button onClick={leaveGameAndReturn}>Back to Lobby</Button>
           </div>
         </div>
 
         {/* Countdown until public game TTL expires (only for public games in waiting state) */}
         {game && !game.private && timeLeftMs !== null && game.status === 'waiting_for_players' && (
-          <div className="muted small" style={{ marginTop: 6 }}>
+          <div className="muted small mt-6">
             {timeLeftMs > 0 ? (
               <>
                 Time left to start: <Timer seconds={Math.floor((timeLeftMs || 0) / 1000)} />
@@ -244,9 +224,9 @@ const GameRoom: React.FC = () => {
         )}
 
         {isCreator && game.players.length === 2 && game.status === 'waiting_for_players' && (
-          <button onClick={handleStartGame} disabled={!allReady || submitting || (timeLeftMs !== null && timeLeftMs <= 0)}>
+          <Button onClick={handleStartGame} disabled={!allReady || submitting || (timeLeftMs !== null && timeLeftMs <= 0)}>
             {allReady ? 'Start Game' : 'Waiting hybrids...'}
-          </button>
+          </Button>
         )}
 
         {game.status === 'waiting_for_players' && !isCreator && (
@@ -261,8 +241,8 @@ const GameRoom: React.FC = () => {
           <p>Game is in progress. Redirecting to game board...</p>
         )}
 
-        <div style={{ marginTop: 12 }}>
-          <button
+        <div className="mt-12">
+          <Button
             onClick={async () => {
               if (submitting) return;
               setSubmitting(true);
@@ -290,7 +270,7 @@ const GameRoom: React.FC = () => {
             disabled={submitting}
           >
             Cancel Match
-          </button>
+          </Button>
         </div>
       </main>
     </div>

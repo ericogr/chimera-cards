@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from './ui';
 
 interface UserProfileProps {
   user: {
@@ -17,7 +18,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
       <p><strong>Name:</strong> {user.name}</p>
       <p><strong>Email:</strong> {user.email}</p>
       <div className="mt-12">
-        <button onClick={onLogout}>Logout</button>
+        <Button onClick={onLogout}>Logout</Button>
       </div>
     </div>
   );

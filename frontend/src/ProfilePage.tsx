@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from './ui';
 import * as constants from './constants';
 import { apiFetch } from './api';
 import { safeSetLocal } from './runtimeConfig';
@@ -70,17 +71,17 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
         <div className="row-between">
           <h2 className="no-margin">User Profile</h2>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: 'block', marginBottom: 6 }}>Display Name</label>
+        <div className="mb-12">
+          <label className="form-label">Display Name</label>
           <input value={name} onChange={e => setName(e.target.value)} className="form-input" />
         </div>
-        <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={saveName} disabled={loading}>{loading ? 'Saving…' : 'Save'}</button>
+        <div className="row-between mb-12">
+          <div className="row-center">
+            <Button onClick={saveName} disabled={loading}>{loading ? 'Saving…' : 'Save'}</Button>
             {message && <span className="ml-12">{message}</span>}
           </div>
           <div>
-            <button onClick={() => navigate('/')}>Back</button>
+            <Button variant="ghost" onClick={() => navigate('/')}>Back</Button>
           </div>
         </div>
 

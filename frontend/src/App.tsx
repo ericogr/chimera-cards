@@ -7,6 +7,7 @@ import GameRoom from './GameRoom';
 import GameBoard from './GameBoard';
 import ProfilePage from './ProfilePage';
 import Header from './Header';
+import { Button } from './ui';
 import './App.css';
 import * as constants from './constants';
 import { getMissingRuntimeKeys, safeSetLocal, safeRemoveLocal } from './runtimeConfig';
@@ -87,9 +88,9 @@ const App: React.FC = () => {
           <div>
             <p>Please log in to continue</p>
             {error && <p className="error-message">{error}</p>}
-            <button onClick={() => login()} className="google-login-button">
+            <Button className="google-login-button" onClick={() => login()}>
               Sign in with Google
-            </button>
+            </Button>
           </div>
         </header>
       </div>

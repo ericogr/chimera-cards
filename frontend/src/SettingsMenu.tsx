@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './SettingsMenu.css';
+import { Button } from './ui';
 
 interface SettingsMenuProps {
   onLogout: () => void;
@@ -31,7 +32,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, onProfile, classN
 
   return (
     <div ref={ref} className={`settings-menu ${className || ''}`}>
-      <button
+      <Button
+        variant="ghost"
         aria-label="Open settings"
         className="settings-toggle"
         onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
@@ -41,19 +43,21 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, onProfile, classN
           <rect x="0" y="7" width="20" height="2" rx="1" fill="currentColor" />
           <rect x="0" y="13" width="20" height="2" rx="1" fill="currentColor" />
         </svg>
-      </button>
+      </Button>
       {open && (
         <div className="settings-dropdown" role="menu">
           {onProfile && (
-            <button
+            <Button
+              variant="ghost"
               className="settings-item"
               role="menuitem"
               onClick={() => { setOpen(false); onProfile(); }}
             >
               User Profile
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="ghost"
             className="settings-item"
             role="menuitem"
             onClick={() => {
@@ -62,7 +66,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ onLogout, onProfile, classN
             }}
           >
             Logout
-          </button>
+          </Button>
         </div>
       )}
     </div>

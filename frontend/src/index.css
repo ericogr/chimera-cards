@@ -71,6 +71,11 @@ button:disabled {
   box-shadow: none !important;
 }
 
+.btn-danger {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+  color: #fff;
+}
+
 /* Blinking helpers used for urgent UI elements (e.g., timers) */
 .blink-text { animation: blinkText 1s ease-in-out infinite; color: #ffffff; }
 @keyframes blinkText { 0% { opacity: 1; } 50% { opacity: 0.25; } 100% { opacity: 1; } }
@@ -111,6 +116,37 @@ button:disabled {
 .section-padding { padding: 0 20px 40px; }
 .mb-20 { margin-bottom: 20px; }
 .mt-20 { margin-top: 20px; }
+.mt-8 { margin-top: 8px; }
+.mt-6 { margin-top: 6px; }
+.mb-8 { margin-bottom: 8px; }
+.ml-10 { margin-left: 10px; }
+.flex-grow-1 { flex-grow: 1; }
+.mb-12 { margin-bottom: 12px; }
+
+/* Panels */
+.panel-dark { margin-top: 12px; white-space: pre-wrap; padding: 12px; background: #111; border: 1px solid #333; border-radius: 6px; }
+
+/* Row helpers */
+.row-start { display: flex; gap: 12px; align-items: flex-start; }
+
+/* Form label */
+.form-label { display: block; margin-bottom: 6px; }
+
+/* Small helpers */
+.flex-1 { flex: 1; min-width: 0; }
+.block { display: block; }
+.mt-4 { margin-top: 4px; }
+.text-left { text-align: left; }
+.help-list { padding-left: 18px; margin: 0; }
+.label-inline { font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+.ability-row { margin-top: 4px; border-top: 1px dashed transparent; padding-top: 4px; min-height: 22px; }
+.error-sm { margin-top: 8px; color: #c00; font-size: 13px; }
+
+.selected-border { border: 2px solid #61dafb; }
+
+/* Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-content { background: #fff; color: #000; border-radius: 8px; padding: 18px 20px; max-width: 680px; width: 100%; box-sizing: border-box; text-align: center; font-size: 16px; line-height: 1.4; }
 
 /* Lightweight table styles */
 .table-light { width: 100%; border-collapse: collapse; }

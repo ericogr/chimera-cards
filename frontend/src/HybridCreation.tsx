@@ -4,6 +4,7 @@ import { apiFetch } from './api';
 import * as constants from './constants';
 import { entityAssetUrl } from './utils/keys';
 import './HybridCreation.css';
+import { Button, Modal } from './ui';
 
 interface Props {
   gameId: string;
@@ -134,30 +135,21 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
             alt={a.name}
             width={96}
             height={96}
-            className="entity-image"
-            style={{ border: selected ? '2px solid #61dafb' : '2px solid transparent' }}
+            className={`entity-image ${selected ? 'selected-border' : ''}`}
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
           />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <strong style={{ display: 'block' }}>{a.name}</strong>
-            <div style={{ fontSize: 12, color: '#ccc' }}>
+          <div className="flex-1">
+            <strong className="block">{a.name}</strong>
+            <div className="muted-sm">
               HP {a.pv} | ATK {a.atq} | DEF {a.def} | AGI {a.agi} | ENE {a.ene} | VIG {a.vigor_cost ?? '-'}
             </div>
-            <div style={{ fontSize: 12 }}>{a.skill?.name} (Cost {a.skill?.cost})</div>
+            <div className="muted-sm">{a.skill?.name} (Cost {a.skill?.cost})</div>
             {(() => {
               const isPicked = src.entityIds.includes(a.ID);
               return (
-                <div
-                  style={{
-                    marginTop: 4,
-                    borderTop: `1px dashed ${isPicked ? '#ccc' : 'transparent'}`,
-                    paddingTop: 4,
-                    minHeight: 22,
-                  }}
-                  onClick={isPicked ? (e) => e.stopPropagation() : undefined}
-                >
+                <div className={`ability-row`} onClick={isPicked ? (e) => e.stopPropagation() : undefined}>
                   {isPicked && (
-                    <label style={{ fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <label className="label-inline">
                       <input
                         type="radio"
                         name={`${target}-selected-ability`}
@@ -190,74 +182,44 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
   return (
     <div className="card">
       <div className="row-center">
-        <button type="button" onClick={() => setShowHelp(true)} className="btn-ghost">
+        <Button type="button" variant="ghost" onClick={() => setShowHelp(true)}>
           Help
-        </button>
+        </Button>
         <h3 className="no-margin">Create Your Hybrids</h3>
       </div>
       <div className="hybrid-creation-grid">
         <section>
           <h4>Hybrid 1</h4>
           {grid('h1')}
-          <div className="muted-sm" style={{ marginTop: 4 }}>Pick 2 to 3 entities and choose 1 special ability among them</div>
-          <div className="muted-sm" style={{ marginTop: 4 }}>Name (auto): {h1Name || '-'}</div>
+          <div className="muted-sm mt-4">Pick 2 to 3 entities and choose 1 special ability among them</div>
+          <div className="muted-sm mt-4">Name (auto): {h1Name || '-'}</div>
         </section>
         <section>
           <h4>Hybrid 2</h4>
           {grid('h2')}
-          <div className="muted-sm" style={{ marginTop: 4 }}>Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
-          <div className="muted-sm" style={{ marginTop: 4 }}>Name (auto): {h2Name || '-'}</div>
+          <div className="muted-sm mt-4">Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
+          <div className="muted-sm mt-4">Name (auto): {h2Name || '-'}</div>
         </section>
-        <button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired}>
+        <Button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired}>
           {submitting ? 'Creating…' : 'Create Hybrids'}
-        </button>
+        </Button>
         {ttlExpired && (
-          <div style={{ marginTop: 8, color: '#c00', fontSize: 13 }}>Hybrid creation is closed — the game can no longer be started.</div>
+          <div className="error-sm">Hybrid creation is closed — the game can no longer be started.</div>
         )}
         <div className="muted-sm">* Names are generated automatically by the game.</div>
       </div>
       {showHelp && (
-        <div
-          onClick={() => setShowHelp(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20,
-          }}
-        >
-          <div
-            style={{
-              background: '#fff',
-              color: '#000',
-              borderRadius: 8,
-              padding: '18px 20px',
-              maxWidth: 680,
-              width: '100%',
-              boxSizing: 'border-box',
-              textAlign: 'center',
-              fontSize: 16,
-              lineHeight: 1.4,
-            }}
-          >
-            <div style={{ textAlign: 'left' }}>
-              <ul style={{ paddingLeft: 18, margin: 0 }}>
-                <li style={{ marginBottom: 8 }}>Pick 2–3 entities for each hybrid.</li>
-                <li style={{ marginBottom: 8 }}>Create two different hybrids — hybrids cannot share the same entity.</li>
-                <li style={{ marginBottom: 8 }}>For each hybrid, choose one of the selected entities to enable its special ability.</li>
-                <li>Tap <strong>"Create Hybrids"</strong> to save.</li>
-              </ul>
-            </div>
-            <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>Tap anywhere to close</div>
+        <Modal onClose={() => setShowHelp(false)}>
+          <div className="text-left">
+            <ul className="help-list">
+              <li className="mb-8">Pick 2–3 entities for each hybrid.</li>
+              <li className="mb-8">Create two different hybrids — hybrids cannot share the same entity.</li>
+              <li className="mb-8">For each hybrid, choose one of the selected entities to enable its special ability.</li>
+              <li>Tap <strong>"Create Hybrids"</strong> to save.</li>
+            </ul>
           </div>
-        </div>
+          <div className="mt-8 muted">Tap anywhere to close</div>
+        </Modal>
       )}
     </div>
   );
