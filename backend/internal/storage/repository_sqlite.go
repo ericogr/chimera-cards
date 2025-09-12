@@ -227,7 +227,11 @@ func (r *sqliteRepository) UpdateStatsOnGameEnd(g *game.Game, resignedEmail stri
 				return err
 			}
 		}
-		ps.PlayerName = name
+		// Preserve an existing user-customized PlayerName. Only set the
+		// PlayerName when creating a new record or when the stored name is empty.
+		if ps.PlayerName == "" {
+			ps.PlayerName = name
+		}
 		ps.PlayerUUID = uuid
 		ps.GamesPlayed += played
 		ps.Wins += wins
@@ -294,7 +298,11 @@ func (r *sqliteRepository) UpsertUser(email, uuid, name string) error {
 			return err
 		}
 	}
-	u.PlayerName = name
+	// For existing users, preserve any user-customized PlayerName.
+	// Only set the PlayerName when the stored value is empty.
+	if u.PlayerName == "" {
+		u.PlayerName = name
+	}
 	u.PlayerUUID = uuid
 	return r.db.Save(&u).Error
 }
