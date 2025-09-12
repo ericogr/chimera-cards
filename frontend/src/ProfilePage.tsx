@@ -8,14 +8,16 @@ import { useNavigate } from 'react-router-dom';
 interface Props {
   user: { name?: string; email?: string; picture?: string } | null;
   onLogout: () => void;
+  onUserUpdate?: (u: { name?: string; email?: string; picture?: string } | null) => void;
 }
 
-const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
+const ProfilePage: React.FC<Props> = ({ user, onLogout, onUserUpdate }) => {
   const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<{ GamesPlayed: number; Wins: number; Resignations: number } | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -34,32 +36,42 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
     fetchStats();
   }, [user?.email]);
 
+  const nameRegex = /^[\p{L}\p{M}\p{N}.'\- ]{4,40}$/u;
+
   const saveName = async () => {
-    if (!user?.email) return setMessage('Missing email');
+    setError(null);
+    setNameError(null);
+    if (!user?.email) return setError('Missing email');
+    const trimmed = name.trim();
+    if (!nameRegex.test(trimmed)) {
+      setNameError('Invalid name');
+      return;
+    }
     setLoading(true);
-    setMessage(null);
     try {
       const res = await apiFetch(constants.API_PLAYER_STATS, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: trimmed }),
       });
       if (!res.ok) {
         const txt = await res.text();
         throw new Error(txt || 'Failed to save');
       }
-      // Update local copy
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          parsed.name = name;
-          safeSetLocal('user', JSON.stringify(parsed));
-        } catch {}
-      }
-      setMessage('Saved');
+      // Update local storage and notify parent to update header
+      try {
+        const stored = localStorage.getItem('user');
+        let parsed: any = stored ? JSON.parse(stored) : { email: user.email };
+        parsed.name = trimmed;
+        safeSetLocal('user', JSON.stringify(parsed));
+        if (typeof onUserUpdate === 'function') {
+          onUserUpdate(parsed);
+        }
+      } catch {}
+      // Redirect to home
+      navigate('/');
     } catch (e: any) {
-      setMessage(`Error: ${e.message}`);
+      setError(`Error: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -77,8 +89,9 @@ const ProfilePage: React.FC<Props> = ({ user, onLogout }) => {
         </div>
         <div className="row-between mb-12">
           <div className="row-center">
-            <Button onClick={saveName} disabled={loading}>{loading ? 'Saving…' : 'Save'}</Button>
-            {message && <span className="ml-12">{message}</span>}
+            <Button onClick={saveName} disabled={loading || !nameRegex.test(name.trim())}>{loading ? 'Saving…' : 'Save'}</Button>
+            {nameError && <span className="ml-12 error-message">{nameError}</span>}
+            {error && <span className="ml-12 error-message">{error}</span>}
           </div>
           <div>
             <Button variant="ghost" onClick={() => navigate('/')}>Back</Button>

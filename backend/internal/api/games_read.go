@@ -2,7 +2,9 @@ package api
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/ericogr/chimera-cards/internal/constants"
 	"github.com/gin-gonic/gin"
@@ -110,13 +112,24 @@ func (h *GameHandler) UpdatePlayerProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrEmailRequired})
 		return
 	}
+	// Validate display name using the same Unicode-aware pattern as the
+	// frontend. Accept letters, marks, numbers, apostrophe, dot, hyphen
+	// and spaces, length 4-40.
+	var playerNameRegex = regexp.MustCompile(`^[\p{L}\p{M}\p{N}.'\- ]{4,40}$`)
+
+	trimmed := strings.TrimSpace(body.Name)
+	if !playerNameRegex.MatchString(trimmed) {
+		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: "Invalid player name"})
+		return
+	}
+
 	// Load or create user stats record
 	ps, err := h.repo.GetStatsByEmail(email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchStats})
 		return
 	}
-	ps.PlayerName = body.Name
+	ps.PlayerName = trimmed
 	// Persist
 	if err := h.repo.SaveUser(ps); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedUpdateGame})

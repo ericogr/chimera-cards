@@ -9,17 +9,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/ericogr/chimera-cards/internal/constants"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+    "github.com/ericogr/chimera-cards/internal/constants"
+    "github.com/ericogr/chimera-cards/internal/storage"
+    "github.com/gin-gonic/gin"
+    "golang.org/x/oauth2"
+    "golang.org/x/oauth2/google"
 )
 
 type AuthHandler struct {
+    repo storage.Repository
 }
 
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
+func NewAuthHandler(repo storage.Repository) *AuthHandler {
+    return &AuthHandler{repo: repo}
 }
 
 type GoogleOAuthCallbackRequest struct {
@@ -78,15 +80,28 @@ func (h *AuthHandler) GoogleOAuthCallback(c *gin.Context) {
 		return
 	}
 
-	// Mint session token and set cookie
-	sess, err := createSessionToken(email, name, 24*time.Hour)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedCreateSession, constants.JSONKeyDetails: err.Error()})
-		return
-	}
-	setSessionCookie(c, sess, 24*time.Hour)
+    // Prefer a server-stored custom display name when available so users who
+    // edited their profile keep seeing their chosen name after logging in.
+    nameToUse := name
+    if h.repo != nil {
+        if ps, err := h.repo.GetStatsByEmail(email); err == nil && ps.PlayerName != "" {
+            nameToUse = ps.PlayerName
+        }
+    }
 
-	// Upsert user profile (best-effort) via repository if available
-	// We don't have repo here; login is independent. The game routes will upsert on usage.
-	c.Data(http.StatusOK, constants.ContentTypeJSON, userData)
+    // Mint session token using the chosen display name and set cookie.
+    sess, err := createSessionToken(email, nameToUse, 24*time.Hour)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedCreateSession, constants.JSONKeyDetails: err.Error()})
+        return
+    }
+    setSessionCookie(c, sess, 24*time.Hour)
+
+    // Return merged minimal user info to client: prefer server-stored name
+    // but include picture from Google's payload when present.
+    out := map[string]any{"email": email, "name": nameToUse}
+    if pic, ok := payload["picture"].(string); ok && pic != "" {
+        out["picture"] = pic
+    }
+    c.JSON(http.StatusOK, out)
 }

@@ -124,7 +124,7 @@ func main() {
 			}
 		}
 	}()
-	authHandler := api.NewAuthHandler()
+    authHandler := api.NewAuthHandler(repo)
 
 	router := gin.Default()
 
