@@ -1,0 +1,26 @@
+#cloud-config
+users:
+- name: ${user_name}
+  groups: sudo
+  shell: /bin/bash
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  ssh_authorized_keys:
+  - "${ssh_pub_key}"
+package_update: true
+package_upgrade: true
+runcmd:
+- apt-get update
+- apt-get install -y ca-certificates curl gnupg nano
+- install -m 0755 -d /etc/apt/keyrings
+- curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+- chmod a+r /etc/apt/keyrings/docker.asc
+- echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $${UBUNTU_CODENAME:-$${VERSION_CODENAME}}) stable" > /etc/apt/sources.list.d/docker.list
+- apt-get update
+- apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+- mkdir -p /home/${user_name}/chimera-cards/backend/data
+- mkdir -p /home/${user_name}/chimera-cards/infrastructure/caddy/data
+- mkdir -p /home/${user_name}/chimera-cards/infrastructure/caddy/config
+- chown -R ${user_name}:${user_name} /home/${user_name}/chimera-cards
+- systemctl enable docker
+- systemctl start docker
+- usermod -aG docker ${user_name}

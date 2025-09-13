@@ -32,6 +32,12 @@ variable "dns_label" {
   default     = "chimera"
 }
 
+variable "user_name" {
+  description = "Username to create on the instance"
+  type        = string
+  default     = "chimera"
+}
+
 variable "ssh_public_key" {
   description = "SSH public key (openssh format) to inject in the instance (required)"
   type        = string

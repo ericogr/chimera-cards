@@ -20,6 +20,12 @@ resource "oci_core_instance" "vm" {
 
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
+    user_data = base64encode(
+      templatefile("${path.module}/cloud-init.yaml.tmpl", {
+        user_name   = var.user_name
+        ssh_pub_key = var.ssh_public_key
+      })
+    )
   }
 
   dynamic "shape_config" {
@@ -29,6 +35,7 @@ resource "oci_core_instance" "vm" {
       memory_in_gbs = var.memory_in_gbs
     }
   }
+
 }
 
 // Get the primary VNIC public IP
