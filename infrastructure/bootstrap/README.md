@@ -64,30 +64,17 @@ oci session authenticate
 Usage
 
 Use the Makefile target and forward arguments via `BOOTSTRAP_ARGS`, or
-call the script directly. Examples:
+call the script directly. The `--compartment` flag is required and must
+contain the OCID of the compartment where Terraform will create resources.
 
-- **Let the script find/create `chimera-cards` (defaults):**
-
-   ```bash
-   make infra-bootstrap BOOTSTRAP_ARGS="--profile DEFAULT --outdir ./infrastructure/bootstrap/oci-creds --email you@example.com"
-   ```
-
-- **Explicit tenancy (recommended if tenancy is not in your profile):**
+Examples:
 
   ```bash
-  make infra-bootstrap BOOTSTRAP_ARGS="--profile DEFAULT --tenancy ocid1.tenancy.oc1..XXXXXXXX --outdir ./infrastructure/bootstrap/oci-creds"
+  make infra-bootstrap BOOTSTRAP_ARGS="--profile DEFAULT --tenancy ocid1.tenancy.oc1..XXXXXXXX --compartment ocid1.compartment.oc1..YYYYYYYYYYYY --outdir ./infrastructure/bootstrap/oci-creds --email you@example.com"
   ```
 
-- **Or call the script directly:**
-
   ```bash
-  bash infrastructure/bootstrap/bootstrap-oci.sh --profile DEFAULT --outdir ./infrastructure/bootstrap/oci-creds
-  ```
-
-- **Target an existing compartment by OCID:**
-
-  ```bash
-  bash infrastructure/bootstrap/bootstrap-oci.sh --profile DEFAULT --compartment ocid1.compartment.oc1..YYYYYYYYYYYY --outdir ./infrastructure/bootstrap/oci-creds
+  bash infrastructure/bootstrap/bootstrap-oci.sh --profile DEFAULT --tenancy ocid1.tenancy.oc1..XXXXXXXX --compartment ocid1.compartment.oc1..YYYYYYYYYYYY --outdir ./infrastructure/bootstrap/oci-creds
   ```
 
 Post-run
@@ -105,9 +92,9 @@ Post-run
   source "$OUTDIR/oci-provider.env"
   ```
 
-- **Set Terraform variables:** copy [`infrastructure/terraform/terraform.tfvars.example`](../terraform/terraform.tfvars.example) to
-  [`infrastructure/terraform/terraform.tfvars`](../terraform/terraform.tfvars) and set `compartment_ocid` to the created
-  compartment OCID (the script prints the created compartment OCID to stdout).
+-- **Set Terraform variables:** copy [`infrastructure/terraform/terraform.tfvars.example`](../terraform/terraform.tfvars.example) to
+  [`infrastructure/terraform/terraform.tfvars`](../terraform/terraform.tfvars) and set `compartment_ocid` to the target
+  compartment OCID you passed to the bootstrap script via `--compartment`.
 
 - **Initialize and run Terraform:**
 
@@ -120,9 +107,10 @@ Post-run
 Security notes
 - The private key is written to the output directory with `0600` file
   permissions; keep this file safe and do not commit it to source control.
-- The script attempts to create a broad policy (manage all-resources) for
-  convenience; review the created policy and narrow its scope for
-  production environments.
+- The script attempts to create a minimal policy scoped to the OCI
+  resource families used by the Terraform configuration (virtual-network,
+  instance, load-balancer, volume and image lookup). Review the created
+  policy and adjust it for your production security requirements.
 
 If you prefer not to run the script, you can create the following items
 manually: an OCI user, an API key for that user, a group containing the
