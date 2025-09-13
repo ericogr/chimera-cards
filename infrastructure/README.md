@@ -104,20 +104,20 @@ sudo systemctl enable --now docker
   ```
 - Save the images to tar files (specify tag if necessary):
   ```bash
-  docker save -o /tmp/chimera-backend.tar chimera-backend:latest
-  docker save -o /tmp/chimera-frontend.tar chimera-frontend:latest
+  docker save -o /tmp/chimera-cards-backend.tar ericogr/chimera-cards-backend:latest
+  docker save -o /tmp/chimera-cards-frontend.tar ericogr/chimera-cards-frontend:latest
   ```
 - Copy the tar files to the VM (from your workstation):
   ```bash
-  scp /tmp/chimera-backend.tar ubuntu@<PUBLIC_IP>:/tmp
-  scp /tmp/chimera-frontend.tar ubuntu@<PUBLIC_IP>:/tmp
+  scp /tmp/chimera-cards-backend.tar ubuntu@<PUBLIC_IP>:/tmp
+  scp /tmp/chimera-cards-frontend.tar ubuntu@<PUBLIC_IP>:/tmp
   ```
 
 7) Load Docker images on the VM
 ```bash
 ssh ubuntu@<PUBLIC_IP>
-sudo docker load -i /tmp/chimera-backend.tar
-sudo docker load -i /tmp/chimera-frontend.tar
+sudo docker load -i /tmp/chimera-cards-backend.tar
+sudo docker load -i /tmp/chimera-cards-frontend.tar
 ```
 
 8) Prepare directory layout and configuration on VM

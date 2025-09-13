@@ -21,8 +21,8 @@ test:
 	@echo "Running frontend tests (CI mode)..."
 	@CI=true npm test -- --watchAll=false
 
-# Docker image variables
-IMAGE ?= chimera-frontend
+# Docker image variables (push to Docker Hub under ericogr namespace by default)
+IMAGE ?= ericogr/chimera-cards-frontend
 TAG ?= latest
 DOCKERFILE ?= Dockerfile
 

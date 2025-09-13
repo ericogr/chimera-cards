@@ -1,7 +1,7 @@
 services:
   chimera-backend:
     container_name: chimera-backend
-    image: ${BACKEND_IMAGE:-chimera-backend}:${TAG:-latest}
+    image: ${BACKEND_IMAGE:-ericogr/chimera-cards-backend}:${TAG:-latest}
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     expose:
     - "8080"
@@ -19,7 +19,7 @@ services:
 
   chimera-frontend:
     container_name: chimera-frontend
-    image: ${FRONTEND_IMAGE:-chimera-frontend}:${TAG:-latest}
+    image: ${FRONTEND_IMAGE:-ericogr/chimera-cards-frontend}:${TAG:-latest}
     environment:
       REACT_APP_GOOGLE_CLIENT_ID: ${REACT_APP_GOOGLE_CLIENT_ID}
       REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-/api}

@@ -124,7 +124,7 @@ func main() {
 			}
 		}
 	}()
-    authHandler := api.NewAuthHandler(repo)
+	authHandler := api.NewAuthHandler(repo)
 
 	router := gin.Default()
 
@@ -135,6 +135,9 @@ func main() {
 		apiRoutes.GET(constants.RoutePublicGames, handler.ListPublicGames)
 		apiRoutes.GET(constants.RouteLeaderboard, handler.ListLeaderboard)
 		apiRoutes.GET(constants.RouteConfig, handler.GetConfig)
+
+		// Version information for debugging/releases
+		apiRoutes.GET("/version", api.Version)
 
 		// Authenticated endpoints
 		protected := apiRoutes.Group("")

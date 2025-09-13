@@ -19,3 +19,5 @@ export const HEADER_CONTENT_TYPE = 'Content-Type';
 export const CONTENT_TYPE_JSON = 'application/json';
 
 export const API_CONFIG = `${API_PREFIX}/config`;
+
+export const API_VERSION = `${API_PREFIX}/version`;

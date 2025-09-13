@@ -90,3 +90,9 @@
   font-size: 14px;
   text-align: center;
 }
+
+.version-discrete {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+}

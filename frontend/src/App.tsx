@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useGoogleLogin, CodeResponse } from '@react-oauth/google';
-import { apiFetch } from './api';
+import { apiFetch, apiJson } from './api';
 import Lobby from './Lobby';
 import GameRoom from './GameRoom';
 import GameBoard from './GameBoard';
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const location = useLocation();
   const requiredRuntimeKeys = ['REACT_APP_GOOGLE_CLIENT_ID', 'REACT_APP_API_BASE_URL'];
   const missingRuntimeKeys = getMissingRuntimeKeys(requiredRuntimeKeys);
+  const [versionInfo, setVersionInfo] = useState<{version?: string; commit?: string; date?: string; dirty?: string} | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -37,6 +38,22 @@ const App: React.FC = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    if (user) return; // fetch version only on the login screen
+    async function fetchVersion() {
+      try {
+        const data = await apiJson<{version?: string; commit?: string; date?: string; dirty?: string}>(constants.API_VERSION);
+        if (!mounted) return;
+        if (data && data.version) setVersionInfo(data);
+      } catch (err) {
+        // ignore; version is non-critical for login
+      }
+    }
+    fetchVersion();
+    return () => { mounted = false; };
+  }, [user]);
 
   const handleLoginSuccess = async (codeResponse: Omit<CodeResponse, 'error' | 'error_description' | 'error_uri'>) => {
     try {
@@ -91,6 +108,9 @@ const App: React.FC = () => {
             <Button className="google-login-button" onClick={() => login()}>
               Sign in with Google
             </Button>
+            {versionInfo && (
+              <div className="version-discrete">Version: {versionInfo.version}{versionInfo.dirty === 'true' ? '-dirty' : ''} {versionInfo.commit ? `(${versionInfo.commit})` : null}</div>
+            )}
           </div>
         </header>
       </div>

@@ -9,19 +9,19 @@ import (
 	"os"
 	"time"
 
-    "github.com/ericogr/chimera-cards/internal/constants"
-    "github.com/ericogr/chimera-cards/internal/storage"
-    "github.com/gin-gonic/gin"
-    "golang.org/x/oauth2"
-    "golang.org/x/oauth2/google"
+	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/storage"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 type AuthHandler struct {
-    repo storage.Repository
+	repo storage.Repository
 }
 
 func NewAuthHandler(repo storage.Repository) *AuthHandler {
-    return &AuthHandler{repo: repo}
+	return &AuthHandler{repo: repo}
 }
 
 type GoogleOAuthCallbackRequest struct {
@@ -80,28 +80,28 @@ func (h *AuthHandler) GoogleOAuthCallback(c *gin.Context) {
 		return
 	}
 
-    // Prefer a server-stored custom display name when available so users who
-    // edited their profile keep seeing their chosen name after logging in.
-    nameToUse := name
-    if h.repo != nil {
-        if ps, err := h.repo.GetStatsByEmail(email); err == nil && ps.PlayerName != "" {
-            nameToUse = ps.PlayerName
-        }
-    }
+	// Prefer a server-stored custom display name when available so users who
+	// edited their profile keep seeing their chosen name after logging in.
+	nameToUse := name
+	if h.repo != nil {
+		if ps, err := h.repo.GetStatsByEmail(email); err == nil && ps.PlayerName != "" {
+			nameToUse = ps.PlayerName
+		}
+	}
 
-    // Mint session token using the chosen display name and set cookie.
-    sess, err := createSessionToken(email, nameToUse, 24*time.Hour)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedCreateSession, constants.JSONKeyDetails: err.Error()})
-        return
-    }
-    setSessionCookie(c, sess, 24*time.Hour)
+	// Mint session token using the chosen display name and set cookie.
+	sess, err := createSessionToken(email, nameToUse, 24*time.Hour)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedCreateSession, constants.JSONKeyDetails: err.Error()})
+		return
+	}
+	setSessionCookie(c, sess, 24*time.Hour)
 
-    // Return merged minimal user info to client: prefer server-stored name
-    // but include picture from Google's payload when present.
-    out := map[string]any{"email": email, "name": nameToUse}
-    if pic, ok := payload["picture"].(string); ok && pic != "" {
-        out["picture"] = pic
-    }
-    c.JSON(http.StatusOK, out)
+	// Return merged minimal user info to client: prefer server-stored name
+	// but include picture from Google's payload when present.
+	out := map[string]any{"email": email, "name": nameToUse}
+	if pic, ok := payload["picture"].(string); ok && pic != "" {
+		out["picture"] = pic
+	}
+	c.JSON(http.StatusOK, out)
 }
