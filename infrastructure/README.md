@@ -42,27 +42,6 @@ make terraform-apply
   ```bash
   ssh ubuntu@<PUBLIC_IP>
   ```
-- Create a new user (interactive):
-  ```bash
-  sudo adduser deployuser
-  ```
-- Give the new user sudo privileges:
-  ```bash
-  sudo usermod -aG sudo deployuser
-  ```
-  (Alternatively, to allow passwordless sudo — use with caution):
-  ```bash
-  echo 'deployuser ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
-  ```
-- Copy SSH authorized keys (recommended; do not copy private keys):
-  ```bash
-  sudo mkdir -p /home/deployuser/.ssh
-  sudo cp /home/ubuntu/.ssh/authorized_keys /home/deployuser/.ssh/authorized_keys
-  sudo chown -R deployuser:deployuser /home/deployuser/.ssh
-  sudo chmod 700 /home/deployuser/.ssh
-  sudo chmod 600 /home/deployuser/.ssh/authorized_keys
-  ```
-
 2) Install essential utilities
 ```bash
 sudo apt update
