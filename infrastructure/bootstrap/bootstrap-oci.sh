@@ -2,16 +2,31 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Default configuration (constants)
+# These values are used when the corresponding CLI args are not provided.
+DEFAULT_ADMIN_PROFILE="DEFAULT"
+DEFAULT_USERNAME_PREFIX="chimera-terraform"
+DEFAULT_EMAIL_DOMAIN="example.com"
+DEFAULT_GROUPNAME_PREFIX="chimera-terraform-group"
+DEFAULT_POLICY_NAME_PREFIX="chimera-terraform-policy"
+DEFAULT_OUTDIR_PREFIX="infrastructure/bootstrap/oci-creds"
+DEFAULT_COMPARTMENT_NAME="chimera-cards"
+DEFAULT_TARGET_COMP_OCID=""
+DEFAULT_TENANCY_OCID=""
+DEFAULT_REGION=""
+
+# Derived / runtime values
 TS=$(date -u +%Y%m%d%H%M%S)
-ADMIN_PROFILE="DEFAULT"
-NEW_USERNAME="chimera-terraform-${TS}"
-EMAIL="${NEW_USERNAME}@example.com"
-NEW_GROUPNAME="chimera-terraform-group-${TS}"
-POLICY_NAME="chimera-terraform-policy-${TS}"
-OUTDIR="infrastructure/bootstrap/oci-creds-${TS}"
-TARGET_COMP_OCID=""
-TENANCY_OCID=""
-REGION=""
+ADMIN_PROFILE="${DEFAULT_ADMIN_PROFILE}"
+NEW_USERNAME="${DEFAULT_USERNAME_PREFIX}-${TS}"
+EMAIL="${NEW_USERNAME}@${DEFAULT_EMAIL_DOMAIN}"
+NEW_GROUPNAME="${DEFAULT_GROUPNAME_PREFIX}-${TS}"
+POLICY_NAME="${DEFAULT_POLICY_NAME_PREFIX}-${TS}"
+OUTDIR="${DEFAULT_OUTDIR_PREFIX}-${TS}"
+TARGET_COMP_OCID="${DEFAULT_TARGET_COMP_OCID}"
+TENANCY_OCID="${DEFAULT_TENANCY_OCID}"
+REGION="${DEFAULT_REGION}"
+COMPARTMENT_NAME="${DEFAULT_COMPARTMENT_NAME}"
 
 print_usage() {
   cat <<'USAGE'
@@ -152,14 +167,14 @@ oci --profile "$ADMIN_PROFILE" iam group add-user --group-id "$GROUP_OCID" --use
 
 # Ensure a compartment named 'chimera-cards' exists (if no compartment OCID provided)
 if [ -z "$TARGET_COMP_OCID" ]; then
-  echo "No compartment OCID provided. Looking for compartment named 'chimera-cards' under tenancy..."
-  EXISTING_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment list --compartment-id "$TENANCY_OCID" --all --query 'data[?name==`chimera-cards`].id | [0]' --raw-output --auth security_token 2>/dev/null || true)
+  echo "No compartment OCID provided. Looking for compartment named '$COMPARTMENT_NAME' under tenancy..."
+  EXISTING_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment list --compartment-id "$TENANCY_OCID" --all --query "data[?name==\\\`$COMPARTMENT_NAME\\\`].id | [0]" --raw-output --auth security_token 2>/dev/null || true)
   if [ -n "$EXISTING_COMP_OCID" ] && [ "$EXISTING_COMP_OCID" != "None" ]; then
     TARGET_COMP_OCID="$EXISTING_COMP_OCID"
     echo "Found existing compartment 'chimera-cards': $TARGET_COMP_OCID"
   else
-    echo "Compartment 'chimera-cards' not found. Creating a new compartment under the tenancy..."
-    CREATED_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment create --compartment-id "$TENANCY_OCID" --name "chimera-cards" \
+    echo "Compartment '$COMPARTMENT_NAME' not found. Creating a new compartment under the tenancy..."
+    CREATED_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment create --compartment-id "$TENANCY_OCID" --name "$COMPARTMENT_NAME" \
       --description "Compartment for Chimera resources (created by bootstrap script)" --query 'data.id' --raw-output --auth security_token 2>/dev/null || true)
     if [ -n "$CREATED_COMP_OCID" ] && [ "$CREATED_COMP_OCID" != "None" ]; then
       TARGET_COMP_OCID="$CREATED_COMP_OCID"
