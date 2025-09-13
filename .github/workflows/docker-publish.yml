@@ -5,6 +5,9 @@ on:
     branches: [ main ]
     tags:
       - 'v*.*.*'
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
   workflow_dispatch:
 
 jobs:
