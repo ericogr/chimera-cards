@@ -1,8 +1,0 @@
-# Ignore runtime Caddy data and config (certs/keys)
-data/
-config/
-
-# Keep these folders tracked via .gitkeep
-!data/.gitkeep
-!config/.gitkeep
-
