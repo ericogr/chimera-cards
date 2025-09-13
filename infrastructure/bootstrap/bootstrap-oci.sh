@@ -37,14 +37,14 @@ This script bootstraps OCI credentials for Terraform. It will:
   - create an OCI user
   - upload the public API key to the user
   - create a group and add the user to it
-  - create a policy that grants the group permissions in the provided compartment
+  - create a policy that grants the group permissions (either in a compartment or in the tenancy)
 
 Requirements: `oci` CLI configured with an admin profile and `openssl` available in PATH.
 
 Options:
   -p, --profile PROFILE         OCI CLI profile to use for admin actions (default: DEFAULT)
   -t, --tenancy TENANCY_OCID    Tenancy OCID (will try to read from profile if omitted)
-  -c, --compartment COMPARTMENT_OCID  Target compartment OCID for policy (required)
+  -c, --compartment COMPARTMENT_OCID  Target compartment OCID for policy (optional)
   -n, --username USERNAME       Username to create (default: chimera-terraform-<ts>)
   -e, --email EMAIL             Email address to use for the new user (default: <username>@example.com)
   -g, --group GROUPNAME         Group name (default: chimera-terraform-group-<ts>)
@@ -167,67 +167,48 @@ oci --profile "$ADMIN_PROFILE" iam group add-user --group-id "$GROUP_OCID" --use
 
 # Ensure a compartment named 'chimera-cards' exists (if no compartment OCID provided)
 if [ -z "$TARGET_COMP_OCID" ]; then
-  echo "Error: --compartment COMPARTMENT_OCID is required. Provide the target compartment OCID where resources will be created." >&2
-  print_usage
-  exit 1
+  echo "No compartment OCID provided. Looking for compartment named '$COMPARTMENT_NAME' under tenancy..."
+  EXISTING_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment list --compartment-id "$TENANCY_OCID" --all --query "data[?name==\\\`$COMPARTMENT_NAME\\\`].id | [0]" --raw-output --auth security_token 2>/dev/null || true)
+  if [ -n "$EXISTING_COMP_OCID" ] && [ "$EXISTING_COMP_OCID" != "None" ]; then
+    TARGET_COMP_OCID="$EXISTING_COMP_OCID"
+    echo "Found existing compartment 'chimera-cards': $TARGET_COMP_OCID"
+  else
+    echo "Compartment '$COMPARTMENT_NAME' not found. Creating a new compartment under the tenancy..."
+    CREATED_COMP_OCID=$(oci --profile "$ADMIN_PROFILE" iam compartment create --compartment-id "$TENANCY_OCID" --name "$COMPARTMENT_NAME" \
+      --description "Compartment for Chimera resources (created by bootstrap script)" --query 'data.id' --raw-output --auth security_token 2>/dev/null || true)
+    if [ -n "$CREATED_COMP_OCID" ] && [ "$CREATED_COMP_OCID" != "None" ]; then
+      TARGET_COMP_OCID="$CREATED_COMP_OCID"
+      echo "Created compartment 'chimera-cards': $TARGET_COMP_OCID"
+    else
+      echo "Failed to create compartment 'chimera-cards'. Continuing without compartment (policy will apply to tenancy)." >&2
+      TARGET_COMP_OCID=""
+    fi
+  fi
 fi
-
-# Validate that the provided compartment OCID exists and is readable by the
-# admin profile. We also capture the compartment's friendly name for use in
-# policy statements below.
-echo "Validating provided compartment OCID: $TARGET_COMP_OCID"
-COMP_NAME=$(oci --profile "$ADMIN_PROFILE" iam compartment get --compartment-id "$TARGET_COMP_OCID" --query 'data.name' --raw-output --auth security_token 2>/dev/null || true)
-if [ -z "$COMP_NAME" ] || [ "$COMP_NAME" = "None" ]; then
-  echo "Error: could not find or access compartment with OCID: $TARGET_COMP_OCID" >&2
-  echo "Ensure the OCID is correct and the admin profile has permission to read it." >&2
-  exit 1
-fi
-echo "Using compartment: $COMP_NAME ($TARGET_COMP_OCID)"
 
 # Create a policy for the group
-# Determine the scope for the policy statements. Prefer compartment scope
-# when a compartment was created/found; otherwise fall back to tenancy.
 if [ -n "$TARGET_COMP_OCID" ]; then
   echo "Fetching compartment name for $TARGET_COMP_OCID"
   COMP_NAME=$(oci --profile "$ADMIN_PROFILE" iam compartment get --compartment-id "$TARGET_COMP_OCID" --query 'data.name' --raw-output --auth security_token 2>/dev/null || true)
   if [ -z "$COMP_NAME" ]; then
     echo "Could not determine compartment name for $TARGET_COMP_OCID. Falling back to tenancy-level policy." >&2
-    COMP_SCOPE="tenancy"
+    STATEMENT="Allow group $NEW_GROUPNAME to manage all-resources in tenancy"
   else
-    COMP_SCOPE="compartment $COMP_NAME"
+    STATEMENT="Allow group $NEW_GROUPNAME to manage all-resources in compartment $COMP_NAME"
   fi
 else
-  COMP_SCOPE="tenancy"
+  STATEMENT="Allow group $NEW_GROUPNAME to manage all-resources in tenancy"
 fi
 
-# Build minimal, focused IAM statements for the Terraform automation.
-# These are narrower than 'manage all-resources' and cover only the
-# resource families used by the Terraform configuration in
-# `infrastructure/terraform`.
-# - virtual-network-family: VCN, subnets, route tables, IGW, security lists
-# - instance-family: compute instances
-# - load-balancer-family: load balancers and related resources
-# - volume-family: block volumes (boot volumes)
-# - inspect images in tenancy: image lookup used by the data source
-STATEMENTS_JSON=$(printf '["Allow group %s to manage virtual-network-family in %s","Allow group %s to manage instance-family in %s","Allow group %s to manage load-balancer-family in %s","Allow group %s to manage volume-family in %s","Allow group %s to inspect images in tenancy"]' \
-  "$NEW_GROUPNAME" "$COMP_SCOPE" \
-  "$NEW_GROUPNAME" "$COMP_SCOPE" \
-  "$NEW_GROUPNAME" "$COMP_SCOPE" \
-  "$NEW_GROUPNAME" "$COMP_SCOPE" \
-  "$NEW_GROUPNAME")
+STATEMENTS_JSON=$(printf '["%s"]' "$STATEMENT")
 
-echo "Creating policy for group with statements: $STATEMENTS_JSON"
-POLICY_OCID=$(oci --profile "$ADMIN_PROFILE" iam policy create --compartment-id "$TARGET_COMP_OCID" --name "$POLICY_NAME" \
+echo "Creating policy for group (statement: $STATEMENT)"
+POLICY_OCID=$(oci --profile "$ADMIN_PROFILE" iam policy create --compartment-id "$TENANCY_OCID" --name "$POLICY_NAME" \
   --description "Policy for Terraform (created by bootstrap script)" --statements "$STATEMENTS_JSON" --query 'data.id' --raw-output --auth security_token 2>/dev/null || true)
 
 if [ -z "$POLICY_OCID" ]; then
-  echo "Warning: failed to create policy automatically. You may need to create the policy manually with the following statements:" >&2
-  # Print a friendly list of statements so the user can copy/paste
-  printf '%s\n' "- Allow group $NEW_GROUPNAME to manage virtual-network-family in $COMP_SCOPE"
-  printf '%s\n' "- Allow group $NEW_GROUPNAME to manage instance-family in $COMP_SCOPE"
-  printf '%s\n' "- Allow group $NEW_GROUPNAME to manage load-balancer-family in $COMP_SCOPE"
-  printf '%s\n' "- Allow group $NEW_GROUPNAME to manage volume-family in $COMP_SCOPE"
-  printf '%s\n' "- Allow group $NEW_GROUPNAME to inspect images in tenancy"
+  echo "Warning: failed to create policy automatically. You may need to create the policy manually with the following statement:" >&2
+  echo "  $STATEMENT"
 else
   echo "Created policy: $POLICY_OCID"
 fi
