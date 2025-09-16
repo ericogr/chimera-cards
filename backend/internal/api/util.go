@@ -3,10 +3,12 @@ package api
 import (
 	"encoding/json"
 	"math/rand"
+	"regexp"
+	"strings"
 )
 
 const codeCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-const codeLength = 5
+const codeLength = 8
 
 // generateJoinCode creates a short alphanumeric code for joining games.
 func generateJoinCode() string {
@@ -15,6 +17,12 @@ func generateJoinCode() string {
 		b[i] = codeCharset[rand.Intn(len(codeCharset))]
 	}
 	return string(b)
+}
+
+var joinCodeRegex = regexp.MustCompile("^[A-Z0-9]{8}$")
+
+func normalizeJoinCode(s string) string {
+	return strings.ToUpper(strings.TrimSpace(s))
 }
 
 // normalizeTimestamps recursively renames GORM timestamp keys from CamelCase

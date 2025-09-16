@@ -7,7 +7,7 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
   const res = await fetch(input, mergedInit);
   if (res.status === 401) {
     // Best-effort local cleanup; ignore storage errors.
-    safeRemoveLocal('game_id');
+    safeRemoveLocal('game_code');
     safeRemoveLocal('player_email');
     safeRemoveLocal('session_ok');
     safeRemoveLocal('user');

@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ericogr/chimera-cards/internal/constants"
 	"github.com/ericogr/chimera-cards/internal/game"
@@ -19,12 +18,13 @@ type ActionRequest struct {
 
 // SubmitAction stores a player's chosen action for the current round.
 func (h *GameHandler) SubmitAction(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	// Path param contains join code. Resolve to internal ID.
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
 		return
 	}
-	g, err := h.repo.GetGameByID(uint(gameID))
+	g, err := h.repo.FindGameByJoinCode(code)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
@@ -45,7 +45,7 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 	// Delegate to service layer
 	// Convert raw action_type string to the typed PendingActionType
 	actionType := game.PendingActionType(req.ActionType)
-	g2, resolved, err := service.SubmitAction(h.repo, uint(gameID), req.PlayerUUID, actionType, req.EntityID, h.actionTimeout)
+	g2, resolved, err := service.SubmitAction(h.repo, g.ID, req.PlayerUUID, actionType, req.EntityID, h.actionTimeout)
 	if err != nil {
 		switch err {
 		case service.ErrGameNotFound:

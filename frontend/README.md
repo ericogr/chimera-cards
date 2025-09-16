@@ -38,3 +38,10 @@ REACT_APP_GOOGLE_CLIENT_ID="..."
   project. If running frontend and backend separately, ensure the backend
   is reachable and env vars are set appropriately.
 
+Join code format and input mask
+--------------------------------
+
+- Public games are identified by an 8-character alphanumeric join code
+  (`join_code`). The SPA uses this code in the route `/game/:gameCode`.
+- The Join input enforces an input mask: characters are auto-uppercased and
+  only A–Z and 0–9 are accepted; the field length is limited to 8 characters.

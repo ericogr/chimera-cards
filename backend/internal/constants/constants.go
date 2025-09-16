@@ -64,12 +64,12 @@ const (
 	RoutePlayerStats        = "/player-stats"
 	RouteGames              = "/games"
 	RouteGamesJoin          = "/games/join"
-	RouteGameByID           = "/games/:gameID"
-	RouteGameStart          = "/games/:gameID/start"
-	RouteGameEnd            = "/games/:gameID/end"
-	RouteGameLeave          = "/games/:gameID/leave"
-	RouteCreateHybrids      = "/games/:gameID/create-hybrids"
-	RouteGameAction         = "/games/:gameID/action"
+	RouteGameByCode         = "/games/:gameCode"
+	RouteGameStart          = "/games/:gameCode/start"
+	RouteGameEnd            = "/games/:gameCode/end"
+	RouteGameLeave          = "/games/:gameCode/leave"
+	RouteCreateHybrids      = "/games/:gameCode/create-hybrids"
+	RouteGameAction         = "/games/:gameCode/action"
 )
 
 // Common JSON response keys
@@ -85,7 +85,7 @@ const (
 const (
 	ErrInvalidRequest         = "Invalid request"
 	ErrMissingGoogleEnv       = "Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET in environment"
-	ErrInvalidGameID          = "Invalid game ID"
+	ErrInvalidGameID          = "Invalid game code"
 	ErrGameNotFound           = "Game not found"
 	ErrFailedFetchEntities    = "Failed to fetch entities"
 	ErrFailedFetchGames       = "Failed to fetch games"

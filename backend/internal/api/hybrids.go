@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/ericogr/chimera-cards/internal/constants"
 	"github.com/ericogr/chimera-cards/internal/game"
@@ -40,9 +39,15 @@ func sumEntityStats(entities []game.Entity) (hitPoints, attack, defense, agility
 
 // CreateHybrids stores two hybrids for a player in a game.
 func (h *GameHandler) CreateHybrids(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	// The path param is the game's join code
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
+		return
+	}
+	g, err := h.repo.FindGameByJoinCode(code)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
 	}
 	var req CreateHybridsPayload
@@ -57,7 +62,7 @@ func (h *GameHandler) CreateHybrids(c *gin.Context) {
 		Hybrid2:    service.CreateHybridSpec{EntityIDs: req.Hybrid2.EntityIDs, SelectedEntityID: req.Hybrid2.SelectedEntityID},
 	}
 
-	if err := service.CreateHybrids(h.repo, uint(gameID), srvReq); err != nil {
+	if err := service.CreateHybrids(h.repo, g.ID, srvReq); err != nil {
 		switch err {
 		case service.ErrGameNotFound:
 			c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})

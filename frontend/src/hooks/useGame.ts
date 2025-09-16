@@ -56,4 +56,3 @@ export function useGame(gameId?: string | null, intervalMs = 3000) {
 
   return { game, error, refresh: fetchGame } as const;
 }
-

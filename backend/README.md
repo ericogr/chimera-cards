@@ -54,6 +54,19 @@ CHIMERA_CONFIG="./chimera_config.json"
 - The development DB is SQLite and intended only for local development; for
   production use, migrate to a managed database and update `internal/storage`.
 
+Join codes
+----------
+
+- Games are identified publicly by an 8-character alphanumeric join code
+  (`join_code`) which is returned when creating or joining a game. These
+  codes are used in URLs and API routes (for example: `/game/AB12CD34` in the
+  frontend and `/api/games/AB12CD34` on the backend).
+- Join codes are validated by the backend using a strict pattern:
+  `^[A-Z0-9]{8}$` (case-insensitive on input; normalized to upper-case).
+
+Note: The database still uses a numeric `id` for internal relations, but the
+public-facing identifier is the `join_code` as described above.
+
 ## Configuration file (`chimera_config.json`)
 
 The server reads `chimera_config.json` (path may be set via the `CHIMERA_CONFIG`

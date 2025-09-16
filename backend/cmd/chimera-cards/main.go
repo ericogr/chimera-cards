@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -18,6 +19,8 @@ import (
 )
 
 func main() {
+	// Seed math/rand so generated join codes are different across process restarts.
+	rand.Seed(time.Now().UnixNano())
 	checkEnvVars([]string{constants.EnvSessionSecret, constants.EnvGoogleClientID, constants.EnvGoogleClientSecret, constants.EnvOpenAIAPIKey})
 	// Load entity configuration file (required). Path may be provided via
 	// CHIMERA_CONFIG env var or defaults to ./chimera_config.json in the
@@ -150,7 +153,7 @@ func main() {
 		protected.GET(constants.RoutePlayerStats, handler.GetPlayerStats)
 		protected.POST(constants.RouteGames, handler.CreateGame)
 		protected.POST(constants.RouteGamesJoin, handler.JoinGame)
-		protected.GET(constants.RouteGameByID, handler.GetGame)
+		protected.GET(constants.RouteGameByCode, handler.GetGame)
 		protected.POST(constants.RouteGameStart, handler.StartGame)
 		protected.POST(constants.RouteGameEnd, handler.EndGame)
 		protected.POST(constants.RouteGameLeave, handler.LeaveGame)

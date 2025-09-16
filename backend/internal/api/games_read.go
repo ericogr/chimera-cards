@@ -55,13 +55,20 @@ func (h *GameHandler) ListLeaderboard(c *gin.Context) {
 
 // GetGame returns a game by ID.
 func (h *GameHandler) GetGame(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	// The route param contains the game's join code (string). Look up the
+	// game by its join code and then load the full game by ID so the
+	// returned payload includes preloaded hybrids and entity data.
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
 		return
 	}
-
-	g, err := h.repo.GetGameByID(uint(gameID))
+	short, err := h.repo.FindGameByJoinCode(code)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
+		return
+	}
+	g, err := h.repo.GetGameByID(short.ID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return

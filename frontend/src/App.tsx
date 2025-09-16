@@ -129,8 +129,8 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Lobby user={user} onLogout={handleLogout} />} />
         <Route path="/profile" element={<ProfilePage user={user} onLogout={handleLogout} onUserUpdate={(u) => setUser(u)} />} />
-        <Route path="/game/:gameId" element={<GameRoom />} />
-        <Route path="/game/:gameId/board" element={<GameBoard />} />
+        <Route path="/game/:gameCode" element={<GameRoom />} />
+        <Route path="/game/:gameCode/board" element={<GameBoard />} />
       </Routes>
     </div>
   );

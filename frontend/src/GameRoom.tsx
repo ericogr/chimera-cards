@@ -10,9 +10,9 @@ import * as constants from './constants';
 import { safeRemoveLocal } from './runtimeConfig';
 
 const GameRoom: React.FC = () => {
-  const { gameId } = useParams<{ gameId: string }>();
+  const { gameCode } = useParams<{ gameCode: string }>();
   const navigate = useNavigate();
-  const { game, error: gameError } = useGame(gameId, 3000);
+  const { game, error: gameError } = useGame(gameCode, 3000);
   const [timeLeftMs, setTimeLeftMs] = useState<number | null>(null);
   const [publicGamesTTLSeconds, setPublicGamesTTLSeconds] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -30,13 +30,13 @@ const GameRoom: React.FC = () => {
     } else if (game.status === 'in_progress') {
       setSubmitting(false);
       toBoardRef.current = true;
-      navigate(`/game/${gameId}/board`);
+      navigate(`/game/${gameCode}/board`);
     } else if (game.status === 'error') {
       setSubmitting(false);
     } else {
       setSubmitting(false);
     }
-  }, [game, gameId, navigate]);
+  }, [game, gameCode, navigate]);
 
   // Fetch backend config (public games TTL) and compute countdown.
   useEffect(() => {
@@ -99,7 +99,7 @@ const GameRoom: React.FC = () => {
       hasLeftRef.current = true;
       try {
         const body = JSON.stringify({ player_uuid: currentPlayerUUID });
-        fetch(`${constants.API_GAMES}/${gameId}/leave`, {
+        fetch(`${constants.API_GAMES}/${gameCode}/leave`, {
           method: 'POST',
           headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
           body,
@@ -109,7 +109,7 @@ const GameRoom: React.FC = () => {
           try {
             const blob = new Blob([body], { type: 'application/json' });
             // @ts-ignore
-            if (navigator.sendBeacon) navigator.sendBeacon(`${constants.API_GAMES}/${gameId}/leave`, blob);
+            if (navigator.sendBeacon) navigator.sendBeacon(`${constants.API_GAMES}/${gameCode}/leave`, blob);
           } catch {}
         });
       } catch {}
@@ -126,14 +126,14 @@ const GameRoom: React.FC = () => {
       window.removeEventListener('pagehide', onPageHide);
       leaveIfEligible();
     };
-  }, [gameId, currentPlayerUUID]);
+  }, [gameCode, currentPlayerUUID]);
 
   const handleStartGame = async () => {
     try {
       if (actingRef.current || submitting) return;
       actingRef.current = true;
       setSubmitting(true);
-      const response = await apiFetch(`${constants.API_GAMES}/${gameId}/start`, { method: 'POST' });
+      const response = await apiFetch(`${constants.API_GAMES}/${gameCode}/start`, { method: 'POST' });
       if (!response.ok) {
         throw new Error('Failed to start game');
       }
@@ -171,7 +171,7 @@ const GameRoom: React.FC = () => {
       // Prevent the unload/visibility handler from firing an extra leave
       hasLeftRef.current = true;
       if (game?.status === 'waiting_for_players' && currentPlayerUUID && game.players?.some(p => p.player_uuid === currentPlayerUUID)) {
-                await apiFetch(`${constants.API_GAMES}/${gameId}/leave`, {
+                await apiFetch(`${constants.API_GAMES}/${gameCode}/leave`, {
           method: 'POST',
           headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
           body: JSON.stringify({ player_uuid: currentPlayerUUID }),
@@ -181,7 +181,7 @@ const GameRoom: React.FC = () => {
     } catch (e) {
       console.warn('Leave failed (continuing to lobby):', e);
     } finally {
-      safeRemoveLocal('game_id');
+      safeRemoveLocal('game_code');
       navigate('/');
     }
   };
@@ -190,7 +190,7 @@ const GameRoom: React.FC = () => {
     <div>
       <main className="page-main">
         <div className="row-between">
-          <h3 className="no-margin">Game Room #{game.ID} (Code: {game.join_code})</h3>
+          <h3 className="no-margin">Game Room {game.join_code}</h3>
           <div>
             <Button onClick={leaveGameAndReturn}>Back to Lobby</Button>
           </div>
@@ -222,7 +222,7 @@ const GameRoom: React.FC = () => {
         </ul>
 
         {game.status === 'waiting_for_players' && currentPlayer && !currentPlayer.has_created && (
-          <HybridCreation gameId={gameId!} onCreated={() => {}} ttlExpired={timeLeftMs !== null && timeLeftMs <= 0} />
+          <HybridCreation gameCode={gameCode!} onCreated={() => {}} ttlExpired={timeLeftMs !== null && timeLeftMs <= 0} />
         )}
 
         {isCreator && game.players.length === 2 && game.status === 'waiting_for_players' && (
@@ -256,7 +256,7 @@ const GameRoom: React.FC = () => {
               try {
                 // Before the game starts, just leave to free up the slot
                 if (game?.status === 'waiting_for_players') {
-                  await apiFetch(`${constants.API_GAMES}/${gameId}/leave`, {
+                  await apiFetch(`${constants.API_GAMES}/${gameCode}/leave`, {
                     method: 'POST',
                     headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
                     body: JSON.stringify({ player_uuid: currentPlayerUUID }),
@@ -264,13 +264,13 @@ const GameRoom: React.FC = () => {
 
                 } else {
                   // Fallback: end the match if somehow already started from this view
-                  await apiFetch(`${constants.API_GAMES}/${gameId}/end`, { method: 'POST' });
+                  await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, { method: 'POST' });
                 }
               } catch (e) {
                 console.warn('Cancel failed, continuing to lobby:', e);
               } finally {
                 setSubmitting(false);
-                safeRemoveLocal('game_id');
+              safeRemoveLocal('game_code');
                 navigate('/');
               }
             }}

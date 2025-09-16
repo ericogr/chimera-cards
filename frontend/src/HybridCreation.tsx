@@ -7,7 +7,7 @@ import './HybridCreation.css';
 import { Button, Modal } from './ui';
 
 interface Props {
-  gameId: string;
+  gameCode: string;
   onCreated?: () => void;
   // When true, the server-side public-games TTL expired and creation must be disabled
   ttlExpired?: boolean;
@@ -18,7 +18,7 @@ interface HybridSpecState {
   selectedEntityId?: number;
 }
 
-const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false }) => {
+const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = false }) => {
   const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +87,7 @@ const HybridCreation: React.FC<Props> = ({ gameId, onCreated, ttlExpired = false
     actingRef.current = true;
     setSubmitting(true);
     try {
-      const res = await apiFetch(`${constants.API_GAMES}/${gameId}/create-hybrids`, {
+      const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/create-hybrids`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
       body: JSON.stringify({

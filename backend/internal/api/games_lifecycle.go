@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 	"unicode/utf8"
 
@@ -103,7 +102,12 @@ func (h *GameHandler) JoinGame(c *gin.Context) {
 		req.PlayerName, _ = v.(string)
 	}
 
-	g, err := h.repo.FindGameByJoinCode(req.JoinCode)
+	code := normalizeJoinCode(req.JoinCode)
+	if code == "" || !joinCodeRegex.MatchString(code) {
+		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
+		return
+	}
+	g, err := h.repo.FindGameByJoinCode(code)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
@@ -134,6 +138,7 @@ func (h *GameHandler) JoinGame(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"game_id":     g.ID,
+		"join_code":   g.JoinCode,
 		"player_uuid": newPlayerUUID,
 		"message":     "Successfully joined game",
 	})
@@ -141,13 +146,18 @@ func (h *GameHandler) JoinGame(c *gin.Context) {
 
 // StartGame initializes state for the first round.
 func (h *GameHandler) StartGame(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	// Resolve join code to internal ID
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
 		return
 	}
-
-	g, err := h.repo.GetGameByID(uint(gameID))
+	short, err := h.repo.FindGameByJoinCode(code)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
+		return
+	}
+	g, err := h.repo.GetGameByID(short.ID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
@@ -217,8 +227,9 @@ type EndGamePayload struct {
 
 // LeaveGame removes a player from a waiting room.
 func (h *GameHandler) LeaveGame(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	// find by join code
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
 		return
 	}
@@ -227,7 +238,7 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidRequest})
 		return
 	}
-	g, err := h.repo.GetGameByID(uint(gameID))
+	g, err := h.repo.FindGameByJoinCode(code)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
@@ -272,12 +283,12 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 
 // EndGame allows any player to end the match (cancels/finishes for both)
 func (h *GameHandler) EndGame(c *gin.Context) {
-	gameID, err := strconv.Atoi(c.Param("gameID"))
-	if err != nil {
+	code := normalizeJoinCode(c.Param("gameCode"))
+	if code == "" || !joinCodeRegex.MatchString(code) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidGameID})
 		return
 	}
-	g, err := h.repo.GetGameByID(uint(gameID))
+	g, err := h.repo.FindGameByJoinCode(code)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return

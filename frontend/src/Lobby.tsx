@@ -26,7 +26,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
   const [gameDescription, setGameDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const JOIN_CODE_LENGTH = 5;
+  const JOIN_CODE_LENGTH = 8;
   const navigate = useNavigate();
   const actingRef = useRef(false);
 
@@ -106,8 +106,9 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       }
       const newGameInfo = await response.json();
       try { if (user?.email) safeSetLocal('player_email', user.email); } catch {}
-      safeSetLocal('game_id', newGameInfo.game_id);
-      navigate(`/game/${newGameInfo.game_id}`);
+      try { if (user?.email) safeSetLocal('player_email', user.email); } catch {}
+      safeSetLocal('game_code', newGameInfo.join_code);
+      navigate(`/game/${newGameInfo.join_code}`);
     } catch (err) {
       alert('Error creating game. Please try again.');
       console.error(err);
@@ -141,8 +142,8 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
       if (response.ok) {
         const joinedGameInfo = await response.json();
         try { if (user?.email) safeSetLocal('player_email', user.email); } catch {}
-        safeSetLocal('game_id', joinedGameInfo.game_id);
-        navigate(`/game/${joinedGameInfo.game_id}`);
+        safeSetLocal('game_code', joinedGameInfo.join_code);
+        navigate(`/game/${joinedGameInfo.join_code}`);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to join game');
@@ -196,7 +197,11 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
                 type="text"
                 placeholder="Enter game code"
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  const raw = (e.target as HTMLInputElement).value.toUpperCase();
+                  const sanitized = raw.replace(/[^A-Z0-9]/g, '').slice(0, JOIN_CODE_LENGTH);
+                  setJoinCode(sanitized);
+                }}
                 maxLength={JOIN_CODE_LENGTH}
                 className="flex-grow-1"
               />

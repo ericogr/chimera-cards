@@ -16,9 +16,9 @@ import { useGame } from './hooks/useGame';
 import { Button, IconButton } from './ui';
 
 const GameBoard: React.FC = () => {
-  const { gameId } = useParams<{ gameId: string }>();
+  const { gameCode } = useParams<{ gameCode: string }>();
   const navigate = useNavigate();
-  const { game, error: gameError } = useGame(gameId, 3000);
+  const { game, error: gameError } = useGame(gameCode, 3000);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lockedRound, setLockedRound] = useState<number | null>(null);
@@ -116,7 +116,7 @@ const GameBoard: React.FC = () => {
       if (game?.round_count != null) {
         setLockedRound(game.round_count);
       }
-      const res = await apiFetch(`${constants.API_GAMES}/${gameId}/action`, {
+      const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/action`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
         body: JSON.stringify({ player_uuid: playerUUID, action_type, entity_id: entity?.ID }),
@@ -181,15 +181,15 @@ const GameBoard: React.FC = () => {
         {game.status === 'finished' && (
           <div className="row-center">
             <div>Winner: {game.winner === '' || game.winner == null ? 'None' : game.winner}</div>
-            <Button
+              <Button
               variant="ghost"
               onClick={() => {
-                safeRemoveLocal('game_id');
+                safeRemoveLocal('game_code');
                 navigate('/');
               }}
             >
               Back to Lobby
-            </Button>
+              </Button>
           </div>
         )}
         {myTurn && myActive && (
@@ -242,7 +242,7 @@ const GameBoard: React.FC = () => {
                 if (endRef.current || submitting) return;
                 endRef.current = true;
                 setSubmitting(true);
-                await apiFetch(`${constants.API_GAMES}/${gameId}/end`, {
+                await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, {
                   method: 'POST',
                   headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
                   body: JSON.stringify({ player_uuid: playerUUID, player_email: playerEmail }),
@@ -250,7 +250,7 @@ const GameBoard: React.FC = () => {
               } finally {
                 setSubmitting(false);
                 endRef.current = false;
-                try { localStorage.removeItem('game_id'); } catch {}
+                try { localStorage.removeItem('game_code'); } catch {}
                 navigate('/');
               }
             }}
