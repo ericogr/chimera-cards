@@ -72,14 +72,7 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
     !!h1.selectedEntityId &&
     !!h2.selectedEntityId;
 
-  const idToName = new Map(entities.map(a => [a.ID, a.name] as const));
-  const computeName = (ids: number[]) => {
-    if (ids.length === 0) return '';
-    const names = ids.map(id => idToName.get(id) || '').filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-    return names.join(' + ');
-  };
-  const h1Name = computeName(h1.entityIds);
-  const h2Name = computeName(h2.entityIds);
+  
 
   const handleSubmit = async () => {
     if (ttlExpired) return;
@@ -192,13 +185,13 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
           <h4>Hybrid 1</h4>
           {grid('h1')}
           <div className="muted-sm mt-4">Pick 2 to 3 entities and choose 1 special ability among them</div>
-          <div className="muted-sm mt-4">Name (auto): {h1Name || '-'}</div>
+          
         </section>
         <section>
           <h4>Hybrid 2</h4>
           {grid('h2')}
           <div className="muted-sm mt-4">Pick 2 to 3 entities (no overlap with Hybrid 1) and choose 1 special ability</div>
-          <div className="muted-sm mt-4">Name (auto): {h2Name || '-'}</div>
+          
         </section>
         <Button onClick={handleSubmit} disabled={!isValidSelection || submitting || ttlExpired}>
           {submitting ? 'Creating…' : 'Create Hybrids'}
@@ -206,7 +199,7 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
         {ttlExpired && (
           <div className="error-sm">Hybrid creation is closed — the game can no longer be started.</div>
         )}
-        <div className="muted-sm">* Names are generated automatically by the game.</div>
+        
       </div>
       {showHelp && (
         <Modal onClose={() => setShowHelp(false)}>
