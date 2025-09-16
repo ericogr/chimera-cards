@@ -243,26 +243,47 @@ button:disabled {
   background: #444;
   color: #fff;
   font-weight: 600;
-  margin-right: 12px;
+  margin-right: 8px;
   flex: 0 0 40px;
 }
 
 /* Responsive player list used on the game room / hybrid creation screen */
 .players-list {
   display: flex;
-  gap: 12px;
+  gap: 6px; /* smaller gap so stacked cards sit closer vertically */
   flex-wrap: wrap;
   padding: 0;
   margin: 0;
 }
 .players-list .player-card {
-  flex: 1 1 calc(50% - 12px);
+  flex: 1 1 calc(50% - 6px);
   min-width: 260px;
   box-sizing: border-box;
+  margin-bottom: 0; /* remove extra margin to avoid double-spacing */
+  padding: 8px;
 }
 @media (max-width: 520px) {
+  .players-list {
+    gap: 4px;
+  }
   .players-list .player-card {
     flex-basis: 100%;
+    padding: 6px;
+  }
+}
+
+/* Reduce spacing between avatar and text inside the player card for compact layout */
+.player-card .row-start {
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 520px) {
+  .player-card .row-start {
+    gap: 6px;
+  }
+  .player-avatar {
+    margin-right: 6px;
   }
 }
 
