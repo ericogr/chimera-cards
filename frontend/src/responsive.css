@@ -75,13 +75,8 @@
 }
 
 /* Game board layout */
-.game-board-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #282c34;
-  color: white;
-}
+/* Game board container styles live in `GameBoard.css` (component-scoped).
+   This file provides responsive helpers only. */
 
 .game-board-main {
   display: flex;

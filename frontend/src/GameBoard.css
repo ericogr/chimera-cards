@@ -6,25 +6,7 @@
   color: white;
 }
 
-.game-board-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #444;
-  background-color: #20232a;
-}
 
-.game-info h1 {
-  margin: 0;
-  font-size: 1.5em;
-}
-
-.game-info p {
-  margin: 5px 0 0;
-  font-size: 0.9em;
-  color: #aaa;
-}
 
 .game-meta {
   text-align: right;
@@ -49,6 +31,22 @@
   align-items: center;
 }
 
+/* Allow the player panels to shrink when names are long and ensure
+   child elements (like the name) can truncate instead of expanding
+   the panel and misaligning the opponent's layout. */
+.player-area { min-width: 0; }
+
+.player-name {
+  display: block;
+  max-width: 220px; /* visual maximum width for the name */
+  min-width: 0; /* allow flex children to shrink */
+  margin: 0 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
 .player-two {
   /* No border needed on the right for the second player */
 }
@@ -57,6 +55,8 @@
   margin-top: 0;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--accent-color);
+  text-align: center;
+  width: 100%;
 }
 
 .game-board-loading,
@@ -93,6 +93,14 @@
   color: #c9c9c9;
 }
 
+/* Hybrid stats grid: default 3 columns on wide screens */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  font-size: 14px;
+}
+
 /* Icon button styles moved to global `index.css` */
 
 @media (max-width: 600px) {
@@ -100,6 +108,21 @@
     grid-template-columns: 1fr;
     gap: 6px;
   }
+
+  /* Reduce hybrid attribute sizes so they fit better on small screens */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .hybrid-card {
+    padding: 8px;
+  }
+
+  .entity-image { width: 48px; height: 48px; }
+
+  .hybrid-name { font-size: 0.95rem; }
 }
 
 /* Component-level responsive tweaks to ensure the two player panels
@@ -124,6 +147,25 @@
     align-items: flex-start;
   }
 
+.player-name { max-width: 140px; }
+
+.combination { text-align: center; }
+
+.hybrid-name {
+  text-align: center;
+  font-weight: 600;
+  margin: 6px 0 4px;
+}
+
+.hybrid-card {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--panel-bg);
+  box-sizing: border-box;
+  width: 100%;
+}
+
   .player-one { border-right: 1px solid #444; border-bottom: none; }
 
   /* Make the entity image and stats more compact so they fit side-by-side */
@@ -137,4 +179,29 @@
   .entity-image { width: 44px; height: 44px; }
   .stats-grid { font-size: 12px; gap: 4px; }
   .player-area { padding: 8px; }
+}
+
+/* Strong overrides for small screens placed at the end so they take
+   precedence over earlier, more general rules. These reduce the
+   hybrid attribute font-size and image sizes to ensure the panel
+   fits on narrow viewports. */
+@media (max-width: 700px) {
+  .game-board-main .player-area .hybrid-card .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    font-size: 12px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-board-main .player-area .hybrid-card .stats-grid {
+    grid-template-columns: 1fr;
+    font-size: 10px;
+    gap: 4px;
+  }
+  .game-board-main .player-area .hybrid-card .entity-image { width: 40px; height: 40px; }
+  .game-board-main .player-area .hybrid-card { padding: 6px; }
+  .game-board-main .player-area h2 { font-size: 0.98rem; }
+  .game-board-main .player-area .player-name { font-size: 0.9rem; }
+  .game-board-main .player-area .hybrid-name { font-size: 0.82rem; }
 }

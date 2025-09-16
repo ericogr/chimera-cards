@@ -1,0 +1,21 @@
+.waiting-animation-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.waiting-animation-mask {
+  overflow: hidden;
+  border-radius: 50%;
+  display: inline-block;
+  background: transparent;
+}
+
+.waiting-animation-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+

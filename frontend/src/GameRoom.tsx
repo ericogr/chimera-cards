@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import HybridCreation from './HybridCreation';
 import Timer from './Timer';
 import { useGame } from './hooks/useGame';
-import { Button } from './ui';
+import { Button, WaitingAnimation } from './ui';
 import { Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
@@ -236,7 +236,10 @@ const GameRoom: React.FC = () => {
         )}
 
         {(game.status === 'starting' || submitting) && (
-          <p>Your hybrid is being created. This may take a few moments.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="mt-6">
+            <WaitingAnimation size={192} />
+            <div className="muted-sm mt-4">Your hybrid is being created and this may take up to 2 minutes.</div>
+          </div>
         )}
 
         {game.status === 'in_progress' && (

@@ -146,15 +146,18 @@ const GameBoard: React.FC = () => {
 
         <div className="game-board-main">
         <div className="player-area player-one">
-          <h2>{player1?.player_name || 'Waiting for Player 1'}</h2>
+          <h2>
+            <span className="player-name" title={player1?.player_name || ''}>
+              {player1?.player_name || 'Waiting for Player 1'}
+            </span>
+          </h2>
           {player1 && (
             <div>
               {(() => {
                 const active = player1.hybrids?.find(h => h.is_active);
                 return (
                   <div>
-                    <p>Active: {active?.generated_name || active?.name || '-'}</p>
-                    <p className="muted-sm">Combination: {active?.name || '-'}</p>
+                    <p className="hybrid-name">{active?.generated_name || active?.name || '-'}</p>
                   </div>
                 );
               })()}
@@ -163,15 +166,18 @@ const GameBoard: React.FC = () => {
           )}
         </div>
         <div className="player-area player-two">
-          <h2>{player2?.player_name || 'Waiting for Player 2'}</h2>
+          <h2>
+            <span className="player-name" title={player2?.player_name || ''}>
+              {player2?.player_name || 'Waiting for Player 2'}
+            </span>
+          </h2>
           {player2 && (
             <div>
               {(() => {
                 const active = player2.hybrids?.find(h => h.is_active);
                 return (
                   <div>
-                    <p>Active: {active?.generated_name || active?.name || '-'}</p>
-                    <p className="muted-sm">Combination: {active?.name || '-'}</p>
+                    <p className="hybrid-name">{active?.generated_name || active?.name || '-'}</p>
                   </div>
                 );
               })()}
@@ -298,18 +304,21 @@ const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) =
   const imgSrc = hybridAssetUrlFromNames((hybrid?.base_entities || []).map(a => a.name));
 
   return (
-    <div className="row-start">
-      {imgSrc && (
-        <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} className="entity-image" onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
-      )}
-      <div className="stats-grid">
-        <div>HP: {hybrid.current_pv} / {hybrid.base_pv}</div>
-        <div>ATK: {hybrid.current_atq}</div>
-        <div>DEF: {hybrid.current_def}</div>
-        <div>AGI: {hybrid.current_agi}</div>
-        <div>ENE: {hybrid.current_ene}</div>
-        {'current_vig' in hybrid && <div>VIG: {hybrid.current_vig} {hybrid.base_vig ? `/ ${hybrid.base_vig}` : ''}</div>}
+    <div className="hybrid-card">
+      <div className="row-start">
+        {imgSrc && (
+          <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} className="entity-image" onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+        )}
+        <div className="stats-grid">
+          <div>HP: {hybrid.current_pv} / {hybrid.base_pv}</div>
+          <div>ATK: {hybrid.current_atq}</div>
+          <div>DEF: {hybrid.current_def}</div>
+          <div>AGI: {hybrid.current_agi}</div>
+          <div>ENE: {hybrid.current_ene}</div>
+          {'current_vig' in hybrid && <div>VIG: {hybrid.current_vig} {hybrid.base_vig ? `/ ${hybrid.base_vig}` : ''}</div>}
+        </div>
       </div>
+      <div className="muted-sm mt-4 combination">Combination: {hybrid.name || '-'}</div>
     </div>
   );
 };
