@@ -232,6 +232,21 @@ button:disabled {
 /* Player card used in lists */
 .player-card { border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
 
+/* Small circular placeholder avatar used in player lists when no picture is available */
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #444;
+  color: #fff;
+  font-weight: 600;
+  margin-right: 12px;
+  flex: 0 0 40px;
+}
+
 /* Muted text variants */
 .muted { color: #666; }
 .muted-sm { color: var(--muted-color); font-size: 12px; }

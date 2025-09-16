@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import HybridCreation from './HybridCreation';
 import Timer from './Timer';
 import { useGame } from './hooks/useGame';
-import { Button, WaitingAnimation } from './ui';
+import { Button, WaitingAnimation, Avatar } from './ui';
 import { Player } from './types';
 import { apiFetch } from './api';
 import * as constants from './constants';
@@ -213,12 +213,45 @@ const GameRoom: React.FC = () => {
 
         <h4>Players ({game.players?.length || 0} / 2)</h4>
         <ul className="list-reset">
-          {game.players.map(player => (
-            <li key={player.ID} className="player-card">
-              {player.player_name || `Player ${player.ID}`} ({player.player_uuid}) {player.player_uuid === currentPlayerUUID ? '(You)' : ''}
-              <div className="muted-sm">Hybrids created: {player.has_created ? 'Yes' : 'No'}</div>
-            </li>
-          ))}
+          {(() => {
+            // Try to read the currently-logged user from localStorage to show their profile picture
+            let storedUser: { picture?: string } | null = null;
+            try {
+              const raw = localStorage.getItem('user');
+              if (raw) storedUser = JSON.parse(raw);
+            } catch (e) {
+              storedUser = null;
+            }
+            const initials = (name?: string) => {
+              if (!name) return '';
+              return name
+                .split(' ')
+                .map((s) => s.charAt(0))
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
+            };
+
+            return game.players.map(player => (
+              <li key={player.ID} className="player-card">
+                <div className="row-start">
+                  {player.player_uuid === currentPlayerUUID && storedUser?.picture ? (
+                    <Avatar src={storedUser.picture} size={40} alt={player.player_name || 'Profile'} />
+                  ) : (
+                    <div className="player-avatar">{initials(player.player_name || `P${player.ID}`)}</div>
+                  )}
+                  <div>
+                    <div>
+                      <strong>{player.player_name || `Player ${player.ID}`}</strong>
+                      {player.player_uuid === currentPlayerUUID && <span className="muted-sm"> (You)</span>}
+                    </div>
+                    <div className="muted-sm">Hybrids created: {player.has_created ? 'Yes' : 'No'}</div>
+                  </div>
+                </div>
+              </li>
+            ));
+          })()}
         </ul>
 
         {game.status === 'waiting_for_players' && currentPlayer && !currentPlayer.has_created && (
