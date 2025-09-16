@@ -27,8 +27,12 @@ const Header: React.FC<Props> = ({ user, onLogout, showProfileOption }) => {
 
   return (
     <header className="page-header shared-header">
-      <div>
-        <h3>{user?.name || 'Player'}</h3>
+      <div className="header-left">
+        <h3>
+          <span className="header-username" title={user?.name || 'Player'}>
+            {user?.name || 'Player'}
+          </span>
+        </h3>
         <div className="header-stats">
           Wins: {wins} · Defeats: {defeats} · Resignations: {resigns}
         </div>

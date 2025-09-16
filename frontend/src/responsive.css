@@ -153,3 +153,26 @@
   .stats-grid { grid-template-columns: 1fr; font-size: 12px; gap: 4px; }
   .player-area { min-width: 160px; padding: 8px; }
 }
+
+/* Ensure the shared header does not wrap on small screens. Some
+   general header rules live in `index.css`, but responsive overrides
+   (this file) previously allowed wrapping which caused the right-side
+   menu to drop below long names. These rules enforce a no-wrap layout
+   and constrain the username width so it truncates instead of pushing
+   the menu to a new line. */
+.page-header.shared-header {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.page-header.shared-header .header-left { min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+.page-header.shared-header .header-right { flex: 0 0 auto; }
+.page-header.shared-header .header-username {
+  max-width: calc(100% - 120px); /* reserve space for avatar + menu */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+  .page-header.shared-header .header-username { max-width: calc(100% - 90px); }
+}

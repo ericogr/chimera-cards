@@ -47,6 +47,9 @@
   text-align: center;
 }
 
+/* Hybrid card: visual container around the hybrid image and attributes */
+
+
 .player-two {
   /* No border needed on the right for the second player */
 }
@@ -157,14 +160,7 @@
   margin: 6px 0 4px;
 }
 
-.hybrid-card {
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
-  background: var(--panel-bg);
-  box-sizing: border-box;
-  width: 100%;
-}
+
 
   .player-one { border-right: 1px solid #444; border-bottom: none; }
 

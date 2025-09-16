@@ -214,6 +214,21 @@ button:disabled {
 .header-stats { font-size: 12px; color: #bbb; margin-top: 4px; }
 .header-right { display: flex; align-items: center; gap: 12px; }
 
+/* Ensure header left block can shrink and avoid wrapping the header on narrow screens */
+.shared-header { flex-wrap: nowrap; }
+.shared-header .header-left { min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; }
+.shared-header .header-right { flex: 0 0 auto; }
+
+/* Truncate long header user names to avoid pushing the avatar/menu */
+.header-username {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 /* Player card used in lists */
 .player-card { border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
 
