@@ -21,6 +21,8 @@ const GameBoard: React.FC = () => {
   const { game, error: gameError } = useGame(gameCode, 3000);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [leftWins, setLeftWins] = useState<number | null>(0);
+  const [rightWins, setRightWins] = useState<number | null>(0);
   const [lockedRound, setLockedRound] = useState<number | null>(null);
   const actingRef = useRef(false);
   const endRef = useRef(false);
@@ -57,6 +59,17 @@ const GameBoard: React.FC = () => {
       actingRef.current = false;
     }
   }, [game, lockedRound]);
+
+  // Compute match-local score: number of opponent hybrids defeated.
+  useEffect(() => {
+    if (!game) return;
+    const p1 = game.players?.[0];
+    const p2 = game.players?.[1];
+    const left = p2?.hybrids?.filter(h => !!(h as any).is_defeated).length ?? 0;
+    const right = p1?.hybrids?.filter(h => !!(h as any).is_defeated).length ?? 0;
+    setLeftWins(left);
+    setRightWins(right);
+  }, [game]);
 
   const effectiveError = gameError;
   if (effectiveError) {
@@ -127,6 +140,8 @@ const GameBoard: React.FC = () => {
     } finally { /* keep locked until next round */ }
   };
 
+  
+
   return (
     <div className="game-board-container">
       <main className="page-main page-main--compact">
@@ -136,11 +151,18 @@ const GameBoard: React.FC = () => {
             <p className="no-margin">{game.description}</p>
           </div>
           <div className="game-meta">
-            <p className="no-margin">Game ID: {game.ID}</p>
-            <p className="no-margin">Created: {new Date(game.created_at).toLocaleString()}</p>
-            {timeLeft != null && (
-              <p className="no-margin">Time left: <Timer seconds={timeLeft} /></p>
-            )}
+            {(() => {
+              return (
+                <>
+                  <div className="scoreboard" aria-label={`Score: ${leftWins ?? 0} by ${rightWins ?? 0}`}>
+                    {leftWins ?? 0}x{rightWins ?? 0}
+                  </div>
+                  {timeLeft != null && (
+                    <p className="no-margin">Time left: <Timer seconds={timeLeft} /></p>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
 

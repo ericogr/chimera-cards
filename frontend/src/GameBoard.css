@@ -8,19 +8,24 @@
 
 
 
-.game-meta {
-  text-align: right;
-  font-size: 0.8em;
-  color: #aaa;
-}
 
-.game-meta p {
-  margin: 0;
-}
 
 .game-board-main {
   display: flex;
   flex-grow: 1;
+}
+
+.scoreboard {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--accent-color);
+  text-align: right;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 520px) {
+  .scoreboard { font-size: 1.6rem; }
 }
 
 .player-area {
