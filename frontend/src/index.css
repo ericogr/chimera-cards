@@ -186,7 +186,7 @@ button:disabled {
 .ability-row { margin-top: 4px; border-top: 1px dashed transparent; padding-top: 4px; min-height: 22px; }
 .error-sm { margin-top: 8px; color: #c00; font-size: 13px; }
 
-.selected-border { border: 2px solid #61dafb; }
+
 
 /* Modal */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }

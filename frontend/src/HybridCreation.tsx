@@ -135,7 +135,7 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
             alt={a.name}
             width={96}
             height={96}
-            className={`entity-image ${selected ? 'selected-border' : ''}`}
+            className={`entity-image`}
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
           />
           <div className="flex-1">
