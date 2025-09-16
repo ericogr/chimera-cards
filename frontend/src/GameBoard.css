@@ -47,6 +47,16 @@
   text-align: center;
 }
 
+/* Card container used for hybrids (applies at all sizes) */
+.hybrid-card {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--panel-bg);
+  box-sizing: border-box;
+  width: 100%;
+}
+
 /* Hybrid card: visual container around the hybrid image and attributes */
 
 
@@ -96,13 +106,17 @@
   color: #c9c9c9;
 }
 
-/* Hybrid stats grid: default 3 columns on wide screens */
-.stats-grid {
+/* Hybrid stats grid: two-column label / value layout */
+.hybrid-card .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  align-items: center;
   font-size: 14px;
 }
+
+.hybrid-card .stat-label { color: var(--muted-color); text-align: left; }
+.hybrid-card .stat-value { text-align: right; font-weight: 600; }
 
 /* Icon button styles moved to global `index.css` */
 
@@ -113,9 +127,9 @@
   }
 
   /* Reduce hybrid attribute sizes so they fit better on small screens */
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+  .hybrid-card .stats-grid {
+    grid-template-columns: auto 1fr;
+    gap: 6px 10px;
     font-size: 12px;
   }
 
@@ -123,7 +137,7 @@
     padding: 8px;
   }
 
-  .entity-image { width: 48px; height: 48px; }
+  .entity-image { width: 64px; height: 64px; }
 
   .hybrid-name { font-size: 0.95rem; }
 }
@@ -167,13 +181,13 @@
   /* Make the entity image and stats more compact so they fit side-by-side */
   .row-start { align-items: center; gap: 8px; }
   .entity-image { width: 56px; height: 56px; }
-  .stats-grid { grid-template-columns: 1fr; font-size: 13px; gap: 6px; }
+  .hybrid-card .stats-grid { grid-template-columns: auto 1fr; font-size: 13px; gap: 6px 10px; }
   .player-area h2 { font-size: 1rem; }
 }
 
 @media (max-width: 420px) {
-  .entity-image { width: 44px; height: 44px; }
-  .stats-grid { font-size: 12px; gap: 4px; }
+  .entity-image { width: 56px; height: 56px; }
+  .hybrid-card .stats-grid { font-size: 12px; gap: 4px 8px; }
   .player-area { padding: 8px; }
 }
 
@@ -191,11 +205,11 @@
 
 @media (max-width: 480px) {
   .game-board-main .player-area .hybrid-card .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
     font-size: 10px;
-    gap: 4px;
+    gap: 4px 6px;
   }
-  .game-board-main .player-area .hybrid-card .entity-image { width: 40px; height: 40px; }
+  .game-board-main .player-area .hybrid-card .entity-image { width: 56px; height: 56px; }
   .game-board-main .player-area .hybrid-card { padding: 6px; }
   .game-board-main .player-area h2 { font-size: 0.98rem; }
   .game-board-main .player-area .player-name { font-size: 0.9rem; }

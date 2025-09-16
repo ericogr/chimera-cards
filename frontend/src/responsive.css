@@ -132,7 +132,7 @@
   .player-one { border-right: 1px solid #444; border-bottom: none; }
 
   /* Make stats more compact so they fit horizontally next to the entity image. */
-  .stats-grid { grid-template-columns: repeat(2, minmax(100px, 1fr)); gap: 6px; font-size: 13px; }
+  .hybrid-card .stats-grid { grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 13px; }
 
   /* Reduce entity artwork size on narrower screens. */
   .entity-image { width: 64px; height: 64px; }
@@ -150,7 +150,7 @@
 
   /* Further reduce artwork and stats for very small screens */
   .entity-image { width: 56px; height: 56px; }
-  .stats-grid { grid-template-columns: 1fr; font-size: 12px; gap: 4px; }
+  .hybrid-card .stats-grid { grid-template-columns: auto 1fr; font-size: 12px; gap: 4px 8px; }
   .player-area { min-width: 160px; padding: 8px; }
 }
 

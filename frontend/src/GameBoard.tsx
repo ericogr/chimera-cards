@@ -153,14 +153,6 @@ const GameBoard: React.FC = () => {
           </h2>
           {player1 && (
             <div>
-              {(() => {
-                const active = player1.hybrids?.find(h => h.is_active);
-                return (
-                  <div>
-                    <p className="hybrid-name">{active?.generated_name || active?.name || '-'}</p>
-                  </div>
-                );
-              })()}
               <Stats hybrid={player1.hybrids?.find(h => h.is_active)} isMe={player1.player_uuid===playerUUID} />
             </div>
           )}
@@ -173,14 +165,6 @@ const GameBoard: React.FC = () => {
           </h2>
           {player2 && (
             <div>
-              {(() => {
-                const active = player2.hybrids?.find(h => h.is_active);
-                return (
-                  <div>
-                    <p className="hybrid-name">{active?.generated_name || active?.name || '-'}</p>
-                  </div>
-                );
-              })()}
               <Stats hybrid={player2.hybrids?.find(h => h.is_active)} isMe={player2.player_uuid===playerUUID} />
             </div>
           )}
@@ -305,17 +289,33 @@ const Stats: React.FC<{ hybrid?: Hybrid; isMe: boolean }> = ({ hybrid, isMe }) =
 
   return (
     <div className="hybrid-card">
+      <div className="hybrid-name">{hybrid.generated_name || hybrid.name || '-'}</div>
       <div className="row-start">
         {imgSrc && (
           <img src={imgSrc} alt={hybrid.generated_name || hybrid.name} width={96} height={96} className="entity-image" onError={(e)=>{ (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
         )}
         <div className="stats-grid">
-          <div>HP: {hybrid.current_pv} / {hybrid.base_pv}</div>
-          <div>ATK: {hybrid.current_atq}</div>
-          <div>DEF: {hybrid.current_def}</div>
-          <div>AGI: {hybrid.current_agi}</div>
-          <div>ENE: {hybrid.current_ene}</div>
-          {'current_vig' in hybrid && <div>VIG: {hybrid.current_vig} {hybrid.base_vig ? `/ ${hybrid.base_vig}` : ''}</div>}
+          <div className="stat-label">HP</div>
+          <div className="stat-value">{hybrid.current_pv} / {hybrid.base_pv}</div>
+
+          <div className="stat-label">ATK</div>
+          <div className="stat-value">{hybrid.current_atq}</div>
+
+          <div className="stat-label">DEF</div>
+          <div className="stat-value">{hybrid.current_def}</div>
+
+          <div className="stat-label">AGI</div>
+          <div className="stat-value">{hybrid.current_agi}</div>
+
+          <div className="stat-label">ENE</div>
+          <div className="stat-value">{hybrid.current_ene}</div>
+
+          {'current_vig' in hybrid && (
+            <>
+              <div className="stat-label">VIG</div>
+              <div className="stat-value">{(hybrid as any).current_vig} {(hybrid as any).base_vig ? `/ ${(hybrid as any).base_vig}` : ''}</div>
+            </>
+          )}
         </div>
       </div>
       <div className="muted-sm mt-4 combination">Combination: {hybrid.name || '-'}</div>
