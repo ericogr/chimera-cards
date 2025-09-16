@@ -247,6 +247,25 @@ button:disabled {
   flex: 0 0 40px;
 }
 
+/* Responsive player list used on the game room / hybrid creation screen */
+.players-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+}
+.players-list .player-card {
+  flex: 1 1 calc(50% - 12px);
+  min-width: 260px;
+  box-sizing: border-box;
+}
+@media (max-width: 520px) {
+  .players-list .player-card {
+    flex-basis: 100%;
+  }
+}
+
 /* Muted text variants */
 .muted { color: #666; }
 .muted-sm { color: var(--muted-color); font-size: 12px; }

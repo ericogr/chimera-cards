@@ -212,7 +212,7 @@ const GameRoom: React.FC = () => {
         <h4>Status: {game.status}</h4>
 
         <h4>Players ({game.players?.length || 0} / 2)</h4>
-        <ul className="list-reset">
+        <ul className="list-reset players-list">
           {(() => {
             // Try to read the currently-logged user from localStorage to show their profile picture
             let storedUser: { picture?: string } | null = null;
