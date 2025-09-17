@@ -26,3 +26,6 @@
 .hybrid-creation-grid, .hybrid-creation-grid h4, .hybrid-creation-grid h3, .hybrid-creation-grid p {
   color: var(--text-light);
 }
+
+/* Match the player-card border color for the hybrid creation container */
+.hybrid-creation-card { border-color: #444; }

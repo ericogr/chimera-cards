@@ -173,7 +173,7 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
   );
 
   return (
-    <div className="card">
+    <div className="card hybrid-creation-card">
       <div className="row-center">
         <Button type="button" variant="ghost" onClick={() => setShowHelp(true)}>
           Help
