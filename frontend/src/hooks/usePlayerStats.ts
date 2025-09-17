@@ -22,9 +22,14 @@ export function usePlayerStats(email?: string | null) {
       }
     };
     load();
-    return () => { mounted = false; };
+
+    // Listen for explicit refresh events so callers (e.g., GameBoard) can
+    // trigger an immediate refresh when the match finishes.
+    const onRefresh = () => { load(); };
+    window.addEventListener('player_stats_refresh', onRefresh as EventListener);
+
+    return () => { mounted = false; window.removeEventListener('player_stats_refresh', onRefresh as EventListener); };
   }, [email]);
 
   return stats;
 }
-

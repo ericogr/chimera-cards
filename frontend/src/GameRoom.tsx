@@ -297,7 +297,8 @@ const GameRoom: React.FC = () => {
 
                 } else {
                   // Fallback: end the match if somehow already started from this view
-                  await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, { method: 'POST' });
+                  const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, { method: 'POST' });
+                  if (res.ok) { try { window.dispatchEvent(new Event('player_stats_refresh')); } catch {} }
                 }
               } catch (e) {
                 console.warn('Cancel failed, continuing to lobby:', e);

@@ -26,6 +26,7 @@ const GameBoard: React.FC = () => {
   const [lockedRound, setLockedRound] = useState<number | null>(null);
   const actingRef = useRef(false);
   const endRef = useRef(false);
+  const prevStatusRef = useRef<string | undefined>(undefined);
   const playerUUID = localStorage.getItem('player_uuid') || '';
   const playerEmail = ((): string => {
     try { return localStorage.getItem('player_email') || ''; } catch { return ''; }
@@ -69,6 +70,16 @@ const GameBoard: React.FC = () => {
     const right = p1?.hybrids?.filter(h => !!(h as any).is_defeated).length ?? 0;
     setLeftWins(left);
     setRightWins(right);
+  }, [game]);
+
+  useEffect(() => {
+    if (!game) return;
+    const prev = prevStatusRef.current;
+    const curr = game.status;
+    if (prev !== curr && curr === 'finished') {
+      try { window.dispatchEvent(new Event('player_stats_refresh')); } catch {}
+    }
+    prevStatusRef.current = curr;
   }, [game]);
 
   const effectiveError = gameError;
@@ -264,11 +275,14 @@ const GameBoard: React.FC = () => {
                 if (endRef.current || submitting) return;
                 endRef.current = true;
                 setSubmitting(true);
-                await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, {
+                const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, {
                   method: 'POST',
                   headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
                   body: JSON.stringify({ player_uuid: playerUUID, player_email: playerEmail }),
                 });
+                if (res.ok) {
+                  try { window.dispatchEvent(new Event('player_stats_refresh')); } catch {}
+                }
               } finally {
                 setSubmitting(false);
                 endRef.current = false;
