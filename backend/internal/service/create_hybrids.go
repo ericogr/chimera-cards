@@ -23,9 +23,9 @@ type CreateHybridSpec struct {
 }
 
 type CreateHybridsRequest struct {
-	PlayerUUID string
-	Hybrid1    CreateHybridSpec
-	Hybrid2    CreateHybridSpec
+    PlayerEmail string
+    Hybrid1    CreateHybridSpec
+    Hybrid2    CreateHybridSpec
 }
 
 var (
@@ -59,12 +59,12 @@ func CreateHybrids(repo GameRepo, gameID uint, req CreateHybridsRequest) error {
 
 	// Find player
 	var p *game.Player
-	for i := range g.Players {
-		if g.Players[i].PlayerUUID == req.PlayerUUID {
-			p = &g.Players[i]
-			break
-		}
-	}
+    for i := range g.Players {
+        if (g.Players[i].PlayerEmail) == req.PlayerEmail {
+            p = &g.Players[i]
+            break
+        }
+    }
 	if p == nil {
 		return ErrPlayerNotFound
 	}

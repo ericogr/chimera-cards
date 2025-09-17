@@ -19,7 +19,7 @@ var (
 
 // SubmitAction stores a player's chosen action and resolves the round if both players submitted.
 // Returns the updated game and a boolean indicating whether the round was resolved.
-func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game.PendingActionType, entityID uint, actionTimeout time.Duration) (*game.Game, bool, error) {
+func SubmitAction(repo GameRepo, gameID uint, playerEmail string, actionType game.PendingActionType, entityID uint, actionTimeout time.Duration) (*game.Game, bool, error) {
 	g, err := repo.GetGameByID(gameID)
 	if err != nil || g == nil {
 		return nil, false, ErrGameNotFound
@@ -35,13 +35,13 @@ func SubmitAction(repo GameRepo, gameID uint, playerUUID string, actionType game
 	}
 
 	var current *game.Player
-	if g.Players[0].PlayerUUID == playerUUID {
-		current = &g.Players[0]
-	} else if g.Players[1].PlayerUUID == playerUUID {
-		current = &g.Players[1]
-	} else {
-		return nil, false, ErrPlayerNotInGame
-	}
+    if (g.Players[0].PlayerEmail) == playerEmail {
+        current = &g.Players[0]
+    } else if (g.Players[1].PlayerEmail) == playerEmail {
+        current = &g.Players[1]
+    } else {
+        return nil, false, ErrPlayerNotInGame
+    }
 
 	var active *game.Hybrid
 	for i := range current.Hybrids {

@@ -26,8 +26,8 @@ type Repository interface {
 	// Hybrid image storage
 	GetHybridImageByKey(key string) ([]byte, error)
 	SaveHybridImageByKey(key string, png []byte) error
-	RemovePlayerByUUID(gameID uint, playerUUID string) error
-	UpsertUser(email, uuid, name string) error
+    RemovePlayerByEmail(gameID uint, playerEmail string) error
+    UpsertUser(email, name string) error
 	UpdateStatsOnGameEnd(g *game.Game, resignedEmail string) error
 	GetStatsByEmail(email string) (*game.User, error)
 	SaveUser(u *game.User) error

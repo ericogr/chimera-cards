@@ -51,11 +51,11 @@ func TestCreateHybridsSuccess(t *testing.T) {
 		4: {Model: game.Entity{}.Model, Name: "Octopus", HitPoints: 5, Attack: 2, Defense: 5, Agility: 4, Energy: 1},
 	}
 
-	g := &game.Game{Players: []game.Player{{PlayerUUID: "p1"}}}
+	g := &game.Game{Players: []game.Player{{PlayerEmail: "p1@example.com"}}}
 	mr := &mockRepo{games: map[uint]*game.Game{42: g}, entities: entities}
 
 	req := CreateHybridsRequest{
-		PlayerUUID: "p1",
+		PlayerEmail: "p1@example.com",
 		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
 		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{3, 4}, SelectedEntityID: 3},
 	}
@@ -92,11 +92,11 @@ func TestCreateHybrids_ReusedAnimal(t *testing.T) {
 		2: {Model: game.Entity{}.Model, Name: "Raven", HitPoints: 2, Attack: 3, Defense: 3, Agility: 7, Energy: 1},
 		3: {Model: game.Entity{}.Model, Name: "Wolf", HitPoints: 4, Attack: 5, Defense: 4, Agility: 6, Energy: 1},
 	}
-	g := &game.Game{Players: []game.Player{{PlayerUUID: "p1"}}}
+	g := &game.Game{Players: []game.Player{{PlayerEmail: "p1@example.com"}}}
 	mr := &mockRepo{games: map[uint]*game.Game{100: g}, entities: entities}
 
 	req := CreateHybridsRequest{
-		PlayerUUID: "p1",
+		PlayerEmail: "p1@example.com",
 		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
 		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{2, 3}, SelectedEntityID: 3},
 	}

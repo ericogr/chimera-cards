@@ -11,9 +11,8 @@ import (
 )
 
 type ActionRequest struct {
-	PlayerUUID string `json:"player_uuid"`
-	ActionType string `json:"action_type"`
-	EntityID   uint   `json:"entity_id"`
+    ActionType string `json:"action_type"`
+    EntityID   uint   `json:"entity_id"`
 }
 
 // SubmitAction stores a player's chosen action for the current round.
@@ -50,21 +49,22 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
 		return
 	}
-	var callerUUID string
-	for i := range g.Players {
-		if g.Players[i].PlayerEmail == emailStr {
-			callerUUID = g.Players[i].PlayerUUID
-			break
-		}
-	}
-	if callerUUID == "" {
-		c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotInThisGame})
-		return
-	}
+    // Ensure the session user is a participant
+    found := false
+    for i := range g.Players {
+        if g.Players[i].PlayerEmail == emailStr {
+            found = true
+            break
+        }
+    }
+    if !found {
+        c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotInThisGame})
+        return
+    }
 
-	// Delegate to service layer using server-derived player UUID (ignore client-supplied uuid)
-	actionType := game.PendingActionType(req.ActionType)
-	g2, resolved, err := service.SubmitAction(h.repo, g.ID, callerUUID, actionType, req.EntityID, h.actionTimeout)
+    // Delegate to service layer using session email as identity
+    actionType := game.PendingActionType(req.ActionType)
+    g2, resolved, err := service.SubmitAction(h.repo, g.ID, emailStr, actionType, req.EntityID, h.actionTimeout)
 	if err != nil {
 		switch err {
 		case service.ErrGameNotFound:

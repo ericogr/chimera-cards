@@ -185,18 +185,18 @@ func (r *sqliteRepository) FindGameByJoinCode(code string) (*game.Game, error) {
 	return &g, err
 }
 
-func (r *sqliteRepository) RemovePlayerByUUID(gameID uint, playerUUID string) error {
-	tx := r.db.Begin()
-	if tx.Error != nil {
-		return tx.Error
-	}
+func (r *sqliteRepository) RemovePlayerByEmail(gameID uint, playerEmail string) error {
+    tx := r.db.Begin()
+    if tx.Error != nil {
+        return tx.Error
+    }
 
-	var p game.Player
-	if err := tx.Where("game_id = ? AND player_uuid = ?", gameID, playerUUID).
-		Preload("Hybrids.BaseEntities").First(&p).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+    var p game.Player
+    if err := tx.Where("game_id = ? AND player_email = ?", gameID, playerEmail).
+        Preload("Hybrids.BaseEntities").First(&p).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
 
 	for _, h := range p.Hybrids {
 		if err := tx.Model(&h).Association("BaseEntities").Clear(); err != nil {
@@ -218,60 +218,59 @@ func (r *sqliteRepository) RemovePlayerByUUID(gameID uint, playerUUID string) er
 
 func (r *sqliteRepository) UpdateStatsOnGameEnd(g *game.Game, resignedEmail string) error {
 	// Helper to upsert and add deltas
-	upsert := func(email, uuid, name string, played, wins, resigns int) error {
-		var ps game.User
-		if err := r.db.Where("email = ?", email).First(&ps).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
-				ps = game.User{Email: email, PlayerUUID: uuid, PlayerName: name, GamesPlayed: 0, Wins: 0, Resignations: 0}
-			} else {
-				return err
-			}
-		}
-		// Preserve an existing user-customized PlayerName. Only set the
-		// PlayerName when creating a new record or when the stored name is empty.
-		if ps.PlayerName == "" {
-			ps.PlayerName = name
-		}
-		ps.PlayerUUID = uuid
-		ps.GamesPlayed += played
-		ps.Wins += wins
-		ps.Resignations += resigns
-		return r.db.Save(&ps).Error
-	}
+    upsert := func(email, name string, played, wins, resigns int) error {
+        var ps game.User
+        if err := r.db.Where("email = ?", email).First(&ps).Error; err != nil {
+            if err == gorm.ErrRecordNotFound {
+                ps = game.User{Email: email, PlayerName: name, GamesPlayed: 0, Wins: 0, Resignations: 0}
+            } else {
+                return err
+            }
+        }
+        // Preserve an existing user-customized PlayerName. Only set the
+        // PlayerName when creating a new record or when the stored name is empty.
+        if ps.PlayerName == "" {
+            ps.PlayerName = name
+        }
+        ps.GamesPlayed += played
+        ps.Wins += wins
+        ps.Resignations += resigns
+        return r.db.Save(&ps).Error
+    }
 	if len(g.Players) != 2 {
 		return nil
 	}
 	p1 := g.Players[0]
 	p2 := g.Players[1]
 	// everyone played one game
-	if err := upsert(p1.PlayerEmail, p1.PlayerUUID, p1.PlayerName, 1, 0, 0); err != nil {
-		return err
-	}
-	if err := upsert(p2.PlayerEmail, p2.PlayerUUID, p2.PlayerName, 1, 0, 0); err != nil {
-		return err
-	}
+    if err := upsert(p1.PlayerEmail, p1.PlayerName, 1, 0, 0); err != nil {
+        return err
+    }
+    if err := upsert(p2.PlayerEmail, p2.PlayerName, 1, 0, 0); err != nil {
+        return err
+    }
 	// winner
 	if g.Winner != "" {
 		if p1.PlayerName == g.Winner {
-			if err := upsert(p1.PlayerEmail, p1.PlayerUUID, p1.PlayerName, 0, 1, 0); err != nil {
-				return err
-			}
-		} else if p2.PlayerName == g.Winner {
-			if err := upsert(p2.PlayerEmail, p2.PlayerUUID, p2.PlayerName, 0, 1, 0); err != nil {
-				return err
-			}
-		}
+            if err := upsert(p1.PlayerEmail, p1.PlayerName, 0, 1, 0); err != nil {
+                return err
+            }
+        } else if p2.PlayerName == g.Winner {
+            if err := upsert(p2.PlayerEmail, p2.PlayerName, 0, 1, 0); err != nil {
+                return err
+            }
+        }
 	}
 	// resignation
 	if resignedEmail != "" {
-		if p1.PlayerEmail == resignedEmail {
-			return upsert(p1.PlayerEmail, p1.PlayerUUID, p1.PlayerName, 0, 0, 1)
-		}
-		if p2.PlayerEmail == resignedEmail {
-			return upsert(p2.PlayerEmail, p2.PlayerUUID, p2.PlayerName, 0, 0, 1)
-		}
-	}
-	return nil
+        if p1.PlayerEmail == resignedEmail {
+            return upsert(p1.PlayerEmail, p1.PlayerName, 0, 0, 1)
+        }
+        if p2.PlayerEmail == resignedEmail {
+            return upsert(p2.PlayerEmail, p2.PlayerName, 0, 0, 1)
+        }
+    }
+    return nil
 }
 
 func (r *sqliteRepository) GetStatsByEmail(email string) (*game.User, error) {
@@ -289,22 +288,21 @@ func (r *sqliteRepository) SaveUser(u *game.User) error {
 	return r.db.Save(u).Error
 }
 
-func (r *sqliteRepository) UpsertUser(email, uuid, name string) error {
-	var u game.User
-	if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			u = game.User{Email: email, PlayerUUID: uuid, PlayerName: name}
-		} else {
-			return err
-		}
-	}
-	// For existing users, preserve any user-customized PlayerName.
-	// Only set the PlayerName when the stored value is empty.
-	if u.PlayerName == "" {
-		u.PlayerName = name
-	}
-	u.PlayerUUID = uuid
-	return r.db.Save(&u).Error
+func (r *sqliteRepository) UpsertUser(email, name string) error {
+    var u game.User
+    if err := r.db.Where("email = ?", email).First(&u).Error; err != nil {
+        if err == gorm.ErrRecordNotFound {
+            u = game.User{Email: email, PlayerName: name}
+        } else {
+            return err
+        }
+    }
+    // For existing users, preserve any user-customized PlayerName.
+    // Only set the PlayerName when the stored value is empty.
+    if u.PlayerName == "" {
+        u.PlayerName = name
+    }
+    return r.db.Save(&u).Error
 }
 
 // GetTopPlayers returns top N players ordered by Wins desc, then GamesPlayed desc

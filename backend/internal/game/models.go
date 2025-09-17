@@ -150,12 +150,11 @@ type Hybrid struct {
 }
 
 type Player struct {
-	gorm.Model
-	GameID                uint              `json:"-"`
-	PlayerUUID            string            `json:"player_uuid"`
-	PlayerName            string            `json:"player_name"`
-	PlayerEmail           string            `json:"player_email"`
-	Hybrids               []Hybrid          `json:"hybrids"`
+    gorm.Model
+    GameID                uint              `json:"-"`
+    PlayerName            string            `json:"player_name"`
+    PlayerEmail           string            `json:"player_email"`
+    Hybrids               []Hybrid          `json:"hybrids"`
 	HasCreated            bool              `json:"has_created"`
 	HasSubmittedAction    bool              `json:"has_submitted_action"`
 	PendingActionType     PendingActionType `json:"pending_action_type"`
@@ -216,13 +215,12 @@ const (
 
 // User stores unique player identity and aggregate stats.
 type User struct {
-	gorm.Model
-	PlayerUUID   string `gorm:"index"`
-	PlayerName   string
-	Email        string `gorm:"uniqueIndex"`
-	GamesPlayed  int
-	Wins         int
-	Resignations int
+    gorm.Model
+    PlayerName   string
+    Email        string `gorm:"uniqueIndex"`
+    GamesPlayed  int
+    Wins         int
+    Resignations int
 }
 
 // Unify global users table name as "player_profiles"
