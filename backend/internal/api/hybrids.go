@@ -56,8 +56,27 @@ func (h *GameHandler) CreateHybrids(c *gin.Context) {
 		return
 	}
 
+	// Derive player UUID from the authenticated session and the game's players
+	userEmail, _ := c.Get("userEmail")
+	emailStr, _ := userEmail.(string)
+	if emailStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
+		return
+	}
+	var playerUUID string
+	for i := range g.Players {
+		if g.Players[i].PlayerEmail == emailStr {
+			playerUUID = g.Players[i].PlayerUUID
+			break
+		}
+	}
+	if playerUUID == "" {
+		c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotPartOfThisGame})
+		return
+	}
+
 	srvReq := service.CreateHybridsRequest{
-		PlayerUUID: req.PlayerUUID,
+		PlayerUUID: playerUUID,
 		Hybrid1:    service.CreateHybridSpec{EntityIDs: req.Hybrid1.EntityIDs, SelectedEntityID: req.Hybrid1.SelectedEntityID},
 		Hybrid2:    service.CreateHybridSpec{EntityIDs: req.Hybrid2.EntityIDs, SelectedEntityID: req.Hybrid2.SelectedEntityID},
 	}

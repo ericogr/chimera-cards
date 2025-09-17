@@ -20,7 +20,7 @@ const GameRoom: React.FC = () => {
   const hasLeftRef = useRef(false);
   const toBoardRef = useRef(false);
 
-  const currentPlayerUUID = localStorage.getItem('player_uuid');
+  const currentPlayerEmail = localStorage.getItem('player_email') || '';
 
   // react to game updates from the polling hook
   useEffect(() => {
@@ -87,9 +87,9 @@ const GameRoom: React.FC = () => {
 
   const canAutoLeaveRef = useRef(false);
   useEffect(() => {
-    const currentPlayer: Player | undefined = game?.players?.find(p => p.player_uuid === currentPlayerUUID);
+    const currentPlayer: Player | undefined = game?.players?.find(p => (p.player_email || '') === currentPlayerEmail);
     canAutoLeaveRef.current = game?.status === 'waiting_for_players' && !!currentPlayer;
-  }, [game, currentPlayerUUID]);
+  }, [game, currentPlayerEmail]);
 
   useEffect(() => {
     const leaveIfEligible = () => {
@@ -98,7 +98,7 @@ const GameRoom: React.FC = () => {
       if (toBoardRef.current) return;
       hasLeftRef.current = true;
       try {
-        const body = JSON.stringify({ player_uuid: currentPlayerUUID });
+        const body = JSON.stringify({});
         fetch(`${constants.API_GAMES}/${gameCode}/leave`, {
           method: 'POST',
           headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
@@ -126,7 +126,7 @@ const GameRoom: React.FC = () => {
       window.removeEventListener('pagehide', onPageHide);
       leaveIfEligible();
     };
-  }, [gameCode, currentPlayerUUID]);
+  }, [gameCode, currentPlayerEmail]);
 
   const handleStartGame = async () => {
     try {
@@ -160,8 +160,8 @@ const GameRoom: React.FC = () => {
     return <div>Loading game...</div>;
   }
 
-  const isCreator = game.players.length > 0 && game.players[0].player_uuid === currentPlayerUUID;
-  const currentPlayer: Player | undefined = game.players.find(p => p.player_uuid === currentPlayerUUID);
+  const isCreator = game.players.length > 0 && (game.players[0].player_email || '') === currentPlayerEmail;
+  const currentPlayer: Player | undefined = game.players.find(p => (p.player_email || '') === currentPlayerEmail);
   const allReady = game.players.length === 2 && game.players.every(p => p.has_created);
 
   
@@ -170,13 +170,13 @@ const GameRoom: React.FC = () => {
     try {
       // Prevent the unload/visibility handler from firing an extra leave
       hasLeftRef.current = true;
-      if (game?.status === 'waiting_for_players' && currentPlayerUUID && game.players?.some(p => p.player_uuid === currentPlayerUUID)) {
+      if (game?.status === 'waiting_for_players' && currentPlayerEmail && game.players?.some(p => (p.player_email || '') === currentPlayerEmail)) {
                 await apiFetch(`${constants.API_GAMES}/${gameCode}/leave`, {
           method: 'POST',
           headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-          body: JSON.stringify({ player_uuid: currentPlayerUUID }),
+          body: JSON.stringify({}),
         });
-        
+
         }
     } catch (e) {
       console.warn('Leave failed (continuing to lobby):', e);
@@ -234,9 +234,9 @@ const GameRoom: React.FC = () => {
             };
 
             return game.players.map(player => (
-              <li key={player.ID} className="player-card">
+      <li key={player.ID} className="player-card">
                 <div className="row-start">
-                  {player.player_uuid === currentPlayerUUID && storedUser?.picture ? (
+                  {player.player_email === currentPlayerEmail && storedUser?.picture ? (
                     <Avatar src={storedUser.picture} size={40} alt={player.player_name || 'Profile'} />
                   ) : (
                     <div className="player-avatar">{initials(player.player_name || `P${player.ID}`)}</div>
@@ -244,7 +244,7 @@ const GameRoom: React.FC = () => {
                   <div>
                     <div>
                       <strong>{player.player_name || `Player ${player.ID}`}</strong>
-                      {player.player_uuid === currentPlayerUUID && <span className="muted-sm"> (You)</span>}
+                      {player.player_email === currentPlayerEmail && <span className="muted-sm"> (You)</span>}
                     </div>
                     <div className="muted-sm">Hybrids created: {player.has_created ? 'Yes' : 'No'}</div>
                   </div>
@@ -292,7 +292,7 @@ const GameRoom: React.FC = () => {
                   await apiFetch(`${constants.API_GAMES}/${gameCode}/leave`, {
                     method: 'POST',
                     headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-                    body: JSON.stringify({ player_uuid: currentPlayerUUID }),
+                    body: JSON.stringify({}),
                   });
 
                 } else {

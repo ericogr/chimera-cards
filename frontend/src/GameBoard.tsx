@@ -27,7 +27,6 @@ const GameBoard: React.FC = () => {
   const actingRef = useRef(false);
   const endRef = useRef(false);
   const prevStatusRef = useRef<string | undefined>(undefined);
-  const playerUUID = localStorage.getItem('player_uuid') || '';
   const playerEmail = ((): string => {
     try { return localStorage.getItem('player_email') || ''; } catch { return ''; }
   })();
@@ -92,8 +91,8 @@ const GameBoard: React.FC = () => {
   }
 
   const [player1, player2] = game.players;
-  const me: Player | undefined = game.players.find(p => p.player_uuid === playerUUID);
-  const opponent: Player | undefined = game.players.find(p => p.player_uuid !== playerUUID);
+  const me: Player | undefined = game.players.find(p => (p.player_email || '') === playerEmail);
+  const opponent: Player | undefined = game.players.find(p => (p.player_email || '') !== playerEmail);
   const myActive: Hybrid | undefined = me?.hybrids?.find(h => h.is_active && !h.is_defeated);
   const planning = game.status === 'in_progress' && game.phase === 'planning';
   const myTurn = planning && !me?.has_submitted_action;
@@ -143,7 +142,7 @@ const GameBoard: React.FC = () => {
       const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/action`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-        body: JSON.stringify({ player_uuid: playerUUID, action_type, entity_id: entity?.ID }),
+        body: JSON.stringify({ action_type, entity_id: entity?.ID }),
       });
       if (!res.ok) throw new Error(await res.text());
     } catch (e: any) {
@@ -186,7 +185,7 @@ const GameBoard: React.FC = () => {
           </h2>
           {player1 && (
             <div>
-              <Stats hybrid={player1.hybrids?.find(h => h.is_active)} isMe={player1.player_uuid===playerUUID} />
+              <Stats hybrid={player1.hybrids?.find(h => h.is_active)} isMe={(player1.player_email || '') === playerEmail} />
             </div>
           )}
         </div>
@@ -198,7 +197,7 @@ const GameBoard: React.FC = () => {
           </h2>
           {player2 && (
             <div>
-              <Stats hybrid={player2.hybrids?.find(h => h.is_active)} isMe={player2.player_uuid===playerUUID} />
+              <Stats hybrid={player2.hybrids?.find(h => h.is_active)} isMe={(player2.player_email || '') === playerEmail} />
             </div>
           )}
         </div>
@@ -278,7 +277,7 @@ const GameBoard: React.FC = () => {
                 const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/end`, {
                   method: 'POST',
                   headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-                  body: JSON.stringify({ player_uuid: playerUUID, player_email: playerEmail }),
+                  body: JSON.stringify({ player_email: playerEmail }),
                 });
                 if (res.ok) {
                   try { window.dispatchEvent(new Event('player_stats_refresh')); } catch {}

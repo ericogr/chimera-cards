@@ -32,6 +32,22 @@ func (h *GameHandler) ListPublicGames(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedEncodeGames})
 		return
 	}
+	// Remove player_uuid from public responses so internal UUIDs are not exposed
+	if arr, ok := out.([]interface{}); ok {
+		for _, item := range arr {
+			if gm, ok := item.(map[string]interface{}); ok {
+				if playersI, ok := gm["players"]; ok {
+					if playersArr, ok := playersI.([]interface{}); ok {
+						for _, pi := range playersArr {
+							if pm, ok := pi.(map[string]interface{}); ok {
+								delete(pm, "player_uuid")
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	c.JSON(http.StatusOK, out)
 }
 
@@ -49,8 +65,20 @@ func (h *GameHandler) ListLeaderboard(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchLeaderboard})
 		return
 	}
-	// Return as-is; frontend computes defeats = games_played - wins - resignations
-	c.JSON(http.StatusOK, users)
+    // Remove player_uuid from public leaderboard responses
+    out, err := MarshalIntoSnakeTimestamps(users)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchLeaderboard})
+        return
+    }
+    if arr, ok := out.([]interface{}); ok {
+        for _, item := range arr {
+            if um, ok := item.(map[string]interface{}); ok {
+                delete(um, "player_uuid")
+            }
+        }
+    }
+    c.JSON(http.StatusOK, out)
 }
 
 // GetGame returns a game by ID.

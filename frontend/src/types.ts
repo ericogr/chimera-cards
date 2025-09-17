@@ -58,7 +58,6 @@ export interface Hybrid {
 
 export interface Player {
   ID: number;
-  player_uuid: string;
   player_name: string;
   player_email?: string;
   has_created: boolean;

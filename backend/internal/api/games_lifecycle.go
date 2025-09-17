@@ -234,10 +234,8 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 		return
 	}
 	var req LeaveGamePayload
-	if err := c.ShouldBindJSON(&req); err != nil || req.PlayerUUID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidRequest})
-		return
-	}
+	// Body is optional; derive leaving player from authenticated session
+	_ = c.ShouldBindJSON(&req)
 	g, err := h.repo.FindGameByJoinCode(code)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
@@ -247,26 +245,32 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{constants.JSONKeyError: constants.ErrCannotLeaveAfterGameStarted})
 		return
 	}
-	// Ensure the player belongs to the game
-	found := false
+	// Derive leaving player's UUID from session email and ensure they belong
+	userEmail, _ := c.Get("userEmail")
+	emailStr, _ := userEmail.(string)
+	if emailStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
+		return
+	}
+	leavingUUID := ""
 	for _, p := range g.Players {
-		if p.PlayerUUID == req.PlayerUUID {
-			found = true
+		if p.PlayerEmail == emailStr {
+			leavingUUID = p.PlayerUUID
 			break
 		}
 	}
-	if !found {
+	if leavingUUID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrPlayerNotInThisGame})
 		return
 	}
-	if err := h.repo.RemovePlayerByUUID(g.ID, req.PlayerUUID); err != nil {
+	if err := h.repo.RemovePlayerByUUID(g.ID, leavingUUID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedRemovePlayer})
 		return
 	}
 	// Reflect removal in the in-memory model to avoid re-attaching via FullSaveAssociations
 	filtered := make([]game.Player, 0, len(g.Players))
 	for _, p := range g.Players {
-		if p.PlayerUUID != req.PlayerUUID {
+		if p.PlayerUUID != leavingUUID {
 			filtered = append(filtered, p)
 		}
 	}
@@ -303,32 +307,38 @@ func (h *GameHandler) EndGame(c *gin.Context) {
 	// the quitter's resignation stat and do not award a win to anyone.
 	var req EndGamePayload
 	_ = c.ShouldBindJSON(&req) // optional body; ignore errors
-	if req.PlayerUUID != "" && len(g.Players) == 2 {
-		var loser *game.Player
-		if g.Players[0].PlayerUUID == req.PlayerUUID {
-			loser = &g.Players[0]
-		} else if g.Players[1].PlayerUUID == req.PlayerUUID {
-			loser = &g.Players[1]
-		}
-		if loser != nil {
-			// Mark a human-friendly message that someone resigned. Do not set
-			// `g.Winner` so the opponent does not receive a win.
-			g.Message = "Player resigned: " + loser.PlayerName
+
+	// Determine the caller via authenticated session. Only a participant
+	// may resign the match on their behalf.
+	userEmail, _ := c.Get("userEmail")
+	emailStr, _ := userEmail.(string)
+	if emailStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
+		return
+	}
+
+	var loser *game.Player
+	for i := range g.Players {
+		if g.Players[i].PlayerEmail == emailStr {
+			loser = &g.Players[i]
+			break
 		}
 	}
+	if loser != nil {
+		g.Message = "Player resigned: " + loser.PlayerName
+	} else {
+		// If caller is not a participant, forbid ending the match.
+		c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotInThisGame})
+		return
+	}
+
 	if g.Message == "" {
 		g.Message = "Game ended by a player"
 	}
+
 	// Update stats on resignation if not already counted
 	if !g.StatsCounted {
-		resignedEmail := req.PlayerEmail
-		if resignedEmail == "" && req.PlayerUUID != "" && len(g.Players) == 2 {
-			if g.Players[0].PlayerUUID == req.PlayerUUID {
-				resignedEmail = g.Players[0].PlayerEmail
-			} else if g.Players[1].PlayerUUID == req.PlayerUUID {
-				resignedEmail = g.Players[1].PlayerEmail
-			}
-		}
+		resignedEmail := loser.PlayerEmail
 		_ = h.repo.UpdateStatsOnGameEnd(g, resignedEmail)
 		g.StatsCounted = true
 	}

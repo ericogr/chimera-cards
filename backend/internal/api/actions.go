@@ -42,10 +42,29 @@ func (h *GameHandler) SubmitAction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{constants.JSONKeyError: constants.ErrInvalidRequest})
 		return
 	}
-	// Delegate to service layer
-	// Convert raw action_type string to the typed PendingActionType
+
+	// Derive the calling player's UUID from the authenticated session
+	userEmail, _ := c.Get("userEmail")
+	emailStr, _ := userEmail.(string)
+	if emailStr == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
+		return
+	}
+	var callerUUID string
+	for i := range g.Players {
+		if g.Players[i].PlayerEmail == emailStr {
+			callerUUID = g.Players[i].PlayerUUID
+			break
+		}
+	}
+	if callerUUID == "" {
+		c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotInThisGame})
+		return
+	}
+
+	// Delegate to service layer using server-derived player UUID (ignore client-supplied uuid)
 	actionType := game.PendingActionType(req.ActionType)
-	g2, resolved, err := service.SubmitAction(h.repo, g.ID, req.PlayerUUID, actionType, req.EntityID, h.actionTimeout)
+	g2, resolved, err := service.SubmitAction(h.repo, g.ID, callerUUID, actionType, req.EntityID, h.actionTimeout)
 	if err != nil {
 		switch err {
 		case service.ErrGameNotFound:

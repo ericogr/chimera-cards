@@ -26,7 +26,6 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
   const [h2, setH2] = useState<HybridSpecState>({ entityIds: [], selectedEntityId: undefined });
   const [submitting, setSubmitting] = useState(false);
   const actingRef = useRef(false);
-  const playerUUID = localStorage.getItem('player_uuid') || '';
   const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
@@ -83,8 +82,7 @@ const HybridCreation: React.FC<Props> = ({ gameCode, onCreated, ttlExpired = fal
       const res = await apiFetch(`${constants.API_GAMES}/${gameCode}/create-hybrids`, {
         method: 'POST',
         headers: { [constants.HEADER_CONTENT_TYPE]: constants.CONTENT_TYPE_JSON },
-      body: JSON.stringify({
-          player_uuid: playerUUID,
+        body: JSON.stringify({
           hybrid1: { entity_ids: h1.entityIds, selected_entity_id: h1.selectedEntityId },
           hybrid2: { entity_ids: h2.entityIds, selected_entity_id: h2.selectedEntityId },
         }),

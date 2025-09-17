@@ -31,14 +31,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
   const actingRef = useRef(false);
 
   useEffect(() => {
-    // Ensure persistent player_uuid across sessions for stats aggregation
-    try {
-      let uuid = localStorage.getItem('player_uuid');
-      if (!uuid) {
-        uuid = window.crypto?.randomUUID ? window.crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
-        safeSetLocal('player_uuid', uuid);
-      }
-    } catch {}
     // surface errors from the games hook
     if (gamesError) setError('Could not load games. Please try again later.');
   }, [gamesError]);
@@ -97,7 +89,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           private: isPrivate,
           player_name: user.name,
           player_email: user.email || '',
-          player_uuid: localStorage.getItem('player_uuid') || '',
         }),
       });
       if (response.status === 401) { window.location.href = '/'; return; }
@@ -134,7 +125,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onLogout }) => {
           join_code: gameCodeToUse,
           player_name: user.name,
           player_email: user.email || '',
-          player_uuid: localStorage.getItem('player_uuid') || '',
          }),
       });
 
