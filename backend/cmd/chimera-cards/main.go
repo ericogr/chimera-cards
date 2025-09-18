@@ -56,7 +56,7 @@ func main() {
 	if dbPath == "" {
 		dbPath = "./data/chimera.db"
 	}
-	db, err := storage.OpenAndMigrate(dbPath, cfg.Entities)
+	db, err := storage.OpenDB(dbPath, cfg.Entities)
 	if err != nil {
 		logging.Fatal("Failed to initialize database", err, nil)
 	}
@@ -129,7 +129,12 @@ func main() {
 	}()
 	authHandler := api.NewAuthHandler(repo)
 
-	router := gin.Default()
+	// Create a fresh Gin engine and attach only the desired middleware.
+	// Using `gin.New()` and explicitly adding `Logger`/`Recovery` avoids
+	// a warning that occurs when the default middleware is attached multiple
+	// times (for example in some environments or tests).
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
 
 	apiRoutes := router.Group(constants.RouteAPIPrefix)
 	{

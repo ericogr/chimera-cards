@@ -11,15 +11,14 @@ import (
 	"github.com/ericogr/chimera-cards/internal/service"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type CreateGamePayload struct {
-    PlayerName  string `json:"player_name"`
-    PlayerEmail string `json:"player_email"`
-    Name        string `json:"name"`
-    Description string `json:"description"`
-    Private     bool   `json:"private"`
+	PlayerName  string `json:"player_name"`
+	PlayerEmail string `json:"player_email"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Private     bool   `json:"private"`
 }
 
 // CreateGame creates a new game and returns IDs and join code.
@@ -37,7 +36,7 @@ func (h *GameHandler) CreateGame(c *gin.Context) {
 		req.PlayerName, _ = v.(string)
 	}
 
-    joinCode := generateJoinCode()
+	joinCode := generateJoinCode()
 
 	// Validate lengths
 	if utf8.RuneCountInString(req.Name) > 32 {
@@ -49,36 +48,36 @@ func (h *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 
-    newGame := game.Game{
-        Name:        req.Name,
-        Description: req.Description,
-        Private:     req.Private,
-        Status:      game.StatusWaitingForPlayers,
-        JoinCode:    joinCode,
-        Players: []game.Player{
-            {PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail},
-        },
-        Message: "Game created. Waiting for second player.",
-    }
+	newGame := game.Game{
+		Name:        req.Name,
+		Description: req.Description,
+		Private:     req.Private,
+		Status:      game.StatusWaitingForPlayers,
+		JoinCode:    joinCode,
+		Players: []game.Player{
+			{PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail},
+		},
+		Message: "Game created. Waiting for second player.",
+	}
 
-    // Upsert user profile (name/email)
-    _ = h.repo.UpsertUser(req.PlayerEmail, req.PlayerName)
+	// Upsert user profile (name/email)
+	_ = h.repo.UpsertUser(req.PlayerEmail, req.PlayerName)
 
 	if err := h.repo.CreateGame(&newGame); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedCreateGame})
 		return
 	}
 
-    c.JSON(http.StatusCreated, gin.H{
-        "game_id":   newGame.ID,
-        "join_code": joinCode,
-    })
+	c.JSON(http.StatusCreated, gin.H{
+		"game_id":   newGame.ID,
+		"join_code": joinCode,
+	})
 }
 
 type JoinGamePayload struct {
-    JoinCode    string `json:"join_code"`
-    PlayerName  string `json:"player_name"`
-    PlayerEmail string `json:"player_email"`
+	JoinCode    string `json:"join_code"`
+	PlayerName  string `json:"player_name"`
+	PlayerEmail string `json:"player_email"`
 }
 
 // JoinGame allows a second player to join a game via join code.
@@ -111,25 +110,25 @@ func (h *GameHandler) JoinGame(c *gin.Context) {
 		return
 	}
 
-    newPlayer := game.Player{PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail}
+	newPlayer := game.Player{PlayerName: req.PlayerName, PlayerEmail: req.PlayerEmail}
 
-    g.Players = append(g.Players, newPlayer)
-    g.Status = game.StatusWaitingForPlayers
+	g.Players = append(g.Players, newPlayer)
+	g.Status = game.StatusWaitingForPlayers
 	g.Message = "Second player joined. Waiting for the game to start."
 
 	// Upsert user profile (name/email)
-    _ = h.repo.UpsertUser(req.PlayerEmail, req.PlayerName)
+	_ = h.repo.UpsertUser(req.PlayerEmail, req.PlayerName)
 
 	if err := h.repo.UpdateGame(g); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedUpdateGame})
 		return
 	}
 
-    c.JSON(http.StatusOK, gin.H{
-        "game_id":   g.ID,
-        "join_code": g.JoinCode,
-        "message":   "Successfully joined game",
-    })
+	c.JSON(http.StatusOK, gin.H{
+		"game_id":   g.ID,
+		"join_code": g.JoinCode,
+		"message":   "Successfully joined game",
+	})
 }
 
 // StartGame initializes state for the first round.
@@ -205,11 +204,11 @@ func (h *GameHandler) StartGame(c *gin.Context) {
 }
 
 type LeaveGamePayload struct {
-    // body intentionally empty; caller identity is derived from session
+	// body intentionally empty; caller identity is derived from session
 }
 
 type EndGamePayload struct {
-    PlayerEmail string `json:"player_email"`
+	PlayerEmail string `json:"player_email"`
 }
 
 // LeaveGame removes a player from a waiting room.
@@ -239,19 +238,19 @@ func (h *GameHandler) LeaveGame(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
 		return
 	}
-    // Remove player by their email (derived from session)
-    if err := h.repo.RemovePlayerByEmail(g.ID, emailStr); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedRemovePlayer})
-        return
-    }
-    // Reflect removal in the in-memory model to avoid re-attaching via FullSaveAssociations
-    filtered := make([]game.Player, 0, len(g.Players))
-    for _, p := range g.Players {
-        if (p.PlayerEmail) != emailStr {
-            filtered = append(filtered, p)
-        }
-    }
-    g.Players = filtered
+	// Remove player by their email (derived from session)
+	if err := h.repo.RemovePlayerByEmail(g.ID, emailStr); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedRemovePlayer})
+		return
+	}
+	// Reflect removal in the in-memory model to avoid re-attaching via FullSaveAssociations
+	filtered := make([]game.Player, 0, len(g.Players))
+	for _, p := range g.Players {
+		if (p.PlayerEmail) != emailStr {
+			filtered = append(filtered, p)
+		}
+	}
+	g.Players = filtered
 	// Optional: set message and keep game open for others
 	g.Message = "A player left. Waiting for a new participant."
 	if err := h.repo.UpdateGame(g); err != nil {

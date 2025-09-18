@@ -35,13 +35,13 @@ func SubmitAction(repo GameRepo, gameID uint, playerEmail string, actionType gam
 	}
 
 	var current *game.Player
-    if (g.Players[0].PlayerEmail) == playerEmail {
-        current = &g.Players[0]
-    } else if (g.Players[1].PlayerEmail) == playerEmail {
-        current = &g.Players[1]
-    } else {
-        return nil, false, ErrPlayerNotInGame
-    }
+	if (g.Players[0].PlayerEmail) == playerEmail {
+		current = &g.Players[0]
+	} else if (g.Players[1].PlayerEmail) == playerEmail {
+		current = &g.Players[1]
+	} else {
+		return nil, false, ErrPlayerNotInGame
+	}
 
 	var active *game.Hybrid
 	for i := range current.Hybrids {

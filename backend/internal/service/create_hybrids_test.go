@@ -56,8 +56,8 @@ func TestCreateHybridsSuccess(t *testing.T) {
 
 	req := CreateHybridsRequest{
 		PlayerEmail: "p1@example.com",
-		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
-		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{3, 4}, SelectedEntityID: 3},
+		Hybrid1:     CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
+		Hybrid2:     CreateHybridSpec{EntityIDs: []uint{3, 4}, SelectedEntityID: 3},
 	}
 
 	if err := CreateHybrids(mr, 42, req); err != nil {
@@ -97,8 +97,8 @@ func TestCreateHybrids_ReusedAnimal(t *testing.T) {
 
 	req := CreateHybridsRequest{
 		PlayerEmail: "p1@example.com",
-		Hybrid1:    CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
-		Hybrid2:    CreateHybridSpec{EntityIDs: []uint{2, 3}, SelectedEntityID: 3},
+		Hybrid1:     CreateHybridSpec{EntityIDs: []uint{1, 2}, SelectedEntityID: 1},
+		Hybrid2:     CreateHybridSpec{EntityIDs: []uint{2, 3}, SelectedEntityID: 3},
 	}
 
 	err := CreateHybrids(mr, 100, req)

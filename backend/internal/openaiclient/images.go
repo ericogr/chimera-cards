@@ -94,38 +94,78 @@ func generateImageWithTemplate(ctx context.Context, template string, entityNames
 	req.Header.Set(constants.HeaderAuthorization, constants.BearerPrefix+apiKey)
 	req.Header.Set(constants.HeaderContentType, constants.ContentTypeJSON)
 
+	// Try up to N attempts in case the OpenAI image endpoint transiently
+	// rejects requests. Use exponential backoff between attempts. If the
+	// provided context is canceled, abort early.
+	const maxAttempts = 3
 	client := &http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("openai image generation failed: %d %s", resp.StatusCode, string(body))
-	}
-
-	var out struct {
-		Data []struct {
-			B64JSON string `json:"b64_json"`
-			URL     string `json:"url"`
-		} `json:"data"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return nil, fmt.Errorf("failed to decode OpenAI response: %w", err)
-	}
-	if len(out.Data) == 0 {
-		return nil, fmt.Errorf("openai returned no image data")
-	}
-
-	if out.Data[0].B64JSON != "" {
-		imgBytes, err := base64.StdEncoding.DecodeString(out.Data[0].B64JSON)
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		// Recreate request body reader for each attempt
+		req, err := http.NewRequestWithContext(ctx, "POST", constants.OpenAIBaseURL+constants.OpenAIImagesGenerationsPath, strings.NewReader(string(b)))
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode base64 image: %w", err)
+			return nil, err
 		}
-		return imgBytes, nil
-	}
+		req.Header.Set(constants.HeaderAuthorization, constants.BearerPrefix+apiKey)
+		req.Header.Set(constants.HeaderContentType, constants.ContentTypeJSON)
 
-	return nil, fmt.Errorf("openai returned unsupported image payload")
+		resp, err := client.Do(req)
+		if err != nil {
+			lastErr = err
+			logging.Error("openai image request failed", err, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+		} else {
+			// Ensure body closed for this attempt
+			bodyBytes, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+				lastErr = fmt.Errorf("openai image generation failed: %d %s", resp.StatusCode, string(bodyBytes))
+				logging.Error("openai image generation failed", lastErr, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+			} else {
+				var out struct {
+					Data []struct {
+						B64JSON string `json:"b64_json"`
+						URL     string `json:"url"`
+					} `json:"data"`
+				}
+				if err := json.Unmarshal(bodyBytes, &out); err != nil {
+					lastErr = fmt.Errorf("failed to decode OpenAI response: %w", err)
+					logging.Error("openai image decode failed", lastErr, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+				} else if len(out.Data) == 0 {
+					lastErr = fmt.Errorf("openai returned no image data")
+					logging.Error("openai returned no image data", lastErr, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+				} else if out.Data[0].B64JSON != "" {
+					imgBytes, err := base64.StdEncoding.DecodeString(out.Data[0].B64JSON)
+					if err != nil {
+						lastErr = fmt.Errorf("failed to decode base64 image: %w", err)
+						logging.Error("openai image base64 decode failed", lastErr, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+					} else {
+						return imgBytes, nil
+					}
+				} else {
+					lastErr = fmt.Errorf("openai returned unsupported image payload")
+					logging.Error("openai returned unsupported image payload", lastErr, logging.Fields{"attempt": attempt, "entities": entitiesPart})
+				}
+			}
+		}
+
+		// If context cancelled, abort early
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
+		// Backoff before next attempt
+		if attempt < maxAttempts {
+			backoff := time.Duration(attempt) * 500 * time.Millisecond
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(backoff):
+			}
+			logging.Info("retrying openai image generation", logging.Fields{"attempt": attempt + 1, "entities": entitiesPart})
+		}
+	}
+	if lastErr != nil {
+		return nil, lastErr
+	}
+	return nil, fmt.Errorf("openai image generation failed")
 }

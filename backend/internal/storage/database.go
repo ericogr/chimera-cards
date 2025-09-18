@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ericogr/chimera-cards/internal/game"
@@ -13,31 +14,43 @@ import (
 	"gorm.io/gorm"
 )
 
-func OpenAndMigrate(dataSourceName string, entitiesFromConfig []game.Entity) (*gorm.DB, error) {
+// OpenDB opens the configured SQLite database and performs only in-memory
+// startup tasks — it does NOT perform schema migrations or DDL changes.
+// The database schema must already exist; managing schema changes is an
+// explicit manual operation outside the application (delete+recreate for
+// development). This function still seeds default entity rows when the
+// `entity_templates` table is present and will attempt to ensure entity
+// images exist.
+func OpenDB(dataSourceName string, entitiesFromConfig []game.Entity) (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Open(dataSourceName), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// In development, do not drop tables on startup anymore.
-	// Keep schema updated via AutoMigrate and let 'make backend-clean' remove the DB when needed.
-	err = db.AutoMigrate(&game.Entity{}, &game.Hybrid{}, &game.User{}, &game.Player{}, &game.Game{}, &game.HybridGeneratedName{})
-	if err != nil {
-		return nil, err
+	// Ensure core tables exist. We intentionally avoid running migrations
+	// against an existing schema: if the DB is partially populated (some
+	// tables present and some missing) the safest course is to surface an
+	// error and let the operator recreate the DB. If no core tables are
+	// present, create the initial schema from the current models.
+	migrator := db.Migrator()
+	coreModels := []interface{}{&game.Entity{}, &game.Hybrid{}, &game.Player{}, &game.Game{}, &game.User{}, &game.HybridGeneratedName{}}
+	present := 0
+	for _, m := range coreModels {
+		if migrator.HasTable(m) {
+			present++
+		}
+	}
+	if present == 0 {
+		logging.Info("no DB schema detected; creating initial schema", nil)
+		if err := db.AutoMigrate(coreModels...); err != nil {
+			return nil, fmt.Errorf("failed to create initial schema: %w", err)
+		}
+	} else if present != len(coreModels) {
+		return nil, fmt.Errorf("incompatible database schema detected (%d/%d core tables present); delete and recreate the DB to proceed", present, len(coreModels))
 	}
 
-	// Ensure a unique constraint across the three entity key columns. We use
-	// an explicit UNIQUE index so combinations like (a,b,0) are enforced when
-	// the third key is 0 (meaning "none"). The index targets the renamed
-	// cache table for hybrid-generated assets.
-	if execErr := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_hybrid_generated_cache_entities ON hybrid_generated_cache(entity1_key, entity2_key, entity3_key);").Error; execErr != nil {
-		return nil, execErr
-	}
-
-	// Index to speed up timeout scanner queries that filter by status, phase and action_deadline.
-	if execErr := db.Exec("CREATE INDEX IF NOT EXISTS idx_games_status_phase_deadline ON games(status, phase, action_deadline);").Error; execErr != nil {
-		return nil, execErr
-	}
+	// Seed defaults only if the schema/tables already exist. Do not attempt
+	// to change or migrate the schema here.
 	seedDefaultEntities(db, entitiesFromConfig)
 	// Ensure entity images are present in the DB. If missing, generate via
 	// OpenAI and resize to 256x256 before storing.

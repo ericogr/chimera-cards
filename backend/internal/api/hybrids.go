@@ -18,8 +18,8 @@ type CreateHybridSpec struct {
 }
 
 type CreateHybridsPayload struct {
-    Hybrid1    CreateHybridSpec `json:"hybrid1"`
-    Hybrid2    CreateHybridSpec `json:"hybrid2"`
+	Hybrid1 CreateHybridSpec `json:"hybrid1"`
+	Hybrid2 CreateHybridSpec `json:"hybrid2"`
 }
 
 func sumEntityStats(entities []game.Entity) (hitPoints, attack, defense, agility, energy int) {
@@ -62,24 +62,24 @@ func (h *GameHandler) CreateHybrids(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{constants.JSONKeyError: constants.ErrAuthRequired})
 		return
 	}
-    // Ensure session user is a participant and pass their email to the service
-    found := false
-    for i := range g.Players {
-        if g.Players[i].PlayerEmail == emailStr {
-            found = true
-            break
-        }
-    }
-    if !found {
-        c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotPartOfThisGame})
-        return
-    }
+	// Ensure session user is a participant and pass their email to the service
+	found := false
+	for i := range g.Players {
+		if g.Players[i].PlayerEmail == emailStr {
+			found = true
+			break
+		}
+	}
+	if !found {
+		c.JSON(http.StatusForbidden, gin.H{constants.JSONKeyError: constants.ErrPlayerNotPartOfThisGame})
+		return
+	}
 
-    srvReq := service.CreateHybridsRequest{
-        PlayerEmail: emailStr,
-        Hybrid1:     service.CreateHybridSpec{EntityIDs: req.Hybrid1.EntityIDs, SelectedEntityID: req.Hybrid1.SelectedEntityID},
-        Hybrid2:     service.CreateHybridSpec{EntityIDs: req.Hybrid2.EntityIDs, SelectedEntityID: req.Hybrid2.SelectedEntityID},
-    }
+	srvReq := service.CreateHybridsRequest{
+		PlayerEmail: emailStr,
+		Hybrid1:     service.CreateHybridSpec{EntityIDs: req.Hybrid1.EntityIDs, SelectedEntityID: req.Hybrid1.SelectedEntityID},
+		Hybrid2:     service.CreateHybridSpec{EntityIDs: req.Hybrid2.EntityIDs, SelectedEntityID: req.Hybrid2.SelectedEntityID},
+	}
 
 	if err := service.CreateHybrids(h.repo, g.ID, srvReq); err != nil {
 		switch err {
