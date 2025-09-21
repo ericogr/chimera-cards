@@ -94,4 +94,12 @@ Additional optional keys
 - `action_timeout`: optional per-round timeout (Go duration string, e.g. "1m").
   When provided, players have this amount of time to submit their actions
   during the planning phase. If the timeout expires and both players haven't
-  submitted, the match is finished with no winner and no stats are awarded.
+  submitted, the default resolution depends on how many players missed the
+  deadline:
+
+  - If both players failed to submit, the match is finished with no winner
+    and no stats are awarded.
+  - If exactly one player failed to submit, the server automatically treats
+    the missing action as `rest` for that player and immediately resolves
+    the round using the normal engine rules. The match then continues or
+    finishes according to the usual resolution logic.

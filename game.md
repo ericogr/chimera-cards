@@ -108,6 +108,19 @@ See `backend/chimera_config.json` for concrete examples used in the game.
 - If a hybrid chooses Rest, it also gains +2 Energy in addition to +2 Vigor.
 - Vigor does not regenerate passively.
 
+### Action timeout behaviour
+
+- Each planning phase may have a server-enforced action deadline (per-round timeout).
+- If the deadline expires and exactly one player failed to submit an action, the server
+  automatically treats that player's action as `Rest` and resolves the round immediately
+  using the same engine rules as a normal simultaneous resolution (the round may end the
+  match or continue as usual).
+- If the deadline expires and both players failed to submit actions, the match ends due
+  to inactivity: the match is marked finished with no winner and no stats are awarded.
+
+This rule applies only to the combat planning phase. The hybrid creation flow is
+unaffected by the action-timeout rule.
+
 ### Simultaneous Action Choice
 
 Both players secretly choose one action, then reveal them at the same time. Actions are resolved simultaneously with AGI as a tiebreaker when relevant.
