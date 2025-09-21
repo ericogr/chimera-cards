@@ -9,6 +9,7 @@ import (
 	"github.com/ericogr/chimera-cards/internal/api"
 	"github.com/ericogr/chimera-cards/internal/config"
 	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/engine"
 	"github.com/ericogr/chimera-cards/internal/game"
 	"github.com/ericogr/chimera-cards/internal/hybridname"
 	"github.com/ericogr/chimera-cards/internal/logging"
@@ -78,7 +79,6 @@ func main() {
 		defer ticker.Stop()
 		for range ticker.C {
 			now := time.Now()
-			// Claim up to N timed-out games atomically for this worker
 			ids, err := repo.ClaimTimedOutGameIDs(now, 20, 2*time.Minute, workerID)
 			if err != nil {
 				logging.Error("timeout scanner failed to list ids", err, nil)
@@ -95,34 +95,73 @@ func main() {
 				if gg.Status != game.StatusInProgress || gg.Phase != game.PhasePlanning {
 					continue
 				}
-				gg.Status = game.StatusFinished
-				gg.Phase = game.PhaseResolved
-				gg.Winner = ""
-				gg.Message = "Match ended due to inactivity"
-				// Build an English last-round summary describing which players
-				// (if any) failed to submit actions before the deadline.
-				summary := "Round timed out: "
-				if len(gg.Players) == 2 {
-					p1Submitted := gg.Players[0].HasSubmittedAction
-					p2Submitted := gg.Players[1].HasSubmittedAction
-					switch {
-					case !p1Submitted && !p2Submitted:
-						summary += "both players failed to submit actions within the allotted time."
-					case p1Submitted && !p2Submitted:
-						summary += gg.Players[1].PlayerName + " did not submit an action in time."
-					case !p1Submitted && p2Submitted:
-						summary += gg.Players[0].PlayerName + " did not submit an action in time."
-					default:
-						summary += "no resolution was reached."
-					}
-				} else {
-					summary += "no resolution was reached due to inactivity."
+				if len(gg.Players) != 2 {
+					gg.Status = game.StatusFinished
+					gg.Phase = game.PhaseResolved
+					gg.Winner = ""
+					gg.Message = "Match ended due to inactivity"
+					gg.LastRoundSummary = "no resolution was reached due to inactivity."
+					gg.StatsCounted = true
+					gg.ActionDeadline = time.Time{}
+					_ = repo.UpdateGame(gg)
+					continue
 				}
-				gg.LastRoundSummary = summary
-				gg.StatsCounted = true
-				gg.ActionDeadline = time.Time{}
-				if err := repo.UpdateGame(gg); err != nil {
-					logging.Error("failed to expire game", err, logging.Fields{constants.LogFieldGameID: gg.ID})
+				p1 := &gg.Players[0]
+				p2 := &gg.Players[1]
+				p1Submitted := p1.HasSubmittedAction
+				p2Submitted := p2.HasSubmittedAction
+				switch {
+				case !p1Submitted && !p2Submitted:
+					gg.Status = game.StatusFinished
+					gg.Phase = game.PhaseResolved
+					gg.Winner = ""
+					gg.Message = "Match ended due to inactivity"
+					gg.LastRoundSummary = "Round timed out: both players failed to submit actions within the allotted time."
+					gg.StatsCounted = true
+					gg.ActionDeadline = time.Time{}
+					_ = repo.UpdateGame(gg)
+				case p1Submitted && !p2Submitted:
+					// auto-submit rest for player 2
+					logging.Info("auto-submitting REST for inactive player", logging.Fields{constants.LogFieldGameID: gg.ID, "player": gg.Players[1].PlayerEmail})
+					p2.HasSubmittedAction = true
+					p2.PendingActionType = game.PendingActionRest
+					p2.PendingActionEntityID = nil
+					engine.ResolveRound(gg)
+					if gg.Status == game.StatusFinished {
+						if !gg.StatsCounted {
+							_ = repo.UpdateStatsOnGameEnd(gg, "")
+							gg.StatsCounted = true
+						}
+					} else {
+						gg.ActionDeadline = time.Now().Add(cfg.ActionTimeout)
+					}
+					_ = repo.UpdateGame(gg)
+				case !p1Submitted && p2Submitted:
+					// auto-submit rest for player 1
+					logging.Info("auto-submitting REST for inactive player", logging.Fields{constants.LogFieldGameID: gg.ID, "player": gg.Players[0].PlayerEmail})
+					p1.HasSubmittedAction = true
+					p1.PendingActionType = game.PendingActionRest
+					p1.PendingActionEntityID = nil
+					engine.ResolveRound(gg)
+					if gg.Status == game.StatusFinished {
+						if !gg.StatsCounted {
+							_ = repo.UpdateStatsOnGameEnd(gg, "")
+							gg.StatsCounted = true
+						}
+					} else {
+						gg.ActionDeadline = time.Now().Add(cfg.ActionTimeout)
+					}
+					_ = repo.UpdateGame(gg)
+				default:
+					// safety fallback
+					gg.Status = game.StatusFinished
+					gg.Phase = game.PhaseResolved
+					gg.Winner = ""
+					gg.Message = "Match ended due to inactivity"
+					gg.LastRoundSummary = "Round timed out: no resolution was reached."
+					gg.StatsCounted = true
+					gg.ActionDeadline = time.Time{}
+					_ = repo.UpdateGame(gg)
 				}
 			}
 		}

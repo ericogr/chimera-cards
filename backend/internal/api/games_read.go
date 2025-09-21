@@ -5,8 +5,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ericogr/chimera-cards/internal/constants"
+	"github.com/ericogr/chimera-cards/internal/engine"
+	"github.com/ericogr/chimera-cards/internal/game"
+	"github.com/ericogr/chimera-cards/internal/logging"
+	"github.com/ericogr/chimera-cards/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -76,6 +81,96 @@ func (h *GameHandler) GetGame(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{constants.JSONKeyError: constants.ErrGameNotFound})
 		return
+	}
+	// Log basic game state for debugging timeouts
+	if len(g.Players) >= 2 {
+		logging.Info("GET /api/games state", logging.Fields{
+			constants.LogFieldGameID: g.ID,
+			"phase":                  g.Phase,
+			"action_deadline":        g.ActionDeadline,
+			"p1_submitted":           g.Players[0].HasSubmittedAction,
+			"p2_submitted":           g.Players[1].HasSubmittedAction,
+		})
+	} else {
+		logging.Info("GET /api/games state (incomplete players)", logging.Fields{constants.LogFieldGameID: g.ID, "phase": g.Phase, "action_deadline": g.ActionDeadline})
+	}
+
+	// If the planning deadline has passed, attempt an immediate best-effort
+	// resolution: if exactly one player is missing, auto-submit `rest` for
+	// them so the round resolves immediately. If both players missed, end
+	// the match as before. This helps clients that refresh the page right
+	// after the deadline and avoids waiting for the background scanner.
+	if g.Phase == game.PhasePlanning && !g.ActionDeadline.IsZero() && g.ActionDeadline.Before(time.Now()) {
+		if len(g.Players) >= 2 {
+			p1Submitted := g.Players[0].HasSubmittedAction
+			p2Submitted := g.Players[1].HasSubmittedAction
+			switch {
+			case !p1Submitted && !p2Submitted:
+				// both missed -> finish match immediately
+				g.Status = game.StatusFinished
+				g.Phase = game.PhaseResolved
+				g.Winner = ""
+				g.Message = "Match ended due to inactivity"
+				g.LastRoundSummary = "Round timed out: both players failed to submit actions within the allotted time."
+				g.StatsCounted = true
+				g.ActionDeadline = time.Time{}
+				if err := h.repo.UpdateGame(g); err != nil {
+					logging.Error("failed to expire game (GET handler)", err, logging.Fields{constants.LogFieldGameID: g.ID})
+				}
+			case p1Submitted && !p2Submitted:
+				// auto-submit REST for player 2
+				if gr, ok := h.repo.(service.GameRepo); ok {
+					_, _, serr := service.SubmitAction(gr, g.ID, g.Players[1].PlayerEmail, game.PendingActionRest, 0, h.actionTimeout)
+					if serr != nil {
+						logging.Error("GET handler failed to auto-submit rest", serr, logging.Fields{constants.LogFieldGameID: g.ID})
+					}
+					// reload
+					if gg, err := h.repo.GetGameByID(short.ID); err == nil {
+						g = gg
+					}
+				} else {
+					// fallback inline
+					g.Players[1].HasSubmittedAction = true
+					g.Players[1].PendingActionType = game.PendingActionRest
+					g.Players[1].PendingActionEntityID = nil
+					engine.ResolveRound(g)
+					if g.Status == game.StatusFinished {
+						if !g.StatsCounted {
+							_ = h.repo.UpdateStatsOnGameEnd(g, "")
+							g.StatsCounted = true
+						}
+					} else {
+						g.ActionDeadline = time.Now().Add(h.actionTimeout)
+					}
+					_ = h.repo.UpdateGame(g)
+				}
+			case !p1Submitted && p2Submitted:
+				// auto-submit REST for player 1 (symmetric)
+				if gr, ok := h.repo.(service.GameRepo); ok {
+					_, _, serr := service.SubmitAction(gr, g.ID, g.Players[0].PlayerEmail, game.PendingActionRest, 0, h.actionTimeout)
+					if serr != nil {
+						logging.Error("GET handler failed to auto-submit rest", serr, logging.Fields{constants.LogFieldGameID: g.ID})
+					}
+					if gg, err := h.repo.GetGameByID(short.ID); err == nil {
+						g = gg
+					}
+				} else {
+					g.Players[0].HasSubmittedAction = true
+					g.Players[0].PendingActionType = game.PendingActionRest
+					g.Players[0].PendingActionEntityID = nil
+					engine.ResolveRound(g)
+					if g.Status == game.StatusFinished {
+						if !g.StatsCounted {
+							_ = h.repo.UpdateStatsOnGameEnd(g, "")
+							g.StatsCounted = true
+						}
+					} else {
+						g.ActionDeadline = time.Now().Add(h.actionTimeout)
+					}
+					_ = h.repo.UpdateGame(g)
+				}
+			}
+		}
 	}
 	out, err := MarshalIntoSnakeTimestamps(g)
 	if err != nil {
