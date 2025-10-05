@@ -32,7 +32,7 @@ func (h *GameHandler) ListPublicGames(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchGames})
 		return
 	}
-	out, err := MarshalIntoSnakeTimestamps(games)
+	out, err := MarshalForContext(c, games)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedEncodeGames})
 		return
@@ -54,7 +54,7 @@ func (h *GameHandler) ListLeaderboard(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchLeaderboard})
 		return
 	}
-	out, err := MarshalIntoSnakeTimestamps(users)
+	out, err := MarshalForContext(c, users)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchLeaderboard})
 		return
@@ -172,7 +172,7 @@ func (h *GameHandler) GetGame(c *gin.Context) {
 			}
 		}
 	}
-	out, err := MarshalIntoSnakeTimestamps(g)
+	out, err := MarshalForContext(c, g)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedEncodeGame})
 		return
@@ -197,7 +197,12 @@ func (h *GameHandler) GetPlayerStats(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchStats})
 		return
 	}
-	c.JSON(http.StatusOK, ps)
+	out, err := MarshalForContext(c, ps)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{constants.JSONKeyError: constants.ErrFailedFetchStats})
+		return
+	}
+	c.JSON(http.StatusOK, out)
 }
 
 // UpdatePlayerProfile updates the authenticated player's display name.
